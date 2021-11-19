@@ -1,8 +1,8 @@
 const bcrypt = require('bcryptjs');
 
-const envConstants = require("../../constants/envConstants");
 const errorConstants = require("../../constants/errorConstants");
-const xhrRequestHelper = require("../../helpers/xhrRequestHelper");
+const usersHelpers = require("../../helpers/mongodb/usersHelpers");
+const tokensHelpers = require("../../helpers/mongodb/tokensHelpers");
 const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
 
 // POST: Attempt login
@@ -16,16 +16,14 @@ module.exports.login = async (req, res) => {
         return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
     }
 
-    // Fetch and check users service response
-    const usersServiceUserData = await xhrRequestHelper.xhrGetRequest(
-        `${envConstants.SERVICE.USERS}/users/${username}`
-    );
-    if(!usersServiceUserData.status) {
-        return res.send(usersServiceUserData);
+    // Get user by username
+    const userByUsernameData = await usersHelpers.userByUsername(username);
+    if(!userByUsernameData.status) {
+        return res.send(userByUsernameData);
     }
 
-    // Fetch and check user status
-    const databaseUser = usersServiceUserData.data;
+    // Check user status
+    const databaseUser = userByUsernameData.data;
     if(!databaseUser.enable) {
         return res.send({status: false, message: errorConstants.USERS.USER_DISABLED, data: null});
     }
@@ -35,29 +33,19 @@ module.exports.login = async (req, res) => {
         return res.send({status: false, message: errorConstants.USERS.USER_AUTH, data: null});
     }
 
-    // Fetch and check tokens service response
+    // Generate user tokens
     const useragent = req.useragent;
-    const tokensServiceGenerateTokens = await xhrRequestHelper.xhrPostRequest(
-        `${envConstants.SERVICE.TOKENS}/generate/users/${username}`,
-        {useragent}
-    );
-    if(!tokensServiceGenerateTokens.status) {
-        return res.send(tokensServiceGenerateTokens);
+    const generateUserTokensData = await tokensHelpers.generateUserTokens(databaseUser, useragent);
+    if(!generateUserTokensData.status) {
+        return res.send(generateUserTokensData);
     }
 
-    // Format user response
-    const responseUserData = {
-        name: databaseUser.name,
-        email: databaseUser.email,
-        roles: databaseUser.roles,
-        username: databaseUser.username
-    };
     return res.send({
         message: "",
         status: true,
         data: {
-            user: responseUserData,
-            tokens: tokensServiceGenerateTokens.data
+            user: databaseUser?.authResponse,
+            tokens: generateUserTokensData?.data
         }
     });
 };
