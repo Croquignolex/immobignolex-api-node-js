@@ -1,9 +1,9 @@
 const bcrypt = require('bcryptjs');
 
-const envConstants = require("../constants/envConstants");
-const errorConstants = require("../constants/errorConstants");
-const xhrRequestHelper = require("../helpers/xhrRequestHelper");
-const formCheckerHelpers = require("../helpers/formCheckerHelpers");
+const envConstants = require("../../constants/envConstants");
+const errorConstants = require("../../constants/errorConstants");
+const xhrRequestHelper = require("../../helpers/xhrRequestHelper");
+const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
 
 // POST: Attempt login
 module.exports.login = async (req, res) => {

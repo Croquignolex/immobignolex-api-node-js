@@ -32,10 +32,10 @@ app.use(bodyParser.json());
 app.use(useragent.express());
 
 // Routes
-const webAuthRoutes = require('./routes/web');
+const webAuthRoutes = require('./routes/web/general/authRoutes');
 
 // Setting general model route
-router.use("/web/v1", webAuthRoutes);
+router.use("/web/v1/auth", webAuthRoutes);
 
 // Append /api for our http requests
 app.use("/api", router);

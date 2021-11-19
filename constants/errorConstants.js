@@ -1,6 +1,5 @@
 // General
 module.exports.GENERAL = {
-    REQUEST: "REQUEST_ERROR",
     DATABASE: "DATABASE_ERROR",
     FORM_DATA: "FORM_DATA_ERROR",
 };

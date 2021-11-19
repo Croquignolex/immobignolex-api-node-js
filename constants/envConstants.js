@@ -4,7 +4,6 @@ require('dotenv').config();
 module.exports.APP = {
     LOGGER: process.env.LOGGER,
     ENVIRONMENT: process.env.ENVIRONMENT,
-    TIMEOUT: parseInt(process.env.TIMEOUT),
     ORIGINS: JSON.parse(process.env.CORS_ORIGINS),
     SERVER_PORT: parseInt(process.env.SERVER_PORT)
 };
@@ -17,9 +16,5 @@ module.exports.JWT = {
     AUDIENCE: process.env.JWT_AUDIENCE
 };
 
-// Services URL
-module.exports.SERVICE = {
-    USERS: process.env.USERS_SERVICE_URL,
-    ROLES: process.env.ROLES_SERVICE_URL,
-    TOKENS: process.env.TOKENS_SERVICE_URL
-};
+// Mongo DB
+module.exports.DATABASE_URL = process.env.MONGO_DB_URL;
