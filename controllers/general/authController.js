@@ -82,24 +82,24 @@ module.exports.logout = async (req, res) => {
 module.exports.refresh = async (req, res) => {
     // Data
     const username = req.username;
-    // Fetch user into local database
-    const getUserByUsernameResponse = await usersHelpers.getUserByUsername(username);
-    if(getUserByUsernameResponse.status) {
-        const databaseUser = getUserByUsernameResponse.data;
-        // While user account exist and is activated, try to auth
-        if(databaseUser.status) {
-            // Get users roles in database
-            const getUserRolesByUsernameResponse = await rolesHelpers.getUserRolesByUsername(username);
-            if(getUserRolesByUsernameResponse.status) {
-                // Response
-                const databaseUserRoles = getUserRolesByUsernameResponse.data;
-                return res.send({message: "", status: true, data: {user: databaseUser, roles: databaseUserRoles}});
-            }
-            return res.send(getUserRolesByUsernameResponse);
-        }
+
+    // Get user by username
+    const userByUsernameData = await usersHelpers.userByUsername(username);
+    if(!userByUsernameData.status) {
+        return res.send(userByUsernameData);
+    }
+
+    // Check user status
+    const databaseUser = userByUsernameData.data;
+    if(!databaseUser.enable) {
         return res.send({status: false, message: errorConstants.USERS.USER_DISABLED, data: null});
     }
-    return res.send(getUserByUsernameResponse);
+
+    return res.send({
+        message: "",
+        status: true,
+        data: databaseUser?.authResponse
+    });
 };
 
 // POST: Create a new access token
