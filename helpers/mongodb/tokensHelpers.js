@@ -1,19 +1,9 @@
 const dayjs = require('dayjs');
-const {MongoClient} = require('mongodb');
 
 const generalHelpers = require('../generalHelpers');
-const envConstants = require('../../constants/envConstants');
-const errorConstants = require('../../constants/errorConstants');
-
-// Data
-const usersCollection = "users";
-const databaseUrl = envConstants.DATABASE_URL;
+const usersHelpers = require('../mongodb/usersHelpers');
 
 module.exports.generateUserTokens = async (user, useragent) => {
-    // Connection configuration
-    let client, refreshToken = "", data = null, status = false, message = "";
-    client = new MongoClient(databaseUrl);
-
     // Extract user agent data
     const tokens = user?.tokens || [];
     const mobile = useragent?.isMobile;
@@ -37,53 +27,62 @@ module.exports.generateUserTokens = async (user, useragent) => {
         {username: user.username, permissions: user.roles}
     );
 
-
-    try {
-        // mongodb query execution
-        await client.connect()
-
-        // Update user token
-        if(tokenNeedle) {
-            refreshToken = tokenNeedle.token;
-            tokens.map(token => {
-                if(
-                    token?.browser === browser &&
-                    token?.desktop === desktop &&
-                    token?.mobile === mobile &&
-                    token?.os === os
-                ) {
-                    token.version = version;
-                    token.usedAt = currentDate;
-                }
-                return token;
-            });
-        }
-        // Create user token
-        else {
-            refreshToken = generalHelpers.buildJwtToken(false, {username: user.user});
-            tokens.push({
-                browser, version, os, mobile, desktop,
-                token: refreshToken,
-                usedAt: currentDate,
-                createdAt: currentDate
-            })
-        }
-        // TODO: save token into database
-        // Return tokens
-        const dbData = await client.db().collection(usersCollection).updateOne(
-            {_id: user._id},
-            {$set: {tokens}}
-        );
-        if(dbData !== null) {
-            status = true;
-            data = {access: accessToken, refresh: refreshToken};
-        }
-        else message = errorConstants.TOKENS.TOKEN_UPDATE;
+    // Update user token
+    let refreshToken = "";
+    if(tokenNeedle) {
+        refreshToken = tokenNeedle.token;
+        tokens.map(token => {
+            if(
+                token?.browser === browser &&
+                token?.desktop === desktop &&
+                token?.mobile === mobile &&
+                token?.os === os
+            ) {
+                token.version = version;
+                token.usedAt = currentDate;
+            }
+            return token;
+        });
     }
-    catch (err) {
-        generalHelpers.log("Connection failure to mongodb", err);
-        message = errorConstants.GENERAL.DATABASE;
+    // Create user token
+    else {
+        refreshToken = generalHelpers.buildJwtToken(false, {username: user.username});
+        tokens.push({
+            browser, version, os, mobile, desktop,
+            token: refreshToken,
+            usedAt: currentDate,
+            createdAt: currentDate
+        });
     }
-    finally { await client?.close(); }
-    return {data, status, message};
+
+    // Update user tokens
+    const updateUserTokensByUserIdData = await usersHelpers.updateUserTokensByUserId(user._id, tokens);
+    if(!updateUserTokensByUserIdData.status) {
+        return updateUserTokensByUserIdData;
+    }
+
+    // Send generated tokens
+    const data = {access: accessToken, refresh: refreshToken};
+    return {message: "", status: true, data};
 };
+
+module.exports.removeUserToken = async (user, useragent) => {
+    // Extract user agent data
+    const tokens = user?.tokens || [];
+    const mobile = useragent?.isMobile;
+    const os = useragent?.os.toString();
+    const desktop = useragent?.isDesktop;
+    const browser = useragent?.browser.toString();
+
+    // Remove user token for the current agent
+    tokens.filter(token => !(
+        token?.browser === browser &&
+        token?.desktop === desktop &&
+        token?.mobile === mobile &&
+        token?.os === os
+    ));
+
+    // Update user tokens
+    return await usersHelpers.updateUserTokensByUserId(user._id, tokens);
+};
+

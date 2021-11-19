@@ -54,3 +54,26 @@ module.exports.login = async (req, res) => {
         }
     });
 };
+
+// POST: Attempt logout
+module.exports.logout = async (req, res) => {
+    // Data
+    const username = req.username;
+
+    // Check if request is made by a human
+    const useragent = req.useragent;
+    if(!!useragent?.isBot) {
+        return res.send({status: false, message: errorConstants.GENERAL.BOT_REQUEST, data: null});
+    }
+
+    // Get user by username
+    const userByUsernameData = await usersHelpers.userByUsername(username);
+    if(!userByUsernameData.status) {
+        return res.send(userByUsernameData);
+    }
+
+    // Delete to user token in database
+    const databaseUser = userByUsernameData.data;
+    const removeUserTokenData = await tokensHelpers.removeUserToken(databaseUser, useragent);
+    res.send(removeUserTokenData);
+};
