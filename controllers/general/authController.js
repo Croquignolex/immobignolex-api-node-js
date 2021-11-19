@@ -10,6 +10,12 @@ module.exports.login = async (req, res) => {
     // Form data & data
     const {username, password} = req.body;
 
+    // Check if request is made by a human
+    const useragent = req.useragent;
+    if(!!useragent?.isBot) {
+        return res.send({status: false, message: errorConstants.GENERAL.BOT_REQUEST, data: null});
+    }
+
     // Form checker
     const {requiredChecker, passwordChecker} = formCheckerHelpers;
     if(!requiredChecker(username) || !passwordChecker(password)) {
@@ -34,7 +40,6 @@ module.exports.login = async (req, res) => {
     }
 
     // Generate user tokens
-    const useragent = req.useragent;
     const generateUserTokensData = await tokensHelpers.generateUserTokens(databaseUser, useragent);
     if(!generateUserTokensData.status) {
         return res.send(generateUserTokensData);
