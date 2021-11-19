@@ -1,3 +1,4 @@
+const dayjs = require('dayjs');
 const {MongoClient} = require('mongodb');
 
 const generalHelpers = require('../generalHelpers');
@@ -5,8 +6,7 @@ const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
 
 // Data
-const collection = "users";
-const document = "immobignolex";
+const usersCollection = "users";
 const databaseUrl = envConstants.DATABASE_URL;
 
 module.exports.generateUserTokens = async (user, useragent) => {
@@ -17,8 +17,9 @@ module.exports.generateUserTokens = async (user, useragent) => {
     // Extract user agent data
     const tokens = user?.tokens || [];
     const mobile = useragent?.isMobile;
-    const desktop = useragent?.isDesktop;
     const os = useragent?.os.toString();
+    const desktop = useragent?.isDesktop;
+    const currentDate = dayjs().valueOf();
     const browser = useragent?.browser.toString();
     const version = useragent?.version.toString();
 
@@ -36,6 +37,7 @@ module.exports.generateUserTokens = async (user, useragent) => {
         {username: user.username, permissions: user.roles}
     );
 
+
     try {
         // mongodb query execution
         await client.connect()
@@ -51,8 +53,7 @@ module.exports.generateUserTokens = async (user, useragent) => {
                     token?.os === os
                 ) {
                     token.version = version;
-                    // TODO: save miliseconds with days js packge at UTC
-                    token.usedAt = "";
+                    token.usedAt = currentDate;
                 }
                 return token;
             });
@@ -63,14 +64,16 @@ module.exports.generateUserTokens = async (user, useragent) => {
             tokens.push({
                 browser, version, os, mobile, desktop,
                 token: refreshToken,
-                // TODO: save miliseconds with days js packge at UTC
-                createdAt: "",
-                usedAt: ""
+                usedAt: currentDate,
+                createdAt: currentDate
             })
         }
         // TODO: save token into database
         // Return tokens
-        const dbData = await client.db(document).collection(collection).find() || [];
+        const dbData = await client.db().collection(usersCollection).updateOne(
+            {_id: user._id},
+            {$set: {tokens}}
+        );
         if(dbData !== null) {
             status = true;
             data = {access: accessToken, refresh: refreshToken};

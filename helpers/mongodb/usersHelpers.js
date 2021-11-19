@@ -6,8 +6,7 @@ const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
 
 // Data
-const collection = "users";
-const document = "immobignolex";
+const usersCollection = "users";
 const databaseUrl = envConstants.DATABASE_URL;
 
 module.exports.users = async () => {
@@ -17,7 +16,7 @@ module.exports.users = async () => {
     try {
         // mongodb query execution
         await client.connect()
-        const dbData = await client.db(document).collection(collection).find() || [];
+        const dbData = await client.db().collection(usersCollection).find() || [];
         data = [];
         status = true;
         dbData.forEach(item => data.push(new UserModel(item)));
@@ -37,7 +36,7 @@ module.exports.userByUsername = async (username) => {
     try {
         // mongodb query execution
         await client.connect()
-        const dbData = await client.db(document).collection(collection).findOne({username});
+        const dbData = await client.db().collection(usersCollection).findOne({username});
         if(dbData !== null) {
             status = true;
             data = new UserModel(dbData);
