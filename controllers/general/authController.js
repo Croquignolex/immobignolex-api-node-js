@@ -77,3 +77,53 @@ module.exports.logout = async (req, res) => {
     const removeUserTokenData = await tokensHelpers.removeUserToken(databaseUser, useragent);
     res.send(removeUserTokenData);
 };
+
+// POST: Refresh user data (equivalent to fetch user data)
+module.exports.refresh = async (req, res) => {
+    // Data
+    const username = req.username;
+    // Fetch user into local database
+    const getUserByUsernameResponse = await usersHelpers.getUserByUsername(username);
+    if(getUserByUsernameResponse.status) {
+        const databaseUser = getUserByUsernameResponse.data;
+        // While user account exist and is activated, try to auth
+        if(databaseUser.status) {
+            // Get users roles in database
+            const getUserRolesByUsernameResponse = await rolesHelpers.getUserRolesByUsername(username);
+            if(getUserRolesByUsernameResponse.status) {
+                // Response
+                const databaseUserRoles = getUserRolesByUsernameResponse.data;
+                return res.send({message: "", status: true, data: {user: databaseUser, roles: databaseUserRoles}});
+            }
+            return res.send(getUserRolesByUsernameResponse);
+        }
+        return res.send({status: false, message: errorConstants.USERS.USER_DISABLED, data: null});
+    }
+    return res.send(getUserByUsernameResponse);
+};
+
+// POST: Create a new access token
+module.exports.token = async (req, res) => {
+    // Data
+    const username = req.username;
+    const token = req.token;
+    // Extract user agent
+    const useragent = req.useragent;
+    // Check if it one of username token
+    const checkUserTokenResponse = await tokenHelpers.checkUserToken(username, token, useragent);
+    if(checkUserTokenResponse.status) {
+        // Get users roles in database
+        const getUserRolesByUsernameResponse = await rolesHelpers.getUserRolesByUsername(username);
+        if(getUserRolesByUsernameResponse.status) {
+            const databaseUserRoles = getUserRolesByUsernameResponse.data;
+            // Generate access token
+            const accessToken = generalHelpers.buildJwtToken(
+                true,
+                {username, permissions: chainRoles(databaseUserRoles)}
+            );
+            return res.send({status: true, message: "", data: accessToken});
+        }
+        return res.send(getUserRolesByUsernameResponse);
+    }
+    return res.send(checkUserTokenResponse);
+};
