@@ -8,7 +8,7 @@ const errorConstants = require("../constants/errorConstants");
 module.exports = (req, res, next) => {
     // Check token existence
     const bearToken = req.header("authorization");
-    if(!bearToken) return res.status(401).send({
+    if(!bearToken) return res.status(401).json({
         data: null,
         status: false,
         message: errorConstants.MIDDLEWARE.UNAUTHORIZED_REQUEST
@@ -36,6 +36,6 @@ module.exports = (req, res, next) => {
         next();
     } catch (e) {
         generalHelpers.log("Token verification error", e);
-        res.status(406).send({status: false, message: errorConstants.MIDDLEWARE.INVALID_TOKEN, data: null});
+        res.status(406).json({status: false, message: errorConstants.MIDDLEWARE.INVALID_TOKEN, data: null});
     }
 };

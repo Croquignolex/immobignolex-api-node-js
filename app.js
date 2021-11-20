@@ -1,14 +1,10 @@
 const http = require('http');
 const cors = require('cors');
 const express = require('express');
-const bodyParser = require('body-parser');
 const useragent = require('express-useragent');
 
 const envConstants = require("./constants/envConstants");
 const generalHelpers = require("./helpers/generalHelpers");
-
-// .env config
-require('dotenv').config();
 
 // Init express server
 const app = express();
@@ -28,7 +24,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(bodyParser.json());
 app.use(useragent.express());
 
 // Routes

@@ -1,3 +1,4 @@
+// .env config
 require('dotenv').config();
 
 // App config

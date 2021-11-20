@@ -5,7 +5,7 @@ const generalConstants = require("../constants/generalConstants");
 module.exports = (req, res, next) => {
     // Check permissions existence
     const permissions = req.permissions;
-    if(!permissions) return res.status(403).send({
+    if(!permissions) return res.status(403).json({
         data: null,
         status: false,
         message: errorConstants.MIDDLEWARE.NO_PERMISSIONS
@@ -13,5 +13,5 @@ module.exports = (req, res, next) => {
 
     if(permissions.includes(generalConstants.ROLES.USER)) return next();
 
-    res.status(403).send({status: false, message: errorConstants.MIDDLEWARE.PERMISSION_DENIED, data: null});
+    res.status(403).json({status: false, message: errorConstants.MIDDLEWARE.PERMISSION_DENIED, data: null});
 };
