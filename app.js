@@ -1,6 +1,7 @@
 const http = require('http');
 const cors = require('cors');
 const express = require('express');
+const bodyParser = require('body-parser');
 const useragent = require('express-useragent');
 
 const envConstants = require("./constants/envConstants");
@@ -24,6 +25,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(bodyParser.json());
 app.use(useragent.express());
 
 // Routes

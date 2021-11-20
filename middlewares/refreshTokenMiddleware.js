@@ -7,7 +7,7 @@ const generalHelpers = require("../helpers/generalHelpers");
 module.exports = (req, res, next) => {
     // Check token existence
     const bearToken = req.header("passport");
-    if(!bearToken) res.status(400).json({status: false, message: "", data: null});
+    if(!bearToken) res.status(400).send({status: false, message: "", data: null});
 
     try {
         // Read public key
@@ -30,6 +30,6 @@ module.exports = (req, res, next) => {
         next();
     } catch (e) {
         generalHelpers.log("Refresh token verification error", e);
-        res.status(400).json({status: false, message: "", data: null});
+        res.status(400).send({status: false, message: "", data: null});
     }
 };
