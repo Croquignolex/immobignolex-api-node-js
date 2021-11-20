@@ -110,7 +110,7 @@ module.exports.checkUserToken = async (user, useragent, refreshToken) => {
             true,
             {username: user.username, permissions: user.roles}
         );
-        return {message: "", status: false, data: accessToken};
+        return {message: "", status: true, data: accessToken};
     }
     // Token not found for this user agent
     return {message: errorConstants.USERS.USER_TOKEN, status: false, data: null};
