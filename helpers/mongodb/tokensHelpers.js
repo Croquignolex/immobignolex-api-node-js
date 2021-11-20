@@ -2,6 +2,7 @@ const dayjs = require('dayjs');
 
 const generalHelpers = require('../generalHelpers');
 const usersHelpers = require('../mongodb/usersHelpers');
+const errorConstants = require('../../constants/errorConstants');
 
 module.exports.generateUserTokens = async (user, useragent) => {
     // Extract user agent data
@@ -84,5 +85,34 @@ module.exports.removeUserToken = async (user, useragent) => {
 
     // Update user tokens
     return await usersHelpers.updateUserTokensByUserId(user._id, tokens);
+};
+
+module.exports.checkUserToken = async (user, useragent, refreshToken) => {
+    // Extract user agent data
+    const tokens = user?.tokens || [];
+    const mobile = useragent?.isMobile;
+    const os = useragent?.os.toString();
+    const desktop = useragent?.isDesktop;
+    const browser = useragent?.browser.toString();
+
+    // Check if user agent is trusted
+    const tokenNeedle = tokens.find(token => (
+        token?.token === refreshToken &&
+        token?.browser === browser &&
+        token?.desktop === desktop &&
+        token?.mobile === mobile &&
+        token?.os === os
+    ));
+
+    // Generate new access token for trusted user agent
+    if(tokenNeedle) {
+        const accessToken = generalHelpers.buildJwtToken(
+            true,
+            {username: user.username, permissions: user.roles}
+        );
+        return {message: "", status: false, data: accessToken};
+    }
+    // Token not found for this user agent
+    return {message: errorConstants.USERS.USER_TOKEN, status: false, data: null};
 };
 

@@ -75,7 +75,7 @@ module.exports.logout = async (req, res) => {
     // Delete to user token in database
     const databaseUser = userByUsernameData.data;
     const removeUserTokenData = await tokensHelpers.removeUserToken(databaseUser, useragent);
-    res.send(removeUserTokenData);
+    return res.send(removeUserTokenData);
 };
 
 // POST: Refresh user data (equivalent to fetch user data)
@@ -107,23 +107,21 @@ module.exports.token = async (req, res) => {
     // Data
     const username = req.username;
     const token = req.token;
-    // Extract user agent
+
+    // Check if request is made by a human
     const useragent = req.useragent;
-    // Check if it one of username token
-    const checkUserTokenResponse = await tokenHelpers.checkUserToken(username, token, useragent);
-    if(checkUserTokenResponse.status) {
-        // Get users roles in database
-        const getUserRolesByUsernameResponse = await rolesHelpers.getUserRolesByUsername(username);
-        if(getUserRolesByUsernameResponse.status) {
-            const databaseUserRoles = getUserRolesByUsernameResponse.data;
-            // Generate access token
-            const accessToken = generalHelpers.buildJwtToken(
-                true,
-                {username, permissions: chainRoles(databaseUserRoles)}
-            );
-            return res.send({status: true, message: "", data: accessToken});
-        }
-        return res.send(getUserRolesByUsernameResponse);
+    if(!!useragent?.isBot) {
+        return res.send({status: false, message: errorConstants.GENERAL.BOT_REQUEST, data: null});
     }
-    return res.send(checkUserTokenResponse);
+
+    // Get user by username
+    const userByUsernameData = await usersHelpers.userByUsername(username);
+    if(!userByUsernameData.status) {
+        return res.send(userByUsernameData);
+    }
+
+    // Delete to user token in database
+    const databaseUser = userByUsernameData.data;
+    const checkUserTokenData = await tokensHelpers.checkUserToken(databaseUser, useragent, token);
+    return res.send(checkUserTokenData);
 };
