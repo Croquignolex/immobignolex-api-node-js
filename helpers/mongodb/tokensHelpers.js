@@ -25,7 +25,7 @@ module.exports.generateUserTokens = async (user, useragent) => {
     // Generate access token
     const accessToken = generalHelpers.buildJwtToken(
         true,
-        {username: user.username, permissions: user.roles}
+        {username: user.username, permissions: user.permissions}
     );
 
     // Update user token
@@ -108,7 +108,7 @@ module.exports.checkUserToken = async (user, useragent, refreshToken) => {
     if(tokenNeedle) {
         const accessToken = generalHelpers.buildJwtToken(
             true,
-            {username: user.username, permissions: user.roles}
+            {username: user.username, permissions: user.permissions}
         );
         return {message: "", status: true, data: accessToken};
     }

@@ -11,7 +11,7 @@ module.exports = (req, res, next) => {
         message: errorConstants.MIDDLEWARE.NO_PERMISSIONS
     });
 
-    if(permissions.includes(generalConstants.ROLES.USER)) return next();
+    if(permissions.includes(generalConstants.PERMISSIONS.BASIC)) return next();
 
     res.status(403).send({status: false, message: errorConstants.MIDDLEWARE.PERMISSION_DENIED, data: null});
 };

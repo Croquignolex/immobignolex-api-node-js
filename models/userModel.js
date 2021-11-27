@@ -6,9 +6,11 @@ module.exports = class UserModel {
     get authResponse() {
         return {
             name: this.name,
-            roles: this.roles,
+            role: this.role,
             email: this.email,
-            username: this.username
+            avatar: this.avatar,
+            username: this.username,
+            permissions: this.permissions
         };
     };
 };
