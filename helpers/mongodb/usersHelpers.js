@@ -82,10 +82,7 @@ module.exports.updateUserAvatar = async (user, avatar) => {
             {_id: user._id},
             {$set: {avatar}}
         );
-        if(dbData !== null) {
-            status = true;
-            data = generalHelpers.filePublicUrl(avatar);
-        }
+        if(dbData !== null) status = true;
         else message = errorConstants.USERS.USER_AVATAR_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

@@ -25,7 +25,7 @@ module.exports.updateUserAvatar = async (user, file) => {
     const newUserAvatar = fileHelperData.data;
     return await usersHelpers.updateUserAvatar(user, {
         url: newUserAvatar.url,
-        asset: newUserAvatar.asset,
+        id: newUserAvatar.asset_id,
         secure: newUserAvatar.secure_url,
     });
 };
