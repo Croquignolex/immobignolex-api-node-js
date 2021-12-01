@@ -1,3 +1,5 @@
+const generalHelpers = require('../helpers/generalHelpers');
+
 module.exports = class UserModel {
     constructor(user) {
         Object.assign(this, user);
@@ -8,9 +10,9 @@ module.exports = class UserModel {
             name: this.name,
             role: this.role,
             email: this.email,
-            avatar: this.avatar,
             username: this.username,
-            permissions: this.permissions
+            permissions: this.permissions,
+            avatar: generalHelpers.filePublicUrl(this.avatar)
         };
     };
 };

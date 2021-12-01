@@ -44,3 +44,9 @@ module.exports.buildJwtToken = (willExpire = true, payload = {}) => {
     // Create the JWT Token
     return jwt.sign(payload, privateKey, options);
 };
+
+// Extract avatar from the correct env
+module.exports.filePublicUrl = (file) => {
+    if(!file) return null;
+    return (envConstants.APP.ENVIRONMENT === "local") ? file.url : file.secure;
+}
