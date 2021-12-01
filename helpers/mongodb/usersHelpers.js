@@ -62,7 +62,7 @@ module.exports.updateUserTokens = async (user, tokens) => {
             {$set: {tokens}}
         );
         if(dbData !== null) status = true;
-        else message = errorConstants.TOKENS.TOKEN_UPDATE;
+        else message = errorConstants.USERS.USER_TOKEN_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
@@ -83,7 +83,7 @@ module.exports.updateUserAvatar = async (user, avatar) => {
             {$set: {avatar}}
         );
         if(dbData !== null) status = true;
-        else message = errorConstants.TOKENS.TOKEN_UPDATE;
+        else message = errorConstants.USERS.USER_AVATAR_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
