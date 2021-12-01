@@ -1,12 +1,9 @@
 const filesHelpers = require('./filesHelpers');
-const usersHelpers = require('../mongodb/usersHelpers');
 const generalHelpers = require("../generalHelpers");
+const usersHelpers = require('../mongodb/usersHelpers');
 
+// Data
 const cloudFolder = 'immobignolex/avatars/';
-
-module.exports.userAvatar = async () => {
-    return {message: "", status: true, data: null};
-};
 
 // Upload user avatar to cloud
 module.exports.updateUserAvatar = async (user, file) => {
@@ -14,14 +11,17 @@ module.exports.updateUserAvatar = async (user, file) => {
     const oldUserAvatar = user.avatar;
 
     // Upload file to cloud
-    const fileHelperData = (oldUserAvatar)
-        ? await filesHelpers.updateFile(oldUserAvatar, filePath, cloudFolder)
-        : await filesHelpers.addFile(filePath, cloudFolder)
-
+    const fileHelperData = await filesHelpers.addFile(filePath, cloudFolder);
     if(!fileHelperData.status) {
         return fileHelperData;
     }
 
+    // Delete old image n cloud if exist
+    if(oldUserAvatar) {
+        await filesHelpers.removeFile(oldUserAvatar.id);
+    }
+
+    // Delete temp image
     await generalHelpers.deleteFileFromPath(filePath);
 
     // Keep into data base
@@ -33,6 +33,11 @@ module.exports.updateUserAvatar = async (user, file) => {
     });
 };
 
-module.exports.deleteUserAvatar = async () => {
-    return {message: "", status: true, data: null};
+// Delete user avatar in cloud
+module.exports.deleteUserAvatar = async (user) => {
+    const oldUserAvatar = user.avatar;
+
+    // Cloud call & db save
+    await filesHelpers.removeFile(oldUserAvatar.id);
+    return await usersHelpers.updateUserAvatar(user, null);
 };

@@ -24,11 +24,13 @@ module.exports.addFile = async (filePath, folder) => {
     });
 };
 
-module.exports.updateFile = async (oldFileId, newFilePath, folder) => {
-    return {message: "", status: true, data: null};
-};
-
 module.exports.removeFile = async (fileId) => {
-    // cloudinary.uploader.destroy('public_id', function(result) { console.log(result) });
-    return {message: "", status: true, data: null};
+    return new Promise((resolve) => {
+        cloudinary.v2.uploader.destroy(fileId, (error, data) => {
+            if(error) {
+                generalHelpers.log("Connection failure to cloudinary", error);
+            }
+            resolve({message: "", status: true, data: null});
+        });
+    });
 };

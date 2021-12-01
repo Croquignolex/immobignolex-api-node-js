@@ -15,14 +15,6 @@ router.post(
     ],
     userController.updateAvatar
 );
-router.delete(
-    '/avatar-delete',
-    [
-        pictureMiddleware,
-        tokenMiddleware,
-        basicPermissionMiddleware
-    ],
-    userController.deleteAvatar
-);
+router.delete('/avatar-delete', [tokenMiddleware, basicPermissionMiddleware], userController.deleteAvatar);
 
 module.exports = router;
