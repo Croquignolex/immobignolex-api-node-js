@@ -25,7 +25,7 @@ module.exports.users = async () => {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
     }
-    finally { await client?.close(); }
+    finally { await client.close(); }
     return {data, status, message};
 };
 
@@ -46,7 +46,7 @@ module.exports.userByUsername = async (username) => {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
     }
-    finally { await client?.close(); }
+    finally { await client.close(); }
     return {data, status, message};
 };
 
@@ -67,7 +67,7 @@ module.exports.updateUserTokens = async (user, tokens) => {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
     }
-    finally { await client?.close(); }
+    finally { await client.close(); }
     return {data, status, message};
 };
 
@@ -88,6 +88,6 @@ module.exports.updateUserAvatar = async (user, avatar) => {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
     }
-    finally { await client?.close(); }
+    finally { await client.close(); }
     return {data, status, message};
 };
