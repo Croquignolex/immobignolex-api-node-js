@@ -12,7 +12,7 @@ module.exports.login = async (req, res) => {
 
     // Check if request is made by a human
     const useragent = req.useragent;
-    if(!!useragent?.isBot) {
+    if(!!useragent.isBot) {
         return res.send({status: false, message: errorConstants.GENERAL.BOT_REQUEST, data: null});
     }
 
@@ -49,8 +49,8 @@ module.exports.login = async (req, res) => {
         message: "",
         status: true,
         data: {
-            user: databaseUser?.authResponse,
-            tokens: generateUserTokensData?.data
+            user: databaseUser.authResponse,
+            tokens: generateUserTokensData.data
         }
     });
 };
@@ -62,7 +62,7 @@ module.exports.logout = async (req, res) => {
 
     // Check if request is made by a human
     const useragent = req.useragent;
-    if(!!useragent?.isBot) {
+    if(!!useragent.isBot) {
         return res.send({status: false, message: errorConstants.GENERAL.BOT_REQUEST, data: null});
     }
 
@@ -98,7 +98,7 @@ module.exports.refresh = async (req, res) => {
     return res.send({
         message: "",
         status: true,
-        data: databaseUser?.authResponse
+        data: databaseUser.authResponse
     });
 };
 
@@ -110,7 +110,7 @@ module.exports.token = async (req, res) => {
 
     // Check if request is made by a human
     const useragent = req.useragent;
-    if(!!useragent?.isBot) {
+    if(!!useragent.isBot) {
         return res.send({status: false, message: errorConstants.GENERAL.BOT_REQUEST, data: null});
     }
 

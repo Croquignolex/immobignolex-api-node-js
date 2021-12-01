@@ -6,20 +6,20 @@ const errorConstants = require('../../constants/errorConstants');
 
 module.exports.generateUserTokens = async (user, useragent) => {
     // Extract user agent data
-    const tokens = user?.tokens || [];
-    const mobile = useragent?.isMobile;
-    const os = useragent?.os.toString();
-    const desktop = useragent?.isDesktop;
+    const tokens = user.tokens || [];
+    const mobile = useragent.isMobile;
+    const os = useragent.os.toString();
+    const desktop = useragent.isDesktop;
     const currentDate = dayjs().valueOf();
-    const browser = useragent?.browser.toString();
-    const version = useragent?.version.toString();
+    const browser = useragent.browser.toString();
+    const version = useragent.version.toString();
 
     // Check if user agent is trusted
     const tokenNeedle = tokens.find(token => (
-        token?.browser === browser &&
-        token?.desktop === desktop &&
-        token?.mobile === mobile &&
-        token?.os === os
+        token.browser === browser &&
+        token.desktop === desktop &&
+        token.mobile === mobile &&
+        token.os === os
     ));
 
     // Generate access token
@@ -34,10 +34,10 @@ module.exports.generateUserTokens = async (user, useragent) => {
         refreshToken = tokenNeedle.token;
         tokens.map(token => {
             if(
-                token?.browser === browser &&
-                token?.desktop === desktop &&
-                token?.mobile === mobile &&
-                token?.os === os
+                token.browser === browser &&
+                token.desktop === desktop &&
+                token.mobile === mobile &&
+                token.os === os
             ) {
                 token.version = version;
                 token.usedAt = currentDate;
@@ -69,18 +69,18 @@ module.exports.generateUserTokens = async (user, useragent) => {
 
 module.exports.removeUserToken = async (user, useragent) => {
     // Extract user agent data
-    const tokens = user?.tokens || [];
-    const mobile = useragent?.isMobile;
-    const os = useragent?.os.toString();
-    const desktop = useragent?.isDesktop;
-    const browser = useragent?.browser.toString();
+    const tokens = user.tokens || [];
+    const mobile = useragent.isMobile;
+    const os = useragent.os.toString();
+    const desktop = useragent.isDesktop;
+    const browser = useragent.browser.toString();
 
     // Remove user token for the current agent
     tokens.filter(token => !(
-        token?.browser === browser &&
-        token?.desktop === desktop &&
-        token?.mobile === mobile &&
-        token?.os === os
+        token.browser === browser &&
+        token.desktop === desktop &&
+        token.mobile === mobile &&
+        token.os === os
     ));
 
     // Update user tokens
@@ -89,19 +89,19 @@ module.exports.removeUserToken = async (user, useragent) => {
 
 module.exports.checkUserToken = async (user, useragent, refreshToken) => {
     // Extract user agent data
-    const tokens = user?.tokens || [];
-    const mobile = useragent?.isMobile;
-    const os = useragent?.os.toString();
-    const desktop = useragent?.isDesktop;
-    const browser = useragent?.browser.toString();
+    const tokens = user.tokens || [];
+    const mobile = useragent.isMobile;
+    const os = useragent.os.toString();
+    const desktop = useragent.isDesktop;
+    const browser = useragent.browser.toString();
 
     // Check if user agent is trusted
     const tokenNeedle = tokens.find(token => (
-        token?.token === refreshToken &&
-        token?.browser === browser &&
-        token?.desktop === desktop &&
-        token?.mobile === mobile &&
-        token?.os === os
+        token.token === refreshToken &&
+        token.browser === browser &&
+        token.desktop === desktop &&
+        token.mobile === mobile &&
+        token.os === os
     ));
 
     // Generate new access token for trusted user agent
