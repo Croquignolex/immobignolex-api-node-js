@@ -50,7 +50,7 @@ module.exports.userByUsername = async (username) => {
     return {data, status, message};
 };
 
-module.exports.updateUserTokensByUserId = async (userId, tokens) => {
+module.exports.updateUserTokens = async (user, tokens) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -58,7 +58,7 @@ module.exports.updateUserTokensByUserId = async (userId, tokens) => {
         // mongodb query execution
         await client.connect()
         const dbData = await client.db().collection(usersCollection).updateOne(
-            {_id: userId},
+            {_id: user._id},
             {$set: {tokens}}
         );
         if(dbData !== null) status = true;
@@ -71,7 +71,7 @@ module.exports.updateUserTokensByUserId = async (userId, tokens) => {
     return {data, status, message};
 };
 
-module.exports.updateUserAvatarByUserId = async (userId, avatar) => {
+module.exports.updateUserAvatar = async (user, avatar) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -79,8 +79,8 @@ module.exports.updateUserAvatarByUserId = async (userId, avatar) => {
         // mongodb query execution
         await client.connect()
         const dbData = await client.db().collection(usersCollection).updateOne(
-            {_id: userId},
-            {$set: {tokens}}
+            {_id: user._id},
+            {$set: {avatar}}
         );
         if(dbData !== null) status = true;
         else message = errorConstants.TOKENS.TOKEN_UPDATE;

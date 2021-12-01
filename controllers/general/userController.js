@@ -30,7 +30,9 @@ module.exports.updateAvatar = async (req, res) => {
         return res.send(userByUsernameData);
     }
 
-    const updateUserAvatarByUserIdData = await usersHelpers.updateUserAvatarByUserId(username, file);
+    //
+    const databaseUser = userByUsernameData.data;
+    const updateUserAvatarByUserIdData = await usersHelpers.updateUserAvatar(databaseUser, file);
     return res.send(updateUserAvatarByUserIdData);
 };
 

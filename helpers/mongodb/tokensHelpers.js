@@ -84,7 +84,7 @@ module.exports.removeUserToken = async (user, useragent) => {
     ));
 
     // Update user tokens
-    return await usersHelpers.updateUserTokensByUserId(user._id, tokens);
+    return await usersHelpers.updateUserTokens(user, tokens);
 };
 
 module.exports.checkUserToken = async (user, useragent, refreshToken) => {
