@@ -12,9 +12,9 @@ cloudinary.config({
 });
 
 // Add file in cloud
-module.exports.addFile = async (filePath, cloudFolder) => {
+module.exports.addFile = async (filePath, folder) => {
     return new Promise((resolve) => {
-        cloudinary.v2.uploader.upload(filePath, (error, data) => {
+        cloudinary.v2.uploader.upload(filePath, {folder}, (error, data) => {
             if(error) {
                 generalHelpers.log("Connection failure to cloudinary", error);
                 resolve({message: errorConstants.GENERAL.CLOUD_SERVICE, status: false, data: null})

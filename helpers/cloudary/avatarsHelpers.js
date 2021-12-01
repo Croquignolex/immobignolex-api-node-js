@@ -1,7 +1,7 @@
 const filesHelpers = require('./filesHelpers');
 const usersHelpers = require('../mongodb/usersHelpers');
 
-const cloudFolder = 'avatar';
+const cloudFolder = 'immobignolex/avatars/';
 
 module.exports.userAvatar = async () => {
     return {message: "", status: true, data: null};
