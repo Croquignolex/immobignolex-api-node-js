@@ -70,3 +70,24 @@ module.exports.updateUserTokensByUserId = async (userId, tokens) => {
     finally { await client?.close(); }
     return {data, status, message};
 };
+
+module.exports.updateUserAvatarByUserId = async (userId, avatar) => {
+    // Connection configuration
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        // mongodb query execution
+        await client.connect()
+        const dbData = await client.db().collection(usersCollection).updateOne(
+            {_id: userId},
+            {$set: {tokens}}
+        );
+        if(dbData !== null) status = true;
+        else message = errorConstants.TOKENS.TOKEN_UPDATE;
+    } catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client?.close(); }
+    return {data, status, message};
+};

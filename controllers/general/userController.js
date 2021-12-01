@@ -1,15 +1,37 @@
+const errorConstants = require('../../constants/errorConstants');
+const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 const avatarsHelpers = require('../../helpers/cloudary/avatarsHelpers');
 
 // POST: Update user avatar
 module.exports.updateAvatar = async (req, res) => {
-    // Data
+    // File data from multer (error management)
+    const pictureError = req.picture;
+    if(pictureError) {
+        return res.send({status: false, data: null, message: pictureError});
+    }
+
+    // Check file existence has form data
+    if(!req.file) {
+        return res.send({status: false, data: null, message: errorConstants.GENERAL.FORM_DATA});
+    }
+
     const username = req.username;
-    const {avatar} = req.body;
-    console.log(req.body);
 
+    // Save user avatar in the cloud
+    const file = req.file;
+    const saveUserAvatarData = await avatarsHelpers.saveUserAvatar(file);
+    if(!saveUserAvatarData.status) {
+        return res.send(saveUserAvatarData);
+    }
 
-    const file = await blobToImage(avatar);
-    return await avatarsHelpers.saveUserAvatar(file);
+    // Get user by username
+    const userByUsernameData = await usersHelpers.userByUsername(username);
+    if(!userByUsernameData.status) {
+        return res.send(userByUsernameData);
+    }
+
+    const updateUserAvatarByUserIdData = await usersHelpers.updateUserAvatarByUserId(username, file);
+    return res.send(updateUserAvatarByUserIdData);
 };
 
 // DELETE: Delete user avatar
@@ -18,15 +40,3 @@ module.exports.deleteAvatar = async (req, res) => {
     const username = req.username;
     return res.send({message: "", status: true, data: null});
 };
-
-const blobToImage = (blob) => {
-    return new Promise(resolve => {
-        const url = URL.createObjectURL(blob)
-        let img = new Image()
-        img.onload = () => {
-            URL.revokeObjectURL(url)
-            resolve(img)
-        }
-        img.src = url
-    })
-}
