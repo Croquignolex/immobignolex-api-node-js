@@ -3,8 +3,8 @@ const multer = require("multer");
 const generalHelpers = require("../helpers/generalHelpers");
 const errorConstants = require("../constants/errorConstants");
 
-// Store image
-const imageStorage = multer.diskStorage({
+// Store image into disk
+const imageDiskStorage = multer.diskStorage({
     destination: (req, file, callback) => {
         const dir = "medias";
         callback(null, dir);
@@ -13,6 +13,9 @@ const imageStorage = multer.diskStorage({
         callback(null, generalHelpers.generateRandomString() + '.jpg');
     }
 });
+
+// Store image into memory
+const imageMemoryStorage = multer.memoryStorage();
 
 // Image filter type
 const imageFilter = function(req, file, callback) {
@@ -26,7 +29,7 @@ const imageFilter = function(req, file, callback) {
 
 module.exports = {
     pictureMiddleware: multer({
-        storage: imageStorage,
+        storage: imageDiskStorage,
         fileFilter: imageFilter
     }).single('picture')
 };

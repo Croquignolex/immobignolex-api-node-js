@@ -12,6 +12,7 @@ module.exports.updateAvatar = async (req, res) => {
 
     // Check file existence has form data
     const file = req.file;
+
     if(!file) {
         return res.send({status: false, data: null, message: errorConstants.GENERAL.FORM_DATA});
     }

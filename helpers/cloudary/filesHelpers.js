@@ -24,10 +24,11 @@ module.exports.addFile = async (filePath, folder) => {
     });
 };
 
-module.exports.updateFile = async (oldFileName, newFile, cloudFolder) => {
+module.exports.updateFile = async (oldFileId, newFilePath, folder) => {
     return {message: "", status: true, data: null};
 };
 
-module.exports.removeFile = async () => {
+module.exports.removeFile = async (fileId) => {
+    // cloudinary.uploader.destroy('public_id', function(result) { console.log(result) });
     return {message: "", status: true, data: null};
 };

@@ -1,4 +1,6 @@
 const envConstants = require("../constants/envConstants");
+const generalHelpers = require("../helpers/generalHelpers");
+const fs = require("fs");
 
 module.exports.log = (message, data = null, highPriority = false) => {
     // Only in local environment
@@ -49,4 +51,19 @@ module.exports.buildJwtToken = (willExpire = true, payload = {}) => {
 module.exports.filePublicUrl = (file) => {
     if(!file) return null;
     return (envConstants.APP.ENVIRONMENT === "local") ? file.url : file.secure;
-}
+};
+
+// Remove a file from path
+module.exports.deleteFileFromPath = (path) => {
+    return new Promise((resolve) => {
+        const fs = require('fs');
+        fs.unlink(path, (err) => {
+            if (err) {
+                generalHelpers.log("File delete error", err);
+                resolve({status: false, message: "", data: null});
+            }
+            resolve({status: true, message: "", data: null});
+        })
+    });
+};
+

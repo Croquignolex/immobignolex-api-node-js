@@ -1,5 +1,6 @@
 const filesHelpers = require('./filesHelpers');
 const usersHelpers = require('../mongodb/usersHelpers');
+const generalHelpers = require("../generalHelpers");
 
 const cloudFolder = 'immobignolex/avatars/';
 
@@ -21,11 +22,13 @@ module.exports.updateUserAvatar = async (user, file) => {
         return fileHelperData;
     }
 
+    await generalHelpers.deleteFileFromPath(filePath);
+
     // Keep into data base
     const newUserAvatar = fileHelperData.data;
     return await usersHelpers.updateUserAvatar(user, {
         url: newUserAvatar.url,
-        id: newUserAvatar.asset_id,
+        id: newUserAvatar.public_id,
         secure: newUserAvatar.secure_url,
     });
 };
