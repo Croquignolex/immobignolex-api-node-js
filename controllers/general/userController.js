@@ -41,6 +41,6 @@ module.exports.deleteAvatar = async (req, res) => {
 
     // Remove avatar in the cloud & database
     const databaseUser = userByUsernameData.data;
-    const deleteUserAvatarData = await avatarsHelpers.deleteUserAvatar(databaseUser, file);
+    const deleteUserAvatarData = await avatarsHelpers.deleteUserAvatar(databaseUser);
     return res.send(deleteUserAvatarData);
 };
