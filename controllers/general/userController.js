@@ -15,23 +15,22 @@ module.exports.updateAvatar = async (req, res) => {
         return res.send({status: false, data: null, message: errorConstants.GENERAL.FORM_DATA});
     }
 
-    const username = req.username;
-
-    // Save user avatar in the cloud
-    const file = req.file;
-    const saveUserAvatarData = await avatarsHelpers.saveUserAvatar(file);
-    if(!saveUserAvatarData.status) {
-        return res.send(saveUserAvatarData);
-    }
-
     // Get user by username
+    const username = req.username;
     const userByUsernameData = await usersHelpers.userByUsername(username);
     if(!userByUsernameData.status) {
         return res.send(userByUsernameData);
     }
 
-    //
+    // Save user avatar in the cloud
+    const file = req.file;
     const databaseUser = userByUsernameData.data;
+    const saveUserAvatarData = await avatarsHelpers.updateUserAvatar(databaseUser, file);
+    if(!saveUserAvatarData.status) {
+        return res.send(saveUserAvatarData);
+    }
+
+    // Update user avatar
     const updateUserAvatarByUserIdData = await usersHelpers.updateUserAvatar(databaseUser, file);
     return res.send(updateUserAvatarByUserIdData);
 };
