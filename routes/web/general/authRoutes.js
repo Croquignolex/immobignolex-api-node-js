@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 
-const controller = require('../../../controllers/general/authController');
+const authController = require('../../../controllers/general/authController');
 const tokenMiddleware = require("../../../middlewares/accessTokenMiddleware");
 const refreshTokenMiddleware = require("../../../middlewares/refreshTokenMiddleware");
 const basicPermissionMiddleware = require("../../../middlewares/basicPermissionMiddleware");
 
-router.post('/login', controller.login);
-router.post('/token', refreshTokenMiddleware, controller.token);
-router.post('/logout', [tokenMiddleware, basicPermissionMiddleware], controller.logout);
-router.post('/refresh', [tokenMiddleware, basicPermissionMiddleware], controller.refresh);
+router.post('/login', authController.login);
+router.post('/token', refreshTokenMiddleware, authController.token);
+router.post('/logout', [tokenMiddleware, basicPermissionMiddleware], authController.logout);
+router.post('/refresh', [tokenMiddleware, basicPermissionMiddleware], authController.refresh);
 
 module.exports = router;

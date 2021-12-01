@@ -30,9 +30,11 @@ app.use(useragent.express());
 
 // Routes
 const webAuthRoutes = require('./routes/web/general/authRoutes');
+const webUserRoutes = require('./routes/web/general/userRoutes');
 
 // Setting general model route
 router.use("/web/v1/auth", webAuthRoutes);
+router.use("/web/v1/user", webUserRoutes);
 
 // Append /api for our http requests
 app.use("/api", router);
