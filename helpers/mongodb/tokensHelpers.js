@@ -57,7 +57,7 @@ module.exports.generateUserTokens = async (user, useragent) => {
     }
 
     // Update user tokens
-    const updateUserTokensByUserIdData = await usersHelpers.updateUserTokensByUserId(user._id, tokens);
+    const updateUserTokensByUserIdData = await usersHelpers.updateUserTokens(user, tokens);
     if(!updateUserTokensByUserIdData.status) {
         return updateUserTokensByUserIdData;
     }

@@ -11,7 +11,8 @@ module.exports.updateAvatar = async (req, res) => {
     }
 
     // Check file existence has form data
-    if(!req.file) {
+    const file = req.file;
+    if(!file) {
         return res.send({status: false, data: null, message: errorConstants.GENERAL.FORM_DATA});
     }
 
@@ -22,17 +23,10 @@ module.exports.updateAvatar = async (req, res) => {
         return res.send(userByUsernameData);
     }
 
-    // Save user avatar in the cloud
-    const file = req.file;
+    // Save user avatar in the cloud & database
     const databaseUser = userByUsernameData.data;
     const saveUserAvatarData = await avatarsHelpers.updateUserAvatar(databaseUser, file);
-    if(!saveUserAvatarData.status) {
-        return res.send(saveUserAvatarData);
-    }
-
-    // Update user avatar
-    const updateUserAvatarByUserIdData = await usersHelpers.updateUserAvatar(databaseUser, file);
-    return res.send(updateUserAvatarByUserIdData);
+    return res.send(saveUserAvatarData);
 };
 
 // DELETE: Delete user avatar

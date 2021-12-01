@@ -1,6 +1,8 @@
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require('cloudinary');
 
 const envConstants = require('../../constants/envConstants');
+const generalHelpers = require('../../helpers/generalHelpers');
+const errorConstants = require('../../constants/errorConstants');
 
 cloudinary.config({
     secure: envConstants.CLOUDINARY.SECURE,
@@ -9,22 +11,21 @@ cloudinary.config({
     api_secret: envConstants.CLOUDINARY.API_SECRET,
 });
 
-module.exports.getFile = async () => {
-    return {message: "", status: true, data: null};
-};
-
-module.exports.addFile = async () => {
-    return {message: "", status: true, data: null};
+// Add file in cloud
+module.exports.addFile = async (filePath, cloudFolder) => {
+    return new Promise((resolve) => {
+        cloudinary.v2.uploader.upload(filePath, (error, data) => {
+            if(error) {
+                generalHelpers.log("Connection failure to cloudinary", error);
+                resolve({message: errorConstants.GENERAL.CLOUD_SERVICE, status: false, data: null})
+            }
+            resolve({message: "", status: true, data});
+        });
+    });
 };
 
 module.exports.updateFile = async (oldFileName, newFile, cloudFolder) => {
-    // Delete old file
-    return new Promise((resolve, reject) => {
-        cloudinary.v2.uploader.upload(newFile, (error, result) => {
-            console.log(result, error);
-            resolve({message: "", status: true, data: null})
-        });
-    });
+    return {message: "", status: true, data: null};
 };
 
 module.exports.removeFile = async () => {
