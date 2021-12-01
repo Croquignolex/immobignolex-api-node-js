@@ -17,5 +17,13 @@ module.exports.JWT = {
     AUDIENCE: process.env.JWT_AUDIENCE
 };
 
+// Cloudinary options
+module.exports.CLOUDINARY = {
+    NAME: process.env.CLOUD_NAME,
+    SECURE: process.env.CLOUD_SECURE,
+    API_KEY: process.env.CLOUD_API_KEY,
+    API_SECRET: process.env.CLOUD_API_SECRET
+};
+
 // Mongo DB
 module.exports.DATABASE_URL = process.env.MONGO_DB_URL;

@@ -27,6 +27,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(useragent.express());
+app.use(bodyParser.urlencoded());
 
 // Routes
 const webAuthRoutes = require('./routes/web/general/authRoutes');
