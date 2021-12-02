@@ -43,7 +43,7 @@ const server = http.createServer(app);
 
 // Express server listen
 server.listen(
-    8000,
+    8000, '0.0.0.0',
     () => {
         generalHelpers.log("API LISTENING TO PORT 8000",
             null,
