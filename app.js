@@ -17,7 +17,7 @@ const router = express.Router();
 const corsOptions = {
     // Authorized header to the client
     allowedHeaders: "accept,content-type,accept-charset,authorization,passport",
-    origin: envConstants.APP.ORIGINS,
+    origin: "*",
     exposedHeaders: "authorization,passport",
     methods: "GET,POST,PUT,DELETE",
     optionsSuccessStatus: 200,
@@ -44,10 +44,10 @@ const server = http.createServer(app);
 
 // Express server listen
 server.listen(
-    envConstants.APP.SERVER_PORT,
+    process.env.PORT || 8000,
     () => {
         generalHelpers.log(
-            `API LISTENING TO PORT ${envConstants.APP.SERVER_PORT}`,
+            `API LISTENING TO PORT ${process.env.PORT || 8000}`,
             null,
             true
         );
