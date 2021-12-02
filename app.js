@@ -4,7 +4,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const useragent = require('express-useragent');
 
-const envConstants = require("./constants/envConstants");
 const generalHelpers = require("./helpers/generalHelpers");
 
 // Init express server
@@ -44,10 +43,9 @@ const server = http.createServer(app);
 
 // Express server listen
 server.listen(
-    process.env.PORT || 8000,
+    8000,
     () => {
-        generalHelpers.log(
-            `API LISTENING TO PORT ${process.env.PORT || 8000}`,
+        generalHelpers.log("API LISTENING TO PORT 8000",
             null,
             true
         );
