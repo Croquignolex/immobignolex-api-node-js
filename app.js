@@ -46,7 +46,7 @@ const server = http.createServer(app);
 server.listen(
     envConstants.APP.SERVER_PORT, '0.0.0.0',
     () => {
-        generalHelpers.log("API LISTENING TO PORT 8000",
+        generalHelpers.log(`API LISTENING TO PORT ${envConstants.APP.SERVER_PORT}`,
             null,
             true
         );
