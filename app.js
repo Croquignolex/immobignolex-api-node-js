@@ -4,6 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const useragent = require('express-useragent');
 
+const envConstants = require("./constants/envConstants");
 const generalHelpers = require("./helpers/generalHelpers");
 
 // Init express server
@@ -16,7 +17,7 @@ const router = express.Router();
 const corsOptions = {
     // Authorized header to the client
     allowedHeaders: "accept,content-type,accept-charset,authorization,passport",
-    origin: "*",
+    origin: envConstants.APP.ORIGINS,
     exposedHeaders: "authorization,passport",
     methods: "GET,POST,PUT,DELETE",
     optionsSuccessStatus: 200,
@@ -43,7 +44,7 @@ const server = http.createServer(app);
 
 // Express server listen
 server.listen(
-    process.env.PORT || 8000, '0.0.0.0',
+    envConstants.APP.SERVER_PORT, '0.0.0.0',
     () => {
         generalHelpers.log("API LISTENING TO PORT 8000",
             null,

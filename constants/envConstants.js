@@ -5,7 +5,8 @@ require('dotenv').config();
 module.exports.APP = {
     LOGGER: process.env.LOGGER,
     ENVIRONMENT: process.env.ENVIRONMENT,
-    // ORIGINS: JSON.parse(process.env.CORS_ORIGINS)
+    ORIGINS: JSON.parse(process.env.CORS_ORIGINS),
+    SERVER_PORT: parseInt(process.env.PORT || 4000)
 };
 
 // JWT options
