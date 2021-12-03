@@ -6,7 +6,7 @@ const usersHelpers = require('../mongodb/usersHelpers');
 const cloudFolder = 'immobignolex/avatars/';
 
 // Upload user avatar to cloud
-module.exports.updateUserAvatar = async (user, file) => {
+module.exports.updateAvatar = async (user, file) => {
     const filePath = file.path;
     const oldUserAvatar = user.avatar;
 
@@ -26,7 +26,7 @@ module.exports.updateUserAvatar = async (user, file) => {
 
     // Keep into data base
     const newUserAvatar = fileHelperData.data;
-    return await usersHelpers.updateUserAvatar(user, {
+    return await usersHelpers.updateUserAvatar(user.username, {
         url: newUserAvatar.url,
         id: newUserAvatar.public_id,
         secure: newUserAvatar.secure_url,
@@ -34,10 +34,10 @@ module.exports.updateUserAvatar = async (user, file) => {
 };
 
 // Delete user avatar in cloud
-module.exports.deleteUserAvatar = async (user) => {
+module.exports.deleteAvatar = async (user) => {
     const oldUserAvatar = user.avatar;
 
     // Cloud call & db save
     await filesHelpers.removeFile(oldUserAvatar.id);
-    return await usersHelpers.updateUserAvatar(user, null);
+    return await usersHelpers.updateUserAvatar(user.username, null);
 };

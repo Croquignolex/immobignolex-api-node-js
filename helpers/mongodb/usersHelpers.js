@@ -9,6 +9,7 @@ const errorConstants = require('../../constants/errorConstants');
 const usersCollection = "users";
 const databaseUrl = envConstants.DATABASE_URL;
 
+// Fetch all users into database
 module.exports.users = async () => {
     // Connection configuration
     let client, data = null, status = false, message = "";
@@ -29,6 +30,7 @@ module.exports.users = async () => {
     return {data, status, message};
 };
 
+// fetch user by username into database
 module.exports.userByUsername = async (username) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
@@ -50,7 +52,8 @@ module.exports.userByUsername = async (username) => {
     return {data, status, message};
 };
 
-module.exports.updateUserTokens = async (user, tokens) => {
+// Update user token into database
+module.exports.updateUserTokens = async (username, tokens) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -58,7 +61,7 @@ module.exports.updateUserTokens = async (user, tokens) => {
         // mongodb query execution
         await client.connect()
         const dbData = await client.db().collection(usersCollection).updateOne(
-            {_id: user._id},
+            {username},
             {$set: {tokens}}
         );
         if(dbData !== null) status = true;
@@ -71,7 +74,8 @@ module.exports.updateUserTokens = async (user, tokens) => {
     return {data, status, message};
 };
 
-module.exports.updateUserAvatar = async (user, avatar) => {
+// Update user avatar into database
+module.exports.updateUserAvatar = async (username, avatar) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -79,11 +83,33 @@ module.exports.updateUserAvatar = async (user, avatar) => {
         // mongodb query execution
         await client.connect()
         const dbData = await client.db().collection(usersCollection).updateOne(
-            {_id: user._id},
+            {username},
             {$set: {avatar}}
         );
         if(dbData !== null) status = true;
         else message = errorConstants.USERS.USER_AVATAR_UPDATE;
+    } catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
+// Update user info into database
+module.exports.updateUserInfo = async (username, {name, phone, email, description}) => {
+    // Connection configuration
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        // mongodb query execution
+        await client.connect()
+        const dbData = await client.db().collection(usersCollection).updateOne(
+            {username},
+            {$set: {name, phone, email, description}}
+        );
+        if(dbData !== null) status = true;
+        else message = errorConstants.USERS.USER_INFO_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
