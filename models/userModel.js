@@ -10,8 +10,10 @@ module.exports = class UserModel {
             name: this.name,
             role: this.role,
             email: this.email,
+            phone: this.phone,
             username: this.username,
             permissions: this.permissions,
+            description: this.description,
             avatar: generalHelpers.filePublicUrl(this.avatar)
         };
     };
