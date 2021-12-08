@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const errorConstants = require("../../constants/errorConstants");
 const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 const tokensHelpers = require("../../helpers/mongodb/tokensHelpers");
-const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
+const {requiredChecker} = require("../../helpers/formCheckerHelpers");
 
 // POST: Attempt login
 module.exports.login = async (req, res) => {
@@ -17,8 +17,7 @@ module.exports.login = async (req, res) => {
     }
 
     // Form checker
-    const {requiredChecker, passwordChecker} = formCheckerHelpers;
-    if(!requiredChecker(username) || !passwordChecker(password)) {
+    if(!requiredChecker(username) || !requiredChecker(password)) {
         return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
     }
 
