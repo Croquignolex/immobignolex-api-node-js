@@ -1,8 +1,8 @@
+const bcrypt = require("bcryptjs");
+
 const errorConstants = require('../../constants/errorConstants');
 const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 const avatarsHelpers = require('../../helpers/cloudary/avatarsHelpers');
-const {requiredChecker} = require("../../helpers/formCheckerHelpers");
-const bcrypt = require("bcryptjs");
 
 // POST: Update user avatar
 module.exports.updateAvatar = async (req, res) => {
@@ -82,6 +82,6 @@ module.exports.updatePassword = async (req, res) => {
     }
 
     // Save user info in the database
-    const updateUserPasswordData = await usersHelpers.updateUserPassword(username, newPassword);
+    const updateUserPasswordData = await usersHelpers.updateUserPassword(username, await bcrypt.hash(newPassword, 10));
     return res.send(updateUserPasswordData);
 };
