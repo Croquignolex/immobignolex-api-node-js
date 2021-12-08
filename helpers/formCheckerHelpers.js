@@ -1,8 +1,3 @@
-// Password checker
-module.exports.passwordChecker = (input) => {
-    return inRange(input, 6);
-};
-
 // Required checker
 module.exports.requiredChecker = (input) => {
     return inRange(input, 1);

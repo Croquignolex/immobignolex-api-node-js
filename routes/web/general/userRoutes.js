@@ -31,5 +31,13 @@ router.post(
     ],
     userController.updateInfo
 );
+router.post(
+    '/password-update',
+    [
+        tokenMiddleware,
+        basicPermissionMiddleware
+    ],
+    userController.updatePassword
+);
 
 module.exports = router;

@@ -117,3 +117,25 @@ module.exports.updateUserInfo = async (username, {name, phone, email, descriptio
     finally { await client.close(); }
     return {data, status, message};
 };
+
+// Update user password into database
+module.exports.updateUserPassword = async (username, password) => {
+    // Connection configuration
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        // mongodb query execution
+        await client.connect()
+        const dbData = await client.db().collection(usersCollection).updateOne(
+            {username},
+            {$set: {password}}
+        );
+        if(dbData !== null) status = true;
+        else message = errorConstants.USERS.USER_INFO_UPDATE;
+    } catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
