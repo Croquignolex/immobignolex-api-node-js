@@ -1,6 +1,5 @@
 const envConstants = require("../constants/envConstants");
 const generalHelpers = require("../helpers/generalHelpers");
-const fs = require("fs");
 
 module.exports.log = (message, data = null, highPriority = false) => {
     // Only in local environment
@@ -65,5 +64,17 @@ module.exports.deleteFileFromPath = (path) => {
             resolve({status: true, message: "", data: null});
         })
     });
+};
+
+// Extract pictures from the correct env
+module.exports.picturesPublicUrl = (pictures) => {
+    if(!pictures) return null;
+
+    const extractedPictures = [];
+    pictures.forEach((picture) => {
+        if(envConstants.APP.ENVIRONMENT === "local") extractedPictures.push(picture.url);
+        else  extractedPictures.push(picture.secure);
+    })
+    return extractedPictures;
 };
 
