@@ -5,7 +5,7 @@ const tokenMiddleware = require("../../../middlewares/accessTokenMiddleware");
 const propertiesController = require('../../../controllers/property/propertiesController');
 const basicPermissionMiddleware = require("../../../middlewares/basicPermissionMiddleware");
 
-router.post(
+router.get(
     '',
     [
         tokenMiddleware,

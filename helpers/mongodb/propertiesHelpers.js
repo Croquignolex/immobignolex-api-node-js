@@ -17,7 +17,7 @@ module.exports.properties = async () => {
     try {
         // mongodb query execution
         await client.connect()
-        const dbData = await client.db().collection(propertiesCollection).find() || [];
+        const dbData = await client.db().collection(propertiesCollection).find().toArray();
         data = [];
         status = true;
         dbData.forEach(item => data.push(new PropertyModel(item)));

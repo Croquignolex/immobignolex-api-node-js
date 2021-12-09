@@ -17,9 +17,10 @@ module.exports.users = async () => {
     try {
         // mongodb query execution
         await client.connect()
-        const dbData = await client.db().collection(usersCollection).find() || [];
+        const dbData = await client.db().collection(usersCollection).find().toArray();
         data = [];
         status = true;
+        console.log({dbData})
         dbData.forEach(item => data.push(new UserModel(item)));
     }
     catch (err) {
