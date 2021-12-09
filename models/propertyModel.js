@@ -10,7 +10,6 @@ module.exports = class PropertyModel {
             name: this.name,
             phones: this.phones,
             address: this.address,
-            manager: this.manager,
             location: this.location,
             description: this.description,
             pictures: generalHelpers.picturesPublicUrl(this.pictures)
