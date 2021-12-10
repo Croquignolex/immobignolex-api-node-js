@@ -30,7 +30,7 @@ module.exports.properties = async () => {
             .toArray();
         data = [];
         status = true;
-        dbData.forEach(item => data.push(new PropertyModel(item)));
+        dbData.forEach(item => data.push((new PropertyModel(item).responseFormat)));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

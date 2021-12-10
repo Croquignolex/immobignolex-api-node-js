@@ -5,13 +5,13 @@ module.exports = class PropertyModel {
         Object.assign(this, property);
     };
 
-    get authResponse() {
+    get responseFormat() {
         return {
             name: this.name,
-            phones: this.phones,
             address: this.address,
             description: this.description,
             caretaker: caretaker(this.manager),
+            phones: generalHelpers.arrayToString(this.phones),
             pictures: generalHelpers.picturesPublicUrl(this.pictures)
         };
     };

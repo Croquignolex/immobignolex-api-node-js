@@ -5,7 +5,7 @@ module.exports = class UserModel {
         Object.assign(this, user);
     };
 
-    get authResponse() {
+    get responseFormat() {
         return {
             name: this.name,
             role: this.role,

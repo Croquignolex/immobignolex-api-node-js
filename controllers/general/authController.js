@@ -48,7 +48,7 @@ module.exports.login = async (req, res) => {
         message: "",
         status: true,
         data: {
-            user: databaseUser.authResponse,
+            user: databaseUser.responseFormat,
             tokens: generateUserTokensData.data
         }
     });
@@ -97,7 +97,7 @@ module.exports.refresh = async (req, res) => {
     return res.send({
         message: "",
         status: true,
-        data: databaseUser.authResponse
+        data: databaseUser.responseFormat
     });
 };
 

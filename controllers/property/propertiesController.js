@@ -4,5 +4,6 @@ const propertiesHelpers = require("../../helpers/mongodb/propertiesHelpers");
 module.exports.properties = async (req, res) => {
     // Get properties
     const propertiesData = await propertiesHelpers.properties();
+    console.log(propertiesData.data)
     return res.send(propertiesData);
 };

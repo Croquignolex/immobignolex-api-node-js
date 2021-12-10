@@ -68,7 +68,7 @@ module.exports.deleteFileFromPath = (path) => {
 
 // Extract pictures from the correct env
 module.exports.picturesPublicUrl = (pictures) => {
-    if(!pictures) return null;
+    if(!pictures || pictures?.length === 0) return null;
 
     const extractedPictures = [];
     pictures.forEach((picture) => {
@@ -77,3 +77,11 @@ module.exports.picturesPublicUrl = (pictures) => {
     })
     return extractedPictures;
 };
+
+// Extract pictures from the correct env
+module.exports.arrayToString = (tab, separator = ", ") => {
+    if(!tab || tab?.length === 0) return null;
+
+    return tab.join(separator);
+};
+
