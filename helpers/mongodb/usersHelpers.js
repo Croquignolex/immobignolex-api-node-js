@@ -7,7 +7,6 @@ const errorConstants = require('../../constants/errorConstants');
 
 // Data
 const usersCollection = "users";
-const propertiesCollection = "properties";
 const databaseUrl = envConstants.DATABASE_URL;
 
 // Fetch all users into database

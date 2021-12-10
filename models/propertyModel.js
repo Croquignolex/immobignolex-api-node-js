@@ -7,17 +7,14 @@ module.exports = class PropertyModel {
 
     get responseFormat() {
         return {
+            id: this._id,
             name: this.name,
-            phone: this.phones,
+            phone: this.phone,
             address: this.address,
+            caretaker: this.caretaker,
             description: this.description,
-            caretaker: caretaker(this.manager),
+            chambers: (this.chambers) ? 0 : this.chambers?.length,
             pictures: generalHelpers.picturesPublicUrl(this.pictures)
         };
     };
-};
-
-const caretaker = (manager) => {
-    if(!manager || manager?.length === 0) return null;
-    return manager[0].name;
 };
