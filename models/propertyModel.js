@@ -13,7 +13,7 @@ module.exports = class PropertyModel {
             address: this.address,
             caretaker: this.caretaker,
             description: this.description,
-            chambers: (this.chambers) ? 0 : this.chambers?.length,
+            chambers: (!this.chambers) ? 0 : this.chambers?.length,
             pictures: generalHelpers.picturesPublicUrl(this.pictures)
         };
     };
