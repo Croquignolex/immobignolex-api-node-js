@@ -14,7 +14,8 @@ module.exports = class UserModel {
             username: this.username,
             permissions: this.permissions,
             description: this.description,
-            avatar: generalHelpers.filePublicUrl(this.avatar)
+            avatar: generalHelpers.filePublicUrl(this.avatar),
+            properties: (this.properties) ? 0 : this.properties?.length
         };
     };
 };

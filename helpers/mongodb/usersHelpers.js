@@ -7,6 +7,7 @@ const errorConstants = require('../../constants/errorConstants');
 
 // Data
 const usersCollection = "users";
+const propertiesCollection = "properties";
 const databaseUrl = envConstants.DATABASE_URL;
 
 // Fetch all users into database
@@ -18,6 +19,7 @@ module.exports.users = async () => {
         // mongodb query execution
         await client.connect()
         const dbData = await client.db().collection(usersCollection).find().toArray();
+
         data = [];
         status = true;
         console.log({dbData})

@@ -10,8 +10,8 @@ const usersCollection = "users";
 const propertiesCollection = "properties";
 const databaseUrl = envConstants.DATABASE_URL;
 
-// Fetch all properties into database
-module.exports.properties = async () => {
+// Fetch all properties with caretaker into database
+module.exports.propertiesWithCaretaker = async () => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);

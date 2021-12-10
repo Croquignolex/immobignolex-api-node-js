@@ -8,10 +8,10 @@ module.exports = class PropertyModel {
     get responseFormat() {
         return {
             name: this.name,
+            phone: this.phones,
             address: this.address,
             description: this.description,
             caretaker: caretaker(this.manager),
-            phones: generalHelpers.arrayToString(this.phones),
             pictures: generalHelpers.picturesPublicUrl(this.pictures)
         };
     };
