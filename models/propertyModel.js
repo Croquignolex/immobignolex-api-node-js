@@ -10,9 +10,14 @@ module.exports = class PropertyModel {
             name: this.name,
             phones: this.phones,
             address: this.address,
-            location: this.location,
             description: this.description,
+            caretaker: caretaker(this.manager),
             pictures: generalHelpers.picturesPublicUrl(this.pictures)
         };
     };
+};
+
+const caretaker = (manager) => {
+    if(!manager || manager?.length === 0) return null;
+    return manager[0].name;
 };

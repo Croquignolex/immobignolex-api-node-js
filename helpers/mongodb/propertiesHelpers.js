@@ -6,6 +6,7 @@ const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
 
 // Data
+const usersCollection = "users";
 const propertiesCollection = "properties";
 const databaseUrl = envConstants.DATABASE_URL;
 
@@ -17,7 +18,16 @@ module.exports.properties = async () => {
     try {
         // mongodb query execution
         await client.connect()
-        const dbData = await client.db().collection(propertiesCollection).find().toArray();
+        const dbData = await client.db().collection(propertiesCollection)
+            .aggregate([{
+                $lookup: {
+                    from: usersCollection,
+                    localField: "caretaker",
+                    foreignField: "_id",
+                    as: "manager"
+                }
+            }])
+            .toArray();
         data = [];
         status = true;
         dbData.forEach(item => data.push(new PropertyModel(item)));

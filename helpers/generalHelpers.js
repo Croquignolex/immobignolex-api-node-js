@@ -77,4 +77,3 @@ module.exports.picturesPublicUrl = (pictures) => {
     })
     return extractedPictures;
 };
-
