@@ -10,6 +10,7 @@ module.exports = class ChamberModel {
             id: this._id,
             name: this.name,
             type: this.type,
+            rent: this.rent,
             description: this.description,
             tenants: (!this.tenants) ? 0 : this.tenants?.length,
             furniture: (!this.furniture) ? 0 : this.furniture?.length,
