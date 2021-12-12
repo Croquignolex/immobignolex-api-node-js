@@ -32,6 +32,7 @@ app.use(useragent.express());
 const webAuthRoutes = require('./routes/web/general/authRoutes');
 const webUserRoutes = require('./routes/web/general/userRoutes');
 const webUsersRoutes = require('./routes/web/admin/usersRoutes');
+const webTenantsRoutes = require('./routes/web/property/tenantsRoutes');
 const webChambersRoutes = require('./routes/web/property/chambersRoutes');
 const webPropertiesRoutes = require('./routes/web/property/propertiesRoutes');
 
@@ -39,6 +40,7 @@ const webPropertiesRoutes = require('./routes/web/property/propertiesRoutes');
 router.use("/web/v1/auth", webAuthRoutes);
 router.use("/web/v1/user", webUserRoutes);
 router.use("/web/v1/users", webUsersRoutes);
+router.use("/web/v1/tenants", webTenantsRoutes);
 router.use("/web/v1/chambers", webChambersRoutes);
 router.use("/web/v1/properties", webPropertiesRoutes);
 

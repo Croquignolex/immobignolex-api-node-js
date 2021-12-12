@@ -21,7 +21,6 @@ module.exports.users = async () => {
 
         data = [];
         status = true;
-        console.log({dbData})
         dbData.forEach(item => data.push(new UserModel(item)));
     }
     catch (err) {
