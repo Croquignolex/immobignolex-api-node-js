@@ -94,11 +94,7 @@ module.exports.refresh = async (req, res) => {
         return res.send({status: false, message: errorConstants.USERS.USER_DISABLED, data: null});
     }
 
-    return res.send({
-        message: "",
-        status: true,
-        data: databaseUser.responseFormat
-    });
+    return res.send({message: "", status: true, data: databaseUser.responseFormat});
 };
 
 // POST: Create a new access token

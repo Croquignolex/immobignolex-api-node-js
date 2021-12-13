@@ -1,3 +1,4 @@
+const UserModel = require('./userModel');
 const generalHelpers = require('../helpers/generalHelpers');
 
 module.exports = class PropertyModel {
@@ -11,10 +12,19 @@ module.exports = class PropertyModel {
             name: this.name,
             phone: this.phone,
             address: this.address,
-            caretaker: this.caretaker,
+            occupation: this.occupation,
             description: this.description,
             chambers: (!this.chambers) ? 0 : this.chambers?.length,
+            caretaker: extractCaretaker(this.caretaker, this.manager),
             pictures: generalHelpers.picturesPublicUrl(this.pictures)
         };
     };
+};
+
+// Extract caretaker
+const extractCaretaker = (caretaker, manager) => {
+    if(manager && manager?.length > 0) {
+        return (new UserModel(manager[0])).responseFormat
+    }
+    return caretaker;
 };

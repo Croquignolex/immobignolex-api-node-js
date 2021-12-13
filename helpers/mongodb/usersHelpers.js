@@ -21,7 +21,7 @@ module.exports.users = async () => {
 
         data = [];
         status = true;
-        dbData.forEach(item => data.push(new UserModel(item)));
+        dbData.forEach(item => data.push((new UserModel(item)).responseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

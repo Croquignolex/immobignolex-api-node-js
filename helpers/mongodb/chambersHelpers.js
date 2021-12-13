@@ -20,7 +20,7 @@ module.exports.chambers = async () => {
         const dbData = await client.db().collection(chambersCollection).find().toArray();
         data = [];
         status = true;
-        dbData.forEach(item => data.push((new ChamberModel(item).responseFormat)));
+        dbData.forEach(item => data.push((new ChamberModel(item)).responseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

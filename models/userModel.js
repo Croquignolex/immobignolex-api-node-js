@@ -11,6 +11,7 @@ module.exports = class UserModel {
             role: this.role,
             email: this.email,
             phone: this.phone,
+            enable: this.enable,
             username: this.username,
             permissions: this.permissions,
             description: this.description,
