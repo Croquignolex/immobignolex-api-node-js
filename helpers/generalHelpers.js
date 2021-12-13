@@ -72,8 +72,8 @@ module.exports.picturesPublicUrl = (pictures) => {
 
     const extractedPictures = [];
     pictures.forEach((picture) => {
-        if(envConstants.APP.ENVIRONMENT === "local") extractedPictures.push(picture.url);
-        else  extractedPictures.push(picture.secure);
+        if(envConstants.APP.ENVIRONMENT === "local") extractedPictures.push({id: picture.id, src: picture.url});
+        else  extractedPictures.push({id: picture.id, src: picture.secure});
     })
     return extractedPictures;
 };
