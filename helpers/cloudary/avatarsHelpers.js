@@ -6,7 +6,7 @@ const usersHelpers = require('../mongodb/usersHelpers');
 const cloudFolder = 'immobignolex/avatars/';
 
 // Upload user avatar to cloud
-module.exports.updateAvatar = async (user, file) => {
+module.exports.updateUserAvatar = async (user, file) => {
     const filePath = file.path;
     const oldUserAvatar = user.avatar;
 
@@ -34,7 +34,7 @@ module.exports.updateAvatar = async (user, file) => {
 };
 
 // Delete user avatar in cloud
-module.exports.deleteAvatar = async (user) => {
+module.exports.deleteUserAvatar = async (user) => {
     const oldUserAvatar = user.avatar;
 
     // Cloud call & db save
