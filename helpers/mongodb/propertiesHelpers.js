@@ -9,7 +9,6 @@ const errorConstants = require('../../constants/errorConstants');
 const usersCollection = "users";
 const propertiesCollection = "properties";
 const databaseUrl = envConstants.DATABASE_URL;
-const propertyPictures = `${propertiesCollection}.pictures`;
 
 // Fetch all properties into database
 module.exports.properties = async () => {
@@ -61,6 +60,28 @@ module.exports.propertiesWithCaretaker = async () => {
 };
 
 // Remove property picture into database
+module.exports.addPropertyPicture = async (propertyId, picture) => {
+    // Connection configuration
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        // mongodb query execution
+        await client.connect()
+        const dbData = await client.db().collection(propertiesCollection).updateOne(
+            {_id: propertyId},
+            {$push: {pictures: picture}}
+        );
+        if(dbData !== null) status = true;
+        else message = errorConstants.PROPERTIES.PROPERTY_PICTURE_ADD;
+    } catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
+// Remove property picture into database
 module.exports.deletePropertyPicture = async (propertyId, pictureId) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
@@ -70,10 +91,10 @@ module.exports.deletePropertyPicture = async (propertyId, pictureId) => {
         await client.connect()
         const dbData = await client.db().collection(propertiesCollection).updateOne(
             {_id: propertyId},
-            {$pull: {propertyPictures: {id: pictureId}}}
+            {$pull: {pictures: {id: pictureId}}}
         );
         if(dbData !== null) status = true;
-        else message = errorConstants.PROPERTIES.PROPERTY_PICTURE_UPDATE;
+        else message = errorConstants.PROPERTIES.PROPERTY_PICTURE_DELETE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;

@@ -26,7 +26,7 @@ module.exports.cloudAddFile = async (filePath, folder) => {
 
 module.exports.cloudRemoveFile = async (fileId) => {
     return new Promise((resolve) => {
-        cloudinary.v2.uploader.destroy(fileId, (error, data) => {
+        cloudinary.v2.uploader.destroy(fileId, (error) => {
             if(error) {
                 generalHelpers.log("Connection failure to cloudinary", error);
             }

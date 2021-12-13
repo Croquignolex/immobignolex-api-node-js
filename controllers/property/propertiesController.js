@@ -1,5 +1,4 @@
 const errorConstants = require("../../constants/errorConstants");
-const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 const propertiesHelpers = require("../../helpers/mongodb/propertiesHelpers");
 const propertyPicturesHelpers = require("../../helpers/cloudary/propertyPicturesHelpers");
 
@@ -28,8 +27,8 @@ module.exports.addPicture = async (req, res) => {
     const {propertyId} = req.params;
 
     // Save property picture in the cloud & database
-    const updateUserAvatarData = await avatarsHelpers.updateUserAvatar(databaseUser, file);
-    return res.send(updateUserAvatarData);
+    const cloudAddPropertyPictureData = await propertyPicturesHelpers.cloudAddPropertyPicture(propertyId, file);
+    return res.send(cloudAddPropertyPictureData);
 };
 
 // DELETE: Delete property picture
