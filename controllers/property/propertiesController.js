@@ -24,15 +24,10 @@ module.exports.addPicture = async (req, res) => {
         return res.send({status: false, data: null, message: errorConstants.GENERAL.FORM_DATA});
     }
 
-    // Get user by username
-    const username = req.username;
-    const userByUsernameData = await usersHelpers.userByUsername(username);
-    if(!userByUsernameData.status) {
-        return res.send(userByUsernameData);
-    }
+    // Route params
+    const {propertyId} = req.params;
 
-    // Save user avatar in the cloud & database
-    const databaseUser = userByUsernameData.data;
+    // Save property picture in the cloud & database
     const updateUserAvatarData = await avatarsHelpers.updateUserAvatar(databaseUser, file);
     return res.send(updateUserAvatarData);
 };

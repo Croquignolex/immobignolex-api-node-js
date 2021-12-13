@@ -9,6 +9,7 @@ const errorConstants = require('../../constants/errorConstants');
 const usersCollection = "users";
 const propertiesCollection = "properties";
 const databaseUrl = envConstants.DATABASE_URL;
+const propertyPictures = `${propertiesCollection}.pictures`;
 
 // Fetch all properties into database
 module.exports.properties = async () => {
@@ -60,19 +61,19 @@ module.exports.propertiesWithCaretaker = async () => {
 };
 
 // Remove property picture into database
-module.exports.deletePropertyPicture = async (username, avatar) => {
+module.exports.deletePropertyPicture = async (propertyId, pictureId) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
         await client.connect()
-        const dbData = await client.db().collection(usersCollection).updateOne(
-            {username},
-            {$set: {avatar}}
+        const dbData = await client.db().collection(propertiesCollection).updateOne(
+            {_id: propertyId},
+            {$pull: {propertyPictures: {id: pictureId}}}
         );
         if(dbData !== null) status = true;
-        else message = errorConstants.USERS.USER_AVATAR_UPDATE;
+        else message = errorConstants.PROPERTIES.PROPERTY_PICTURE_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
