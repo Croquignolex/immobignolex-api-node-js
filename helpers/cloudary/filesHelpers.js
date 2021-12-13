@@ -12,7 +12,7 @@ cloudinary.config({
 });
 
 // Add file in cloud
-module.exports.addFile = async (filePath, folder) => {
+module.exports.cloudAddFile = async (filePath, folder) => {
     return new Promise((resolve) => {
         cloudinary.v2.uploader.upload(filePath, {folder}, (error, data) => {
             if(error) {
@@ -24,7 +24,7 @@ module.exports.addFile = async (filePath, folder) => {
     });
 };
 
-module.exports.removeFile = async (fileId) => {
+module.exports.cloudRemoveFile = async (fileId) => {
     return new Promise((resolve) => {
         cloudinary.v2.uploader.destroy(fileId, (error, data) => {
             if(error) {

@@ -6,19 +6,19 @@ const usersHelpers = require('../mongodb/usersHelpers');
 const cloudFolder = 'immobignolex/avatars/';
 
 // Upload user avatar to cloud
-module.exports.updateUserAvatar = async (user, file) => {
+module.exports.cloudUpdateUserAvatar = async (user, file) => {
     const filePath = file.path;
     const oldUserAvatar = user.avatar;
 
     // Upload file to cloud
-    const fileHelperData = await filesHelpers.addFile(filePath, cloudFolder);
+    const fileHelperData = await filesHelpers.cloudAddFile(filePath, cloudFolder);
     if(!fileHelperData.status) {
         return fileHelperData;
     }
 
     // Delete old image n cloud if exist
     if(oldUserAvatar) {
-        await filesHelpers.removeFile(oldUserAvatar.id);
+        await filesHelpers.cloudRemoveFile(oldUserAvatar.id);
     }
 
     // Delete temp image
@@ -34,10 +34,10 @@ module.exports.updateUserAvatar = async (user, file) => {
 };
 
 // Delete user avatar in cloud
-module.exports.deleteUserAvatar = async (user) => {
+module.exports.cloudDeleteUserAvatar = async (user) => {
     const oldUserAvatar = user.avatar;
 
     // Cloud call & db save
-    await filesHelpers.removeFile(oldUserAvatar.id);
+    await filesHelpers.cloudRemoveFile(oldUserAvatar.id);
     return await usersHelpers.updateUserAvatar(user.username, null);
 };

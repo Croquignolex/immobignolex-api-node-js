@@ -6,8 +6,8 @@ const usersHelpers = require('../mongodb/usersHelpers');
 const cloudFolder = 'immobignolex/avatars/';
 
 // Delete property picture in cloud
-module.exports.deletePropertyPicture = async (propertyId, pictureId) => {
+module.exports.cloudDeletePropertyPicture = async (propertyId, pictureId) => {
     // Cloud call & db save
-    await filesHelpers.removeFile(pictureId);
+    await filesHelpers.cloudRemoveFile(pictureId);
     return await usersHelpers.updateUserAvatar(user.username, null);
 };

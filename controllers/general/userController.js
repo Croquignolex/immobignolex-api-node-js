@@ -27,8 +27,8 @@ module.exports.updateAvatar = async (req, res) => {
 
     // Save user avatar in the cloud & database
     const databaseUser = userByUsernameData.data;
-    const updateUserAvatarData = await avatarsHelpers.updateUserAvatar(databaseUser, file);
-    return res.send(updateUserAvatarData);
+    const cloudUpdateUserAvatarData = await avatarsHelpers.cloudUpdateUserAvatar(databaseUser, file);
+    return res.send(cloudUpdateUserAvatarData);
 };
 
 // DELETE: Delete user avatar
@@ -42,8 +42,8 @@ module.exports.deleteAvatar = async (req, res) => {
 
     // Remove avatar in the cloud & database
     const databaseUser = userByUsernameData.data;
-    const deleteUserAvatarData = await avatarsHelpers.deleteUserAvatar(databaseUser);
-    return res.send(deleteUserAvatarData);
+    const cloudDeleteUserAvatarData = await avatarsHelpers.cloudDeleteUserAvatar(databaseUser);
+    return res.send(cloudDeleteUserAvatarData);
 };
 
 // POST: Update user info
