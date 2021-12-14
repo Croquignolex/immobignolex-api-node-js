@@ -15,6 +15,14 @@ router.get(
     propertiesController.properties
 );
 router.put(
+    '/create',
+    [
+        tokenMiddleware,
+        basicPermissionMiddleware
+    ],
+    propertiesController.create
+);
+router.put(
     '/:propertyId/picture-add',
     [
         pictureMiddleware,

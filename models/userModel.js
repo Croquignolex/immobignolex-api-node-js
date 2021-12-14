@@ -7,6 +7,7 @@ module.exports = class UserModel {
 
     get responseFormat() {
         return {
+            id: this._id,
             name: this.name,
             role: this.role,
             email: this.email,

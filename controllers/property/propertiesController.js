@@ -9,6 +9,16 @@ module.exports.properties = async (req, res) => {
     return res.send(propertiesData);
 };
 
+// PUT: Create property
+module.exports.create = async (req, res) => {
+    // Form data
+    const {name, phone, address, caretaker, description} = req.body;
+
+    // Create property
+    const createPropertyData = await propertiesHelpers.createProperty({name, phone, address, caretaker, description});
+    return res.send(createPropertyData);
+};
+
 // PUT: Add property picture
 module.exports.addPicture = async (req, res) => {
     // File data from multer (error management)

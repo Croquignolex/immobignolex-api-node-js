@@ -59,6 +59,29 @@ module.exports.propertiesWithCaretaker = async () => {
     return {data, status, message};
 };
 
+// Fetch create property into database
+module.exports.createProperty = async ({name, phone, address, caretaker, description}) => {
+    // Connection configuration
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        // mongodb query execution
+        await client.connect();
+        const caretakerId = caretaker ? new ObjectId(caretaker) : null;
+        const dbData = await client.db().collection(propertiesCollection).insertOne({
+            name, phone, address, description, caretaker: caretakerId
+        });
+        if(dbData.acknowledged) status = true;
+        else message = errorConstants.PROPERTIES.CREATE_PROPERTY;
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
 // Fetch property by id into database
 module.exports.propertyById = async (id) => {
     // Connection configuration
