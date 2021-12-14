@@ -68,7 +68,7 @@ module.exports.deleteFileFromPath = (path) => {
 
 // Extract pictures from the correct env
 module.exports.picturesPublicUrl = (pictures) => {
-    if(!pictures || pictures?.length === 0) return null;
+    if(!pictures || pictures?.length === 0) return [];
 
     const extractedPictures = [];
     pictures.forEach((picture) => {

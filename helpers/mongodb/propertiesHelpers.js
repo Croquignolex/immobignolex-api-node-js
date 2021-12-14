@@ -69,7 +69,7 @@ module.exports.addPropertyPicture = async (propertyId, picture) => {
         await client.connect()
         const dbData = await client.db().collection(propertiesCollection).updateOne(
             {_id: propertyId},
-            {$push: {pictures: picture}}
+            {$push: {'properties.pictures': picture}}
         );
         if(dbData !== null) {
             status = true;
