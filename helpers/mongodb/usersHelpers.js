@@ -16,7 +16,7 @@ module.exports.users = async () => {
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
-        await client.connect()
+        await client.connect();
         const dbData = await client.db().collection(usersCollection).find().toArray();
 
         data = [];
@@ -38,7 +38,7 @@ module.exports.userByUsername = async (username) => {
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
-        await client.connect()
+        await client.connect();
         const dbData = await client.db().collection(usersCollection).findOne({username});
         if(dbData !== null) {
             status = true;
@@ -60,7 +60,7 @@ module.exports.updateUserTokens = async (username, tokens) => {
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
-        await client.connect()
+        await client.connect();
         const dbData = await client.db().collection(usersCollection).updateOne(
             {username},
             {$set: {tokens}}
@@ -82,7 +82,7 @@ module.exports.updateUserAvatar = async (username, avatar) => {
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
-        await client.connect()
+        await client.connect();
         const dbData = await client.db().collection(usersCollection).updateOne(
             {username},
             {$set: {avatar}}
@@ -104,7 +104,7 @@ module.exports.updateUserInfo = async (username, {name, phone, email, descriptio
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
-        await client.connect()
+        await client.connect();
         const dbData = await client.db().collection(usersCollection).updateOne(
             {username},
             {$set: {name, phone, email, description}}
@@ -126,7 +126,7 @@ module.exports.updateUserPassword = async (username, password) => {
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
-        await client.connect()
+        await client.connect();
         const dbData = await client.db().collection(usersCollection).updateOne(
             {username},
             {$set: {password}}

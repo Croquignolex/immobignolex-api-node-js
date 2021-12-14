@@ -16,7 +16,7 @@ module.exports.chambers = async () => {
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
-        await client.connect()
+        await client.connect();
         const dbData = await client.db().collection(chambersCollection).find().toArray();
         data = [];
         status = true;

@@ -16,7 +16,7 @@ module.exports.tenants = async () => {
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
-        await client.connect()
+        await client.connect();
         const dbData = await client.db().collection(usersCollection).find().toArray();
 
         data = [];

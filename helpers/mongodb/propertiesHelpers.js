@@ -1,4 +1,4 @@
-const {MongoClient} = require('mongodb');
+const {MongoClient, ObjectId} = require('mongodb');
 
 const generalHelpers = require('../generalHelpers');
 const PropertyModel = require('../../models/propertyModel');
@@ -17,7 +17,7 @@ module.exports.properties = async () => {
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
-        await client.connect()
+        await client.connect();
         const dbData = await client.db().collection(propertiesCollection).find().toArray();
         data = [];
         status = true;
@@ -38,7 +38,7 @@ module.exports.propertiesWithCaretaker = async () => {
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
-        await client.connect()
+        await client.connect();
         const dbData = await client.db().collection(propertiesCollection).aggregate([{
             $lookup: {
                 from: usersCollection,
@@ -60,13 +60,14 @@ module.exports.propertiesWithCaretaker = async () => {
 };
 
 // Fetch property by id into database
-module.exports.propertyById = async (_id) => {
+module.exports.propertyById = async (id) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
-        await client.connect()
+        await client.connect();
+        const _id = new ObjectId(id);
         const dbData = await client.db().collection(propertiesCollection).findOne({_id});
         if(dbData !== null) {
             status = true;
@@ -83,41 +84,20 @@ module.exports.propertyById = async (_id) => {
 };
 
 // Remove property picture into database
-module.exports.updatePropertyPictures = async (_id, pictures) => {
+module.exports.updatePropertyPictures = async (id, pictures) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
-        await client.connect()
+        await client.connect();
+        const _id = new ObjectId(id);
         const dbData = await client.db().collection(propertiesCollection).updateOne(
             {_id},
             {$set: {pictures}}
         );
         if(dbData !== null) status = true;
         else message = errorConstants.PROPERTIES.PROPERTIES_PICTURES_UPDATE;
-    } catch (err) {
-        generalHelpers.log("Connection failure to mongodb", err);
-        message = errorConstants.GENERAL.DATABASE;
-    }
-    finally { await client.close(); }
-    return {data, status, message};
-};
-
-// Remove property picture into database
-module.exports.deletePropertyPicture = async (propertyId, pictureId) => {
-    // Connection configuration
-    let client, data = null, status = false, message = "";
-    client = new MongoClient(databaseUrl);
-    try {
-        // mongodb query execution
-        await client.connect()
-        const dbData = await client.db().collection(propertiesCollection).updateOne(
-            {_id: propertyId},
-            {$pull: {pictures: {id: pictureId}}}
-        );
-        if(dbData !== null) status = true;
-        else message = errorConstants.PROPERTIES.PROPERTY_PICTURE_DELETE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;

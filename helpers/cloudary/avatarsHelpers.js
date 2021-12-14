@@ -22,7 +22,7 @@ module.exports.cloudUpdateUserAvatar = async (user, file) => {
         await filesHelpers.cloudRemoveFile(oldUserAvatar.id);
     }
 
-    // Keep into data base
+    // Keep into database
     const newUserAvatar = fileHelperData.data;
     return await usersHelpers.updateUserAvatar(user.username, {
         url: newUserAvatar.url,
