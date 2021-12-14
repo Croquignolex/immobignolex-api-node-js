@@ -1,7 +1,6 @@
 const errorConstants = require("../../constants/errorConstants");
 const propertiesHelpers = require("../../helpers/mongodb/propertiesHelpers");
 const propertyPicturesHelpers = require("../../helpers/cloudary/propertyPicturesHelpers");
-const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 
 // GET: All properties
 module.exports.properties = async (req, res) => {
@@ -36,8 +35,9 @@ module.exports.addPicture = async (req, res) => {
 module.exports.deletePicture = async (req, res) => {
     // Route params
     const {propertyId, pictureId} = req.params;
+    const cloudPictureId = pictureId.split('-').join('/');
 
     // Remove picture in the cloud & database
-    const cloudDeletePropertyPictureData = await propertyPicturesHelpers.cloudDeletePropertyPicture(propertyId, pictureId);
+    const cloudDeletePropertyPictureData = await propertyPicturesHelpers.cloudDeletePropertyPicture(propertyId, cloudPictureId);
     return res.send(cloudDeletePropertyPictureData);
 };
