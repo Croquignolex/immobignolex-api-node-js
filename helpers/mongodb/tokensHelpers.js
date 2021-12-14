@@ -69,14 +69,14 @@ module.exports.generateUserTokens = async (user, useragent) => {
 
 module.exports.removeUserToken = async (user, useragent) => {
     // Extract user agent data
-    const tokens = user.tokens || [];
+    let tokens = user.tokens || [];
     const mobile = useragent.isMobile;
     const os = useragent.os.toString();
     const desktop = useragent.isDesktop;
     const browser = useragent.browser.toString();
 
     // Remove user token for the current agent
-    tokens.filter(token => !(
+    tokens = tokens.filter(token => !(
         token.browser === browser &&
         token.desktop === desktop &&
         token.mobile === mobile &&
