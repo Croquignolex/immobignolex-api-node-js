@@ -6,7 +6,7 @@ const propertiesHelpers = require('../mongodb/propertiesHelpers');
 const cloudFolder = 'immobignolex/properties/';
 
 // Upload property picture to cloud
-module.exports.cloudAddPropertyPicture = async (propertyId, file) => {
+module.exports.cloudAddPropertyPicture = async (property, file) => {
     const filePath = file.path;
 
     // Upload file to cloud & delete temp file
@@ -16,15 +16,15 @@ module.exports.cloudAddPropertyPicture = async (propertyId, file) => {
         return fileHelperData;
     }
 
-
-
     // Keep into data base
     const propertyPicture = fileHelperData.data;
-    return await propertiesHelpers.addPropertyPicture(propertyId, {
+    const pictures = property.pictures || [];
+    pictures.push({
         url: propertyPicture.url,
         id: propertyPicture.public_id,
         secure: propertyPicture.secure_url,
     });
+    return await propertiesHelpers.updatePropertyPictures(property._id, pictures);
 };
 
 // Delete property picture in cloud

@@ -1,6 +1,7 @@
 const errorConstants = require("../../constants/errorConstants");
 const propertiesHelpers = require("../../helpers/mongodb/propertiesHelpers");
 const propertyPicturesHelpers = require("../../helpers/cloudary/propertyPicturesHelpers");
+const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 
 // GET: All properties
 module.exports.properties = async (req, res) => {
@@ -23,11 +24,15 @@ module.exports.addPicture = async (req, res) => {
         return res.send({status: false, data: null, message: errorConstants.GENERAL.FORM_DATA});
     }
 
-    // Route params
+    // Get property by property id
     const {propertyId} = req.params;
+    const propertyByIdData = await propertiesHelpers.propertyById(propertyId);
+    if(!propertyByIdData.status) {
+        return res.send(propertyByIdData);
+    }
 
     // Save property picture in the cloud & database
-    const cloudAddPropertyPictureData = await propertyPicturesHelpers.cloudAddPropertyPicture(propertyId, file);
+    const cloudAddPropertyPictureData = await propertyPicturesHelpers.cloudAddPropertyPicture(propertyByIdData, file);
     return res.send(cloudAddPropertyPictureData);
 };
 

@@ -59,8 +59,31 @@ module.exports.propertiesWithCaretaker = async () => {
     return {data, status, message};
 };
 
+// Fetch property by id into database
+module.exports.propertyById = async (_id) => {
+    // Connection configuration
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        // mongodb query execution
+        await client.connect()
+        const dbData = await client.db().collection(propertiesCollection).findOne({_id});
+        if(dbData !== null) {
+            status = true;
+            data = new PropertyModel(dbData);
+        }
+        else message = errorConstants.PROPERTIES.NOT_FOUND_BY_ID;
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
 // Remove property picture into database
-module.exports.addPropertyPicture = async (propertyId, picture) => {
+module.exports.updatePropertyPictures = async (_id, pictures) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -68,14 +91,11 @@ module.exports.addPropertyPicture = async (propertyId, picture) => {
         // mongodb query execution
         await client.connect()
         const dbData = await client.db().collection(propertiesCollection).updateOne(
-            {_id: propertyId},
-            {$push: {'properties.pictures': picture}}
+            {_id},
+            {$set: {pictures}}
         );
-        if(dbData !== null) {
-            status = true;
-            data = generalHelpers.picturesPublicUrl([picture])[0];
-        }
-        else message = errorConstants.PROPERTIES.PROPERTY_PICTURE_ADD;
+        if(dbData !== null) status = true;
+        else message = errorConstants.PROPERTIES.PROPERTIES_PICTURES_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;

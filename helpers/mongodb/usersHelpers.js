@@ -66,7 +66,7 @@ module.exports.updateUserTokens = async (username, tokens) => {
             {$set: {tokens}}
         );
         if(dbData !== null) status = true;
-        else message = errorConstants.USERS.USER_TOKEN_UPDATE;
+        else message = errorConstants.USERS.USER_TOKENS_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
