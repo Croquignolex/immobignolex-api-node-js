@@ -71,7 +71,10 @@ module.exports.addPropertyPicture = async (propertyId, picture) => {
             {_id: propertyId},
             {$push: {pictures: picture}}
         );
-        if(dbData !== null) status = true;
+        if(dbData !== null) {
+            status = true;
+            data = generalHelpers.picturesPublicUrl([picture])[0];
+        }
         else message = errorConstants.PROPERTIES.PROPERTY_PICTURE_ADD;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

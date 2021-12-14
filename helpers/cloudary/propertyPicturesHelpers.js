@@ -9,14 +9,14 @@ const cloudFolder = 'immobignolex/properties/';
 module.exports.cloudAddPropertyPicture = async (propertyId, file) => {
     const filePath = file.path;
 
-    // Upload file to cloud
+    // Upload file to cloud & delete temp file
     const fileHelperData = await filesHelpers.cloudAddFile(filePath, cloudFolder);
+    await generalHelpers.deleteFileFromPath(filePath);
     if(!fileHelperData.status) {
         return fileHelperData;
     }
 
-    // Delete temp image
-    await generalHelpers.deleteFileFromPath(filePath);
+
 
     // Keep into data base
     const propertyPicture = fileHelperData.data;

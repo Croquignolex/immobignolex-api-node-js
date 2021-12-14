@@ -10,8 +10,9 @@ module.exports.cloudUpdateUserAvatar = async (user, file) => {
     const filePath = file.path;
     const oldUserAvatar = user.avatar;
 
-    // Upload file to cloud
+    // Upload file to cloud & delete temp file
     const fileHelperData = await filesHelpers.cloudAddFile(filePath, cloudFolder);
+    await generalHelpers.deleteFileFromPath(filePath);
     if(!fileHelperData.status) {
         return fileHelperData;
     }
@@ -20,9 +21,6 @@ module.exports.cloudUpdateUserAvatar = async (user, file) => {
     if(oldUserAvatar) {
         await filesHelpers.cloudRemoveFile(oldUserAvatar.id);
     }
-
-    // Delete temp image
-    await generalHelpers.deleteFileFromPath(filePath);
 
     // Keep into data base
     const newUserAvatar = fileHelperData.data;
