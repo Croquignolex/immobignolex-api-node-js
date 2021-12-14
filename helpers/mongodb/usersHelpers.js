@@ -9,16 +9,15 @@ const errorConstants = require('../../constants/errorConstants');
 const usersCollection = "users";
 const databaseUrl = envConstants.DATABASE_URL;
 
-// Fetch all users into database
-module.exports.users = async () => {
+// Fetch users by role into database
+module.exports.usersByRole = async (role) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
         await client.connect();
-        const dbData = await client.db().collection(usersCollection).find().toArray();
-
+        const dbData = await client.db().collection(usersCollection).find({role}).toArray();
         data = [];
         status = true;
         dbData.forEach(item => data.push((new UserModel(item)).responseFormat));

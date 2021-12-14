@@ -6,12 +6,21 @@ const usersController = require('../../../controllers/admin/usersController');
 const basicPermissionMiddleware = require("../../../middlewares/basicPermissionMiddleware");
 
 router.get(
-    '',
+    '/caretakers',
     [
         tokenMiddleware,
         basicPermissionMiddleware
     ],
-    usersController.users
+    usersController.caretakers
+);
+
+router.get(
+    '/administrators',
+    [
+        tokenMiddleware,
+        basicPermissionMiddleware
+    ],
+    usersController.administrators
 );
 
 module.exports = router;
