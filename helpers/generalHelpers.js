@@ -71,10 +71,7 @@ module.exports.picturesPublicUrl = (pictures) => {
     if(!pictures || pictures?.length === 0) return [];
 
     const extractedPictures = [];
-    pictures.forEach((picture) => {
-        if(envConstants.APP.ENVIRONMENT === "local") extractedPictures.push({id: picture.id, src: picture.url});
-        else  extractedPictures.push({id: picture.id, src: picture.secure});
-    })
+    pictures.forEach((picture) => extractedPictures.push(picturePublicUrl(picture)));
     return extractedPictures;
 };
 
@@ -84,4 +81,15 @@ module.exports.arrayToString = (tab, separator = ", ") => {
 
     return tab.join(separator);
 };
+
+// Extract picture from the correct env
+const picturePublicUrl = (picture) => {
+    return (
+        (envConstants.APP.ENVIRONMENT === "local")
+            ? {id: picture.id, src: picture.url}
+            : {id: picture.id, src: picture.secure}
+    );
+};
+
+module.exports.picturePublicUrl = picturePublicUrl;
 

@@ -84,7 +84,7 @@ module.exports.propertyById = async (id) => {
 };
 
 // Remove property picture into database
-module.exports.updatePropertyPictures = async (id, pictures) => {
+module.exports.addPropertyPicture = async (id, picture) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -94,9 +94,9 @@ module.exports.updatePropertyPictures = async (id, pictures) => {
         const _id = new ObjectId(id);
         const dbData = await client.db().collection(propertiesCollection).updateOne(
             {_id},
-            {$set: {pictures}}
+            {$push: {pictures: picture}}
         );
-        if(dbData !== null) status = true;
+        if(dbData.modifiedCount === 1) status = true;
         else message = errorConstants.PROPERTIES.PROPERTIES_PICTURES_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
@@ -105,3 +105,27 @@ module.exports.updatePropertyPictures = async (id, pictures) => {
     finally { await client.close(); }
     return {data, status, message};
 };
+
+// Remove property picture into database
+module.exports.deletePropertyPicture = async (id, pictureId) => {
+    // Connection configuration
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        // mongodb query execution
+        await client.connect()
+        const _id = new ObjectId(id);
+        const dbData = await client.db().collection(propertiesCollection).updateOne(
+            {_id},
+            {$pull: {pictures: {id: pictureId}}}
+        );
+        if(dbData.modifiedCount === 1) status = true;
+        else message = errorConstants.PROPERTIES.PROPERTY_PICTURE_DELETE;
+    } catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+

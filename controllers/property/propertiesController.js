@@ -24,15 +24,11 @@ module.exports.addPicture = async (req, res) => {
         return res.send({status: false, data: null, message: errorConstants.GENERAL.FORM_DATA});
     }
 
-    // Get property by property id
+    // Route params
     const {propertyId} = req.params;
-    const propertyByIdData = await propertiesHelpers.propertyById(propertyId);
-    if(!propertyByIdData.status) {
-        return res.send(propertyByIdData);
-    }
 
     // Save property picture in the cloud & database
-    const cloudAddPropertyPictureData = await propertyPicturesHelpers.cloudAddPropertyPicture(propertyByIdData, file);
+    const cloudAddPropertyPictureData = await propertyPicturesHelpers.cloudAddPropertyPicture(propertyId, file);
     return res.send(cloudAddPropertyPictureData);
 };
 

@@ -65,7 +65,7 @@ module.exports.updateUserTokens = async (username, tokens) => {
             {username},
             {$set: {tokens}}
         );
-        if(dbData !== null) status = true;
+        if(dbData.modifiedCount === 1) status = true;
         else message = errorConstants.USERS.USER_TOKENS_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
@@ -87,7 +87,7 @@ module.exports.updateUserAvatar = async (username, avatar) => {
             {username},
             {$set: {avatar}}
         );
-        if(dbData !== null) status = true;
+        if(dbData.modifiedCount === 1) status = true;
         else message = errorConstants.USERS.USER_AVATAR_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
@@ -109,7 +109,7 @@ module.exports.updateUserInfo = async (username, {name, phone, email, descriptio
             {username},
             {$set: {name, phone, email, description}}
         );
-        if(dbData !== null) status = true;
+        if(dbData.modifiedCount === 1) status = true;
         else message = errorConstants.USERS.USER_INFO_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
@@ -131,7 +131,7 @@ module.exports.updateUserPassword = async (username, password) => {
             {username},
             {$set: {password}}
         );
-        if(dbData !== null) status = true;
+        if(dbData.modifiedCount === 1) status = true;
         else message = errorConstants.USERS.USER_INFO_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
