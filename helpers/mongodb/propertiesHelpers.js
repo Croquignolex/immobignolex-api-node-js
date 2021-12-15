@@ -10,18 +10,30 @@ const usersCollection = "users";
 const propertiesCollection = "properties";
 const databaseUrl = envConstants.DATABASE_URL;
 
-// Fetch all properties into database
-module.exports.properties = async () => {
+// Fetch all properties with caretaker into database
+module.exports.propertiesWithCaretaker = async () => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
         await client.connect();
-        const dbData = await client.db().collection(propertiesCollection).find().toArray();
+        const dbData = await client.db().collection(propertiesCollection).aggregate([
+            {
+                $lookup: {
+                    from: usersCollection,
+                    localField: "caretaker",
+                    foreignField: "_id",
+                    as: "manager"
+                }
+            },
+            {
+                $unwind: "$manager"
+            }
+        ]).toArray();
         data = [];
         status = true;
-        dbData.forEach(item => data.push((new PropertyModel(item)).responseFormat));
+        dbData.forEach(item => data.push(new PropertyModel(item).responseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
@@ -31,25 +43,32 @@ module.exports.properties = async () => {
     return {data, status, message};
 };
 
-// Fetch all properties with caretaker into database
-module.exports.propertiesWithCaretaker = async () => {
+// Fetch property with caretaker into database
+module.exports.propertyByIdWithCaretaker = async (id) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
         await client.connect();
-        const dbData = await client.db().collection(propertiesCollection).aggregate([{
-            $lookup: {
-                from: usersCollection,
-                localField: "caretaker",
-                foreignField: "_id",
-                as: "manager"
-            }
-        }]).toArray();
-        data = [];
-        status = true;
-        dbData.forEach(item => data.push((new PropertyModel(item)).responseFormat));
+        const _id = new ObjectId(id);
+        const dbData = await client.db().collection(propertiesCollection).aggregate([
+            {
+                $lookup: {
+                    from: usersCollection,
+                    localField: "caretaker",
+                    foreignField: "_id",
+                    as: "manager"
+                }
+            },
+            {$unwind: "$manager"},
+            {$match : {_id}}
+        ]).toArray();
+        if(dbData.length > 0) {
+            status = true;
+            data = new PropertyModel(dbData[0]).responseFormat;
+        }
+        else message = errorConstants.PROPERTIES.NOT_FOUND_BY_ID;
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
@@ -69,34 +88,10 @@ module.exports.createProperty = async ({name, phone, address, caretaker, descrip
         await client.connect();
         const caretakerId = caretaker ? new ObjectId(caretaker) : null;
         const dbData = await client.db().collection(propertiesCollection).insertOne({
-            name, phone, address, description, caretaker: caretakerId, created_by: creator, created_at: (new Date()),
+            name, phone, address, description, caretaker: caretakerId, created_by: creator, created_at: new Date()
         });
         if(dbData.acknowledged) status = true;
         else message = errorConstants.PROPERTIES.CREATE_PROPERTY;
-    }
-    catch (err) {
-        generalHelpers.log("Connection failure to mongodb", err);
-        message = errorConstants.GENERAL.DATABASE;
-    }
-    finally { await client.close(); }
-    return {data, status, message};
-};
-
-// Fetch property by id into database
-module.exports.propertyById = async (id) => {
-    // Connection configuration
-    let client, data = null, status = false, message = "";
-    client = new MongoClient(databaseUrl);
-    try {
-        // mongodb query execution
-        await client.connect();
-        const _id = new ObjectId(id);
-        const dbData = await client.db().collection(propertiesCollection).findOne({_id});
-        if(dbData !== null) {
-            status = true;
-            data = new PropertyModel(dbData);
-        }
-        else message = errorConstants.PROPERTIES.NOT_FOUND_BY_ID;
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

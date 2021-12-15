@@ -6,14 +6,14 @@ const careTakerRole = "Concierge";
 // GET: caretakers
 module.exports.caretakers = async (req, res) => {
     // Get caretakers
-    const usersData = await usersHelpers.usersByRole(careTakerRole);
+    const usersData = await usersHelpers.usersByRoleWithProperties(careTakerRole);
     return res.send(usersData);
 };
 
 // GET: users
 module.exports.users = async (req, res) => {
     // Get users
-    const usersData = await usersHelpers.users();
+    const usersData = await usersHelpers.usersWithProperties();
     return res.send(usersData);
 };
 

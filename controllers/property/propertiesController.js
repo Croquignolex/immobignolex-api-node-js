@@ -5,8 +5,18 @@ const propertyPicturesHelpers = require("../../helpers/cloudary/propertyPictures
 // GET: All properties
 module.exports.properties = async (req, res) => {
     // Get properties
-    const propertiesData = await propertiesHelpers.propertiesWithCaretaker();
-    return res.send(propertiesData);
+    const propertiesWithCaretakerData = await propertiesHelpers.propertiesWithCaretaker();
+    return res.send(propertiesWithCaretakerData);
+};
+
+// GET: Property
+module.exports.property = async (req, res) => {
+    // Route params
+    const {propertyId} = req.params;
+
+    // Get property
+    const propertyByIdWithCaretakerData = await propertiesHelpers.propertyByIdWithCaretaker(propertyId);
+    return res.send(propertyByIdWithCaretakerData);
 };
 
 // PUT: Create property

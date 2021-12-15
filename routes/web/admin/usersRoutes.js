@@ -14,7 +14,7 @@ router.get(
     usersController.caretakers
 );
 router.get(
-    '/users',
+    '',
     [
         tokenMiddleware,
         basicPermissionMiddleware

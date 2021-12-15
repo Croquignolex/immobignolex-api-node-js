@@ -8,20 +8,28 @@ const errorConstants = require('../../constants/errorConstants');
 // Data
 const usersCollection = "users";
 const rolesCollection = "roles";
+const propertiesCollection = "properties";
 const databaseUrl = envConstants.DATABASE_URL;
 
 // Fetch users into database
-module.exports.users = async () => {
+module.exports.usersWithProperties = async () => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
         await client.connect();
-        const dbData = await client.db().collection(usersCollection).find().toArray();
+        const dbData = await client.db().collection(usersCollection).aggregate([{
+            $lookup: {
+                from: propertiesCollection,
+                localField: "properties",
+                foreignField: "_id",
+                as: "managed_properties"
+            }
+        }]).toArray();
         data = [];
         status = true;
-        dbData.forEach(item => data.push((new UserModel(item)).responseFormat));
+        dbData.forEach(item => data.push(new UserModel(item).responseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
@@ -32,17 +40,25 @@ module.exports.users = async () => {
 };
 
 // Fetch users by role into database
-module.exports.usersByRole = async (role) => {
+module.exports.usersByRoleWithProperties = async (role) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
         await client.connect();
-        const dbData = await client.db().collection(usersCollection).find({role}).toArray();
+        const dbData = await client.db().collection(usersCollection).aggregate([{
+            $lookup: {
+                from: propertiesCollection,
+                localField: "properties",
+                foreignField: "_id",
+                as: "managed_properties"
+            }
+        }]).toArray();
+        console.log({dbData})
         data = [];
         status = true;
-        dbData.forEach(item => data.push((new UserModel(item)).responseFormat));
+        dbData.forEach(item => data.push(new UserModel(item).responseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
@@ -66,7 +82,7 @@ module.exports.createUser = async ({name, phone, email, role, description, creat
             // Role permissions
            const permissions = dbRolesData.permissions;
             const dbData = await client.db().collection(usersCollection).insertOne({
-                name, phone, email, role, description, permissions, created_by: creator, created_at: (new Date())
+                name, phone, email, role, description, permissions, created_by: creator, created_at: new Date()
             });
             if(dbData.acknowledged) status = true;
             else message = errorConstants.USERS.CREATE_USER;

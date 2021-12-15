@@ -14,6 +14,14 @@ router.get(
     ],
     propertiesController.properties
 );
+router.get(
+    '/:propertyId',
+    [
+        tokenMiddleware,
+        basicPermissionMiddleware
+    ],
+    propertiesController.property
+);
 router.put(
     '/create',
     [

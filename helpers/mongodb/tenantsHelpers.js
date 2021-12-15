@@ -21,7 +21,7 @@ module.exports.tenants = async () => {
 
         data = [];
         status = true;
-        dbData.forEach(item => data.push((new TenantModel(item).responseFormat)));
+        dbData.forEach(item => data.push(new TenantModel(item).responseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

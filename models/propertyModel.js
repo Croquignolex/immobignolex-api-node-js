@@ -15,17 +15,9 @@ module.exports = class PropertyModel {
             created_at: this.created_at,
             occupation: this.occupation,
             description: this.description,
-            chambers: (!this.chambers) ? 0 : this.chambers?.length,
-            caretaker: extractCaretaker(this.caretaker, this.manager),
-            pictures: generalHelpers.picturesPublicUrl(this.pictures)
+            chambers: this.chambers ? this.chambers?.length : 0,
+            pictures: generalHelpers.picturesPublicUrl(this.pictures),
+            caretaker: this.manager ? new UserModel(this.manager).responseFormat : null
         };
     };
-};
-
-// Extract caretaker
-const extractCaretaker = (caretaker, manager) => {
-    if(manager && manager?.length > 0) {
-        return (new UserModel(manager[0])).responseFormat
-    }
-    return caretaker;
 };

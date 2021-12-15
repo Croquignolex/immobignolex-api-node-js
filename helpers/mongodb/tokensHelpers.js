@@ -4,8 +4,8 @@ const errorConstants = require('../../constants/errorConstants');
 
 module.exports.generateUserTokens = async (user, useragent) => {
     // Extract user agent data
+    const currentDate = new Date();
     const tokens = user.tokens || [];
-    const currentDate = (new Date());
     const mobile = useragent.isMobile;
     const os = useragent.os.toString();
     const desktop = useragent.isDesktop;
