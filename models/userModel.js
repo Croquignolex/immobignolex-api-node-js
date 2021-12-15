@@ -5,6 +5,13 @@ module.exports = class UserModel {
         Object.assign(this, user);
     };
 
+    get miniResponseFormat() {
+        return {
+            id: this._id,
+            name: this.name
+        };
+    };
+
     get simpleResponseFormat() {
         return {
             name: this.name,
@@ -32,7 +39,7 @@ module.exports = class UserModel {
             description: this.description,
             avatar: generalHelpers.filePublicUrl(this.avatar),
             properties: this.properties ? this.properties?.length : 0,
-            creator: this.created_by ? new UserModel(this.created_by).responseFormat : null,
+            creator: this.created_by ? new UserModel(this.created_by).simpleResponseFormat : null,
         };
     };
 };

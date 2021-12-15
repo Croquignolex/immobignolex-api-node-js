@@ -33,7 +33,7 @@ module.exports.propertiesWithCaretaker = async () => {
         ]).toArray();
         data = [];
         status = true;
-        dbData.forEach(item => data.push(new PropertyModel(item).responseFormat));
+        dbData.forEach(item => data.push(new PropertyModel(item).simpleResponseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
@@ -44,7 +44,7 @@ module.exports.propertiesWithCaretaker = async () => {
 };
 
 // Fetch property with caretaker into database
-module.exports.propertyByIdWithCaretaker = async (id) => {
+module.exports.propertyByIdWithCaretakerAndCreator = async (id) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -59,9 +59,18 @@ module.exports.propertyByIdWithCaretaker = async (id) => {
                     localField: "caretaker",
                     foreignField: "_id",
                     as: "manager"
-                }
+                },
             },
             {$unwind: "$manager"},
+            {
+                $lookup: {
+                    from: usersCollection,
+                    localField: "created_by",
+                    foreignField: "_id",
+                    as: "creator"
+                },
+            },
+            {$unwind: "$creator"},
             {$match : {_id}}
         ]).toArray();
         if(dbData.length > 0) {

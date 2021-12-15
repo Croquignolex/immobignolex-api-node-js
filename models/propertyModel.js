@@ -6,6 +6,19 @@ module.exports = class PropertyModel {
         Object.assign(this, property);
     };
 
+    get simpleResponseFormat() {
+        return {
+            id: this._id,
+            name: this.name,
+            phone: this.phone,
+            address: this.address,
+            occupation: this.occupation,
+            chambers: this.chambers ? this.chambers?.length : 0,
+            pictures: generalHelpers.picturesPublicUrl(this.pictures),
+            caretaker: this.manager ? new UserModel(this.manager).miniResponseFormat : null
+        };
+    };
+
     get responseFormat() {
         return {
             id: this._id,
@@ -17,7 +30,8 @@ module.exports = class PropertyModel {
             description: this.description,
             chambers: this.chambers ? this.chambers?.length : 0,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
-            caretaker: this.manager ? new UserModel(this.manager).responseFormat : null
+            creator: this.creator ? new UserModel(this.creator).miniResponseFormat : null,
+            caretaker: this.manager ? new UserModel(this.manager).miniResponseFormat : null,
         };
     };
 };

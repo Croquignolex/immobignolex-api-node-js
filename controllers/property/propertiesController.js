@@ -15,8 +15,8 @@ module.exports.property = async (req, res) => {
     const {propertyId} = req.params;
 
     // Get property
-    const propertyByIdWithCaretakerData = await propertiesHelpers.propertyByIdWithCaretaker(propertyId);
-    return res.send(propertyByIdWithCaretakerData);
+    const propertyByIdWithCaretakerAndCreatorData = await propertiesHelpers.propertyByIdWithCaretakerAndCreator(propertyId);
+    return res.send(propertyByIdWithCaretakerAndCreatorData);
 };
 
 // PUT: Create property
