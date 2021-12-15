@@ -1,5 +1,3 @@
-const dayjs = require('dayjs');
-
 const generalHelpers = require('../generalHelpers');
 const usersHelpers = require('../mongodb/usersHelpers');
 const errorConstants = require('../../constants/errorConstants');
@@ -7,10 +5,10 @@ const errorConstants = require('../../constants/errorConstants');
 module.exports.generateUserTokens = async (user, useragent) => {
     // Extract user agent data
     const tokens = user.tokens || [];
+    const currentDate = (new Date());
     const mobile = useragent.isMobile;
     const os = useragent.os.toString();
     const desktop = useragent.isDesktop;
-    const currentDate = dayjs().valueOf();
     const browser = useragent.browser.toString();
     const version = useragent.version.toString();
 
@@ -40,7 +38,7 @@ module.exports.generateUserTokens = async (user, useragent) => {
                 token.os === os
             ) {
                 token.version = version;
-                token.usedAt = currentDate;
+                token.used_at = currentDate;
             }
             return token;
         });
@@ -51,8 +49,8 @@ module.exports.generateUserTokens = async (user, useragent) => {
         tokens.push({
             browser, version, os, mobile, desktop,
             token: refreshToken,
-            usedAt: currentDate,
-            createdAt: currentDate
+            used_at: currentDate,
+            created_at: currentDate
         });
     }
 

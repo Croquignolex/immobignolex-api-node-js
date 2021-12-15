@@ -13,14 +13,29 @@ router.get(
     ],
     usersController.caretakers
 );
-
 router.get(
-    '/administrators',
+    '/users',
     [
         tokenMiddleware,
         basicPermissionMiddleware
     ],
-    usersController.administrators
+    usersController.users
+);
+router.put(
+    '/create',
+    [
+        tokenMiddleware,
+        basicPermissionMiddleware
+    ],
+    usersController.create
+);
+router.put(
+    '/create-caretaker',
+    [
+        tokenMiddleware,
+        basicPermissionMiddleware
+    ],
+    usersController.createCaretaker
 );
 
 module.exports = router;

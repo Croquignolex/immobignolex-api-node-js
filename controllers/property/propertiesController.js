@@ -11,11 +11,14 @@ module.exports.properties = async (req, res) => {
 
 // PUT: Create property
 module.exports.create = async (req, res) => {
-    // Form data
+    // Form data & data
+    const username = req.username;
     const {name, phone, address, caretaker, description} = req.body;
 
     // Create property
-    const createPropertyData = await propertiesHelpers.createProperty({name, phone, address, caretaker, description});
+    const createPropertyData = await propertiesHelpers.createProperty({
+        name, phone, address, caretaker, description, creator: username
+    });
     return res.send(createPropertyData);
 };
 

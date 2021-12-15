@@ -7,7 +7,29 @@ const errorConstants = require('../../constants/errorConstants');
 
 // Data
 const usersCollection = "users";
+const rolesCollection = "roles";
 const databaseUrl = envConstants.DATABASE_URL;
+
+// Fetch users into database
+module.exports.users = async () => {
+    // Connection configuration
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        // mongodb query execution
+        await client.connect();
+        const dbData = await client.db().collection(usersCollection).find().toArray();
+        data = [];
+        status = true;
+        dbData.forEach(item => data.push((new UserModel(item)).responseFormat));
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
 
 // Fetch users by role into database
 module.exports.usersByRole = async (role) => {
@@ -21,6 +43,34 @@ module.exports.usersByRole = async (role) => {
         data = [];
         status = true;
         dbData.forEach(item => data.push((new UserModel(item)).responseFormat));
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
+// Fetch create user into database
+module.exports.createUser = async ({name, phone, email, role, description, creator}) => {
+    // Connection configuration
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        // mongodb query execution
+        await client.connect();
+
+        const dbRolesData = await client.db().collection(rolesCollection).findOne({name: role});
+        if(dbRolesData !== null) {
+            // Role permissions
+           const permissions = dbRolesData.permissions;
+            const dbData = await client.db().collection(usersCollection).insertOne({
+                name, phone, email, role, description, permissions, created_by: creator, created_at: (new Date())
+            });
+            if(dbData.acknowledged) status = true;
+            else message = errorConstants.USERS.CREATE_USER;
+        } else message = errorConstants.ROLES.NOT_FOUND_BY_NAME;
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

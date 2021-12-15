@@ -60,7 +60,7 @@ module.exports.propertiesWithCaretaker = async () => {
 };
 
 // Fetch create property into database
-module.exports.createProperty = async ({name, phone, address, caretaker, description}) => {
+module.exports.createProperty = async ({name, phone, address, caretaker, description, creator}) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -69,7 +69,7 @@ module.exports.createProperty = async ({name, phone, address, caretaker, descrip
         await client.connect();
         const caretakerId = caretaker ? new ObjectId(caretaker) : null;
         const dbData = await client.db().collection(propertiesCollection).insertOne({
-            name, phone, address, description, caretaker: caretakerId
+            name, phone, address, description, caretaker: caretakerId, created_by: creator, created_at: (new Date()),
         });
         if(dbData.acknowledged) status = true;
         else message = errorConstants.PROPERTIES.CREATE_PROPERTY;
