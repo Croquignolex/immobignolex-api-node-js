@@ -5,21 +5,27 @@ const careTakerRole = "Concierge";
 
 // GET: caretakers
 module.exports.caretakers = async (req, res) => {
+    // Request data
+    const username = req.username;
+
     // Get caretakers
-    const usersData = await usersHelpers.usersByRoleWithProperties(careTakerRole);
-    return res.send(usersData);
+    const usersByRoleData = await usersHelpers.usersByRole(careTakerRole, username);
+    return res.send(usersByRoleData);
 };
 
 // GET: users
 module.exports.users = async (req, res) => {
+    // Request data
+    const username = req.username;
+
     // Get users
-    const usersData = await usersHelpers.usersWithProperties();
+    const usersData = await usersHelpers.users(username);
     return res.send(usersData);
 };
 
 // PUT: Create create user
 module.exports.create = async (req, res) => {
-    // Form data
+    // Form data & data
     const username = req.username;
     const {name, phone, email, description} = req.body;
 

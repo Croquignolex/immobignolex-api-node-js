@@ -8,25 +8,17 @@ const errorConstants = require('../../constants/errorConstants');
 // Data
 const usersCollection = "users";
 const rolesCollection = "roles";
-const propertiesCollection = "properties";
 const databaseUrl = envConstants.DATABASE_URL;
 
 // Fetch users into database
-module.exports.usersWithProperties = async () => {
+module.exports.users = async (username) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
         await client.connect();
-        const dbData = await client.db().collection(usersCollection).aggregate([{
-            $lookup: {
-                from: propertiesCollection,
-                localField: "properties",
-                foreignField: "_id",
-                as: "managed_properties"
-            }
-        }]).toArray();
+        const dbData = await client.db().collection(usersCollection).find({username: {$ne: username}}).toArray();
         data = [];
         status = true;
         dbData.forEach(item => data.push(new UserModel(item).responseFormat));
@@ -40,22 +32,14 @@ module.exports.usersWithProperties = async () => {
 };
 
 // Fetch users by role into database
-module.exports.usersByRoleWithProperties = async (role) => {
+module.exports.usersByRole = async (role, username) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         // mongodb query execution
         await client.connect();
-        const dbData = await client.db().collection(usersCollection).aggregate([{
-            $lookup: {
-                from: propertiesCollection,
-                localField: "properties",
-                foreignField: "_id",
-                as: "managed_properties"
-            }
-        }]).toArray();
-        console.log({dbData})
+        const dbData = await client.db().collection(usersCollection).find({role, username: {$ne: username}}).toArray();
         data = [];
         status = true;
         dbData.forEach(item => data.push(new UserModel(item).responseFormat));
