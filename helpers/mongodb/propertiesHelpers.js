@@ -32,6 +32,11 @@ module.exports.propertiesWithCaretaker = async () => {
                     path: "$manager",
                     preserveNullAndEmptyArrays: true
                 }
+            },
+            {
+                $match : {
+                    enable: true
+                }
             }
         ]).sort({created_at: -1}).toArray();
         data = [];
@@ -84,7 +89,12 @@ module.exports.propertyByIdWithCaretakerAndCreator = async (id) => {
                     preserveNullAndEmptyArrays: true
                 }
             },
-            {$match : {_id}}
+            {
+                $match : {
+                    _id,
+                    enable: true
+                }
+            }
         ]).toArray();
         if(dbData.length > 0) {
             status = true;
@@ -108,8 +118,14 @@ module.exports.createProperty = async ({name, phone, address, caretaker, descrip
     try {
         // mongodb query execution
         await client.connect();
+
+        // Data
+        const enable = true;
+        const created_by = creator;
+        const created_at = new Date();
+        // Query
         const dbData = await client.db().collection(propertiesCollection).insertOne({
-            name, phone, address, description, caretaker, created_by: creator, created_at: new Date()
+            name, phone, address, enable, description, caretaker, created_by, created_at
         });
         if(dbData.acknowledged) status = true;
         else message = errorConstants.PROPERTIES.CREATE_PROPERTY;

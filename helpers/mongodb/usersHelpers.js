@@ -20,7 +20,8 @@ module.exports.users = async (username) => {
         // mongodb query execution
         await client.connect();
         const dbData = await client.db().collection(usersCollection).find({
-            username: {$ne: username}
+            username: {$ne: username},
+            enable: true,
         }).sort({created_at: -1}).toArray();
         data = [];
         status = true;
@@ -43,7 +44,9 @@ module.exports.usersByRole = async (role, username) => {
         // mongodb query execution
         await client.connect();
         const dbData = await client.db().collection(usersCollection).find({
-            role, username: {$ne: username}
+            role,
+            enable: true,
+            username: {$ne: username}
         }).sort({created_at: -1}).toArray();
         data = [];
         status = true;

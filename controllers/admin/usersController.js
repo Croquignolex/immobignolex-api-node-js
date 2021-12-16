@@ -30,9 +30,16 @@ module.exports.create = async (req, res) => {
     const username = req.username;
     const {name, phone, email, role, description} = req.body;
 
+    // Build username & check
+    const createdUsername = name.trim()?.split(' ')?.join("_")?.toLowerCase();
+    const userByUsernameData = await usersHelpers.userByUsername(createdUsername);
+    if(userByUsernameData.status) {
+        return res.send({status: false, data: null, message: errorConstants.USERS.USER_ALREADY_EXIST});
+    }
+
     // Create user
     const createUserData = await usersHelpers.createUser({
-        name, phone, email, description, role, creator: username
+        name: name.trim(), phone, email, description, username: createdUsername, role, creator: username
     });
     return res.send(createUserData);
 };
@@ -44,7 +51,7 @@ module.exports.createCaretaker = async (req, res) => {
     const {name, phone, email, description} = req.body;
 
     // Build username & check
-    const createdUsername = name?.split(' ')?.join("_")?.toLowerCase();
+    const createdUsername = name.trim()?.split(' ')?.join("_")?.toLowerCase();
     const userByUsernameData = await usersHelpers.userByUsername(createdUsername);
     if(userByUsernameData.status) {
         return res.send({status: false, data: null, message: errorConstants.USERS.USER_ALREADY_EXIST});
@@ -52,7 +59,7 @@ module.exports.createCaretaker = async (req, res) => {
 
     // Create caretaker
     const createUserData = await usersHelpers.createUser({
-        name, phone, email, description, username: createdUsername, role: careTakerRole, creator: username
+        name: name.trim(), phone, email, description, username: createdUsername, role: careTakerRole, creator: username
     });
     return res.send(createUserData);
 };
