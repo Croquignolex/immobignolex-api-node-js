@@ -23,12 +23,15 @@ module.exports.propertiesWithCaretaker = async () => {
                 $lookup: {
                     from: usersCollection,
                     localField: "caretaker",
-                    foreignField: "_id",
+                    foreignField: "username",
                     as: "manager"
                 }
             },
             {
-                $unwind: "$manager"
+                $unwind: {
+                    path: "$manager",
+                    preserveNullAndEmptyArrays: true
+                }
             }
         ]).toArray();
         data = [];
@@ -61,7 +64,12 @@ module.exports.propertyByIdWithCaretakerAndCreator = async (id) => {
                     as: "manager"
                 },
             },
-            {$unwind: "$manager"},
+            {
+                $unwind: {
+                    path: "$manager",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
             {
                 $lookup: {
                     from: usersCollection,
@@ -70,7 +78,12 @@ module.exports.propertyByIdWithCaretakerAndCreator = async (id) => {
                     as: "creator"
                 },
             },
-            {$unwind: "$creator"},
+            {
+                $unwind: {
+                    path: "$creator",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
             {$match : {_id}}
         ]).toArray();
         if(dbData.length > 0) {
@@ -95,9 +108,8 @@ module.exports.createProperty = async ({name, phone, address, caretaker, descrip
     try {
         // mongodb query execution
         await client.connect();
-        const caretakerId = caretaker ? new ObjectId(caretaker) : null;
         const dbData = await client.db().collection(propertiesCollection).insertOne({
-            name, phone, address, description, caretaker: caretakerId, created_by: creator, created_at: new Date()
+            name, phone, address, description, caretaker, created_by: creator, created_at: new Date()
         });
         if(dbData.acknowledged) status = true;
         else message = errorConstants.PROPERTIES.CREATE_PROPERTY;
