@@ -7,8 +7,8 @@ module.exports = class UserModel {
 
     get miniResponseFormat() {
         return {
-            id: this._id,
-            name: this.name
+            name: this.name,
+            username: this.username
         };
     };
 
