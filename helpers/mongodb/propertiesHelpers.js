@@ -33,7 +33,7 @@ module.exports.propertiesWithCaretaker = async () => {
                     preserveNullAndEmptyArrays: true
                 }
             }
-        ]).toArray();
+        ]).sort({created_at: -1}).toArray();
         data = [];
         status = true;
         dbData.forEach(item => data.push(new PropertyModel(item).simpleResponseFormat));
@@ -60,7 +60,7 @@ module.exports.propertyByIdWithCaretakerAndCreator = async (id) => {
                 $lookup: {
                     from: usersCollection,
                     localField: "caretaker",
-                    foreignField: "_id",
+                    foreignField: "username",
                     as: "manager"
                 },
             },
@@ -74,7 +74,7 @@ module.exports.propertyByIdWithCaretakerAndCreator = async (id) => {
                 $lookup: {
                     from: usersCollection,
                     localField: "created_by",
-                    foreignField: "_id",
+                    foreignField: "username",
                     as: "creator"
                 },
             },
