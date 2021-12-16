@@ -1,5 +1,5 @@
-const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 const errorConstants = require("../../constants/errorConstants");
+const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 
 // Data
 const careTakerRole = "Concierge";
@@ -30,18 +30,10 @@ module.exports.create = async (req, res) => {
     const username = req.username;
     const {name, phone, email, role, description} = req.body;
 
-    // Build username & check
-    const createdUsername = name.trim()?.split(' ')?.join("_")?.toLowerCase();
-    const userByUsernameData = await usersHelpers.userByUsername(createdUsername);
-    if(userByUsernameData.status) {
-        return res.send({status: false, data: null, message: errorConstants.USERS.USER_ALREADY_EXIST});
-    }
-
-    // Create user
-    const createUserData = await usersHelpers.createUser({
-        name: name.trim(), phone, email, description, username: createdUsername, role, creator: username
-    });
-    return res.send(createUserData);
+    // Database saving
+    return res.send(await saveUser({
+        name: name.trim(), phone, email, description, role, creator: username
+    }));
 };
 
 // PUT: Create create care taker
@@ -49,18 +41,23 @@ module.exports.createCaretaker = async (req, res) => {
     // Form data
     const username = req.username;
     const {name, phone, email, description} = req.body;
+    // Database saving
+    return res.send(await saveUser({
+        name: name.trim(), phone, email, description, role: careTakerRole, creator: username
+    }));
+};
 
+// Save user into database
+const saveUser = async ({name, phone, email, description, role, creator}) => {
     // Build username & check
-    const createdUsername = name.trim()?.split(' ')?.join("_")?.toLowerCase();
+    const createdUsername = name?.split(' ')?.join("_")?.toLowerCase();
     const userByUsernameData = await usersHelpers.userByUsername(createdUsername);
     if(userByUsernameData.status) {
-        return res.send({status: false, data: null, message: errorConstants.USERS.USER_ALREADY_EXIST});
+        return {status: false, data: null, message: errorConstants.USERS.USER_ALREADY_EXIST};
     }
 
     // Create caretaker
-    const createUserData = await usersHelpers.createUser({
-        name: name.trim(), phone, email, description, username: createdUsername, role: careTakerRole, creator: username
+    return await usersHelpers.createUser({
+        name, phone, email, description, username: createdUsername, role, creator
     });
-    return res.send(createUserData);
 };
-
