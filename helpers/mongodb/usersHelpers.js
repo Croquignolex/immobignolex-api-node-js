@@ -4,6 +4,7 @@ const UserModel = require('../../models/userModel');
 const generalHelpers = require('../generalHelpers');
 const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
+const bcrypt = require("bcryptjs");
 
 // Data
 const usersCollection = "users";
@@ -53,7 +54,7 @@ module.exports.usersByRole = async (role, username) => {
 };
 
 // Fetch create user into database
-module.exports.createUser = async ({name, phone, email, role, description, creator}) => {
+module.exports.createUser = async ({name, phone, email, username, role, description, creator}) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -63,10 +64,16 @@ module.exports.createUser = async ({name, phone, email, role, description, creat
 
         const dbRolesData = await client.db().collection(rolesCollection).findOne({name: role});
         if(dbRolesData !== null) {
-            // Role permissions
-           const permissions = dbRolesData.permissions;
+            // Role permissions & data
+            const enable = true;
+            const created_by = creator;
+            const created_at = new Date();
+            const permissions = dbRolesData.permissions;
+            const password = await bcrypt.hash("000000", 10);
+            // Query
             const dbData = await client.db().collection(usersCollection).insertOne({
-                name, phone, email, role, description, permissions, created_by: creator, created_at: new Date()
+                username, name, password, enable, phone, email, role,
+                description, permissions, created_by, created_at
             });
             if(dbData.acknowledged) status = true;
             else message = errorConstants.USERS.CREATE_USER;

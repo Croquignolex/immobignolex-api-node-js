@@ -1,4 +1,5 @@
 const usersHelpers = require("../../helpers/mongodb/usersHelpers");
+const errorConstants = require("../../constants/errorConstants");
 
 // Data
 const careTakerRole = "Concierge";
@@ -27,11 +28,11 @@ module.exports.users = async (req, res) => {
 module.exports.create = async (req, res) => {
     // Form data & data
     const username = req.username;
-    const {name, phone, email, description} = req.body;
+    const {name, phone, email, role, description} = req.body;
 
     // Create user
     const createUserData = await usersHelpers.createUser({
-        name, phone, email, description, role: careTakerRole, creator: username
+        name, phone, email, description, role, creator: username
     });
     return res.send(createUserData);
 };
@@ -40,11 +41,18 @@ module.exports.create = async (req, res) => {
 module.exports.createCaretaker = async (req, res) => {
     // Form data
     const username = req.username;
-    const {name, phone, email, role, description} = req.body;
+    const {name, phone, email, description} = req.body;
+
+    // Build username & check
+    const createdUsername = name?.split(' ')?.join("_")?.toLowerCase();
+    const userByUsernameData = await usersHelpers.userByUsername(createdUsername);
+    if(userByUsernameData.status) {
+        return res.send({status: false, data: null, message: errorConstants.USERS.USER_ALREADY_EXIST});
+    }
 
     // Create caretaker
     const createUserData = await usersHelpers.createUser({
-        name, phone, email, description, role, creator: username
+        name, phone, email, description, username: createdUsername, role: careTakerRole, creator: username
     });
     return res.send(createUserData);
 };
