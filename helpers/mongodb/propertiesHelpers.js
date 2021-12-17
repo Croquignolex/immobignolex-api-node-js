@@ -161,7 +161,8 @@ module.exports.updateProperty = async ({id, name, phone, address, caretaker, des
             {_id},
             {$set: {name, phone, address, description, caretaker}}
         );
-        if(dbData.modifiedCount === 1) {
+        if(dbData.matchedCount === 1 && dbData.modifiedCount === 0) message = errorConstants.GENERAL.NO_CHANGES;
+        else if(dbData.modifiedCount === 1) {
             if(caretaker) {
                 // Update caretaker document
                 const dbDataEmbedded = await client.db().collection(usersCollection).updateOne(
