@@ -5,13 +5,6 @@ const tokenMiddleware = require("../../../middlewares/accessTokenMiddleware");
 const chambersController = require('../../../controllers/property/chambersController');
 const basicPermissionMiddleware = require("../../../middlewares/basicPermissionMiddleware");
 
-router.get(
-    '',
-    [
-        tokenMiddleware,
-        basicPermissionMiddleware
-    ],
-    chambersController.chambers
-);
+router.get('', [tokenMiddleware, basicPermissionMiddleware], chambersController.chambers);
 
 module.exports = router;

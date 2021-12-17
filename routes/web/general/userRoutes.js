@@ -6,38 +6,9 @@ const userController = require('../../../controllers/general/userController');
 const tokenMiddleware = require("../../../middlewares/accessTokenMiddleware");
 const basicPermissionMiddleware = require("../../../middlewares/basicPermissionMiddleware");
 
-router.post(
-    '/avatar-update',
-    [
-        pictureMiddleware,
-        tokenMiddleware,
-        basicPermissionMiddleware
-    ],
-    userController.updateAvatar
-);
-router.delete(
-    '/avatar-delete',
-    [
-        tokenMiddleware,
-        basicPermissionMiddleware
-    ],
-    userController.deleteAvatar
-);
-router.post(
-    '/info-update',
-    [
-        tokenMiddleware,
-        basicPermissionMiddleware
-    ],
-    userController.updateInfo
-);
-router.post(
-    '/password-update',
-    [
-        tokenMiddleware,
-        basicPermissionMiddleware
-    ],
-    userController.updatePassword
-);
+router.post('/info-update', [tokenMiddleware, basicPermissionMiddleware], userController.updateInfo);
+router.delete('/avatar-delete', [tokenMiddleware, basicPermissionMiddleware], userController.deleteAvatar);
+router.post('/password-update', [tokenMiddleware, basicPermissionMiddleware], userController.updatePassword);
+router.post('/avatar-update', [pictureMiddleware, tokenMiddleware, basicPermissionMiddleware], userController.updateAvatar);
 
 module.exports = router;
