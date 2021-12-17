@@ -138,6 +138,31 @@ module.exports.createProperty = async ({name, phone, address, caretaker, descrip
     return {data, status, message};
 };
 
+// Fetch update property info into database
+module.exports.updateProperty = async ({id, name, phone, address, caretaker, description}) => {
+    // Connection configuration
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        // mongodb query execution
+        await client.connect();
+        const _id = new ObjectId(id);
+        // Query
+        const dbData = await client.db().collection(propertiesCollection).updateOne(
+            {_id},
+            {name, phone, address, description, caretaker}
+        );
+        if(dbData.modifiedCount === 1) status = true;
+        else message = errorConstants.PROPERTIES.PROPERTIES_INFO_UPDATE;
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
 // Remove property picture into database
 module.exports.addPropertyPicture = async (id, picture) => {
     // Connection configuration
