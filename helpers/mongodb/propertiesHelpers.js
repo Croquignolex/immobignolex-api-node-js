@@ -130,11 +130,11 @@ module.exports.createProperty = async ({name, phone, address, caretaker, descrip
         if(dbData.acknowledged && dbData.insertedId) {
             if(caretaker) {
                 // Update caretaker document
-                const dbData = await client.db().collection(usersCollection).updateOne(
+                const dbDataEmbedded = await client.db().collection(usersCollection).updateOne(
                     {username: caretaker},
                     {$push: {properties: dbData.insertedId}}
                 );
-                if(dbData.modifiedCount === 1) status = true;
+                if(dbDataEmbedded.modifiedCount === 1) status = true;
                 else message = errorConstants.USERS.USER_PROPERTIES_UPDATE;
             } else status = true;
         }
@@ -164,11 +164,11 @@ module.exports.updateProperty = async ({id, name, phone, address, caretaker, des
         if(dbData.modifiedCount === 1) {
             if(caretaker) {
                 // Update caretaker document
-                const dbData = await client.db().collection(usersCollection).updateOne(
+                const dbDataEmbedded = await client.db().collection(usersCollection).updateOne(
                     {username: caretaker},
                     {$addToSet: {properties: _id}}
                 );
-                if(dbData.modifiedCount === 1) status = true;
+                if(dbDataEmbedded.modifiedCount === 1) status = true;
                 else message = errorConstants.USERS.USER_PROPERTIES_UPDATE;
             } else status = true;
         }
