@@ -20,13 +20,13 @@ module.exports.updateAvatar = async (req, res) => {
 
     // Get user by username
     const username = req.username;
-    const userByUsernameData = await usersHelpers.userByUsername(username);
-    if(!userByUsernameData.status) {
-        return res.send(userByUsernameData);
+    const atomicUserFetchData = await usersHelpers.atomicUserFetch({username});
+    if(!atomicUserFetchData.status) {
+        return res.send(atomicUserFetchData);
     }
 
     // Save user avatar in the cloud & database
-    const databaseUser = userByUsernameData.data;
+    const databaseUser = atomicUserFetchData.data;
     const cloudUpdateUserAvatarData = await avatarsHelpers.cloudUpdateUserAvatar(databaseUser, file);
     return res.send(cloudUpdateUserAvatarData);
 };
@@ -35,13 +35,13 @@ module.exports.updateAvatar = async (req, res) => {
 module.exports.deleteAvatar = async (req, res) => {
     // Get user by username
     const username = req.username;
-    const userByUsernameData = await usersHelpers.userByUsername(username);
-    if(!userByUsernameData.status) {
-        return res.send(userByUsernameData);
+    const atomicUserFetchData = await usersHelpers.atomicUserFetch({username});
+    if(!atomicUserFetchData.status) {
+        return res.send(atomicUserFetchData);
     }
 
     // Remove avatar in the cloud & database
-    const databaseUser = userByUsernameData.data;
+    const databaseUser = atomicUserFetchData.data;
     const cloudDeleteUserAvatarData = await avatarsHelpers.cloudDeleteUserAvatar(databaseUser);
     return res.send(cloudDeleteUserAvatarData);
 };
@@ -53,11 +53,11 @@ module.exports.updateInfo = async (req, res) => {
 
     // Save user info in the database
     const username = req.username;
-    const updateUserInfoData = await usersHelpers.updateUserInfo(
+    const atomicUserUpdateData = await usersHelpers.atomicUserUpdate(
         username,
         {name, phone, email, description}
     );
-    return res.send(updateUserInfoData);
+    return res.send(atomicUserUpdateData);
 };
 
 // POST: Update user password
@@ -70,18 +70,19 @@ module.exports.updatePassword = async (req, res) => {
 
     // Get user by username
     const username = req.username;
-    const userByUsernameData = await usersHelpers.userByUsername(username);
-    if(!userByUsernameData.status) {
-        return res.send(userByUsernameData);
+    const atomicUserFetchData = await usersHelpers.atomicUserFetch({username});
+    if(!atomicUserFetchData.status) {
+        return res.send(atomicUserFetchData);
     }
 
     // Check old password with database password
-    const databaseUser = userByUsernameData.data;
+    const databaseUser = atomicUserFetchData.data;
     if(!await bcrypt.compare(oldPassword, databaseUser.password)) {
         return res.send({status: false, message: errorConstants.USERS.PASSWORD_NOT_MATCH, data: null});
     }
 
     // Save user info in the database
-    const updateUserPasswordData = await usersHelpers.updateUserPassword(username, await bcrypt.hash(newPassword, 10));
-    return res.send(updateUserPasswordData);
+    const password = await bcrypt.hash(newPassword, 10);
+    const atomicUserUpdateData = await usersHelpers.atomicUserUpdate(username, {password});
+    return res.send(atomicUserUpdateData);
 };

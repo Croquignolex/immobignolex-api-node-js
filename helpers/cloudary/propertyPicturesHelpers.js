@@ -2,15 +2,12 @@ const filesHelpers = require('./filesHelpers');
 const generalHelpers = require("../generalHelpers");
 const propertiesHelpers = require('../mongodb/propertiesHelpers');
 
-// Data
-const cloudFolder = 'immobignolex/properties/';
-
 // Upload property picture to cloud
 module.exports.cloudAddPropertyPicture = async (propertyId, file) => {
     const filePath = file.path;
 
     // Upload file to cloud & delete temp file
-    const fileHelperData = await filesHelpers.cloudAddFile(filePath, cloudFolder);
+    const fileHelperData = await filesHelpers.cloudAddFile(filePath, 'immobignolex/properties/');
     await generalHelpers.deleteFileFromPath(filePath);
     if(!fileHelperData.status) {
         return fileHelperData;

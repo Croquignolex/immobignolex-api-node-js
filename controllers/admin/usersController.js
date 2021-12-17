@@ -50,14 +50,14 @@ module.exports.createCaretaker = async (req, res) => {
 // Save user into database
 const saveUser = async ({name, phone, email, description, role, creator}) => {
     // Build username & check
-    const createdUsername = name?.split(' ')?.join("_")?.toLowerCase();
-    const userByUsernameData = await usersHelpers.userByUsername(createdUsername);
-    if(userByUsernameData.status) {
+    const username = name?.split(' ')?.join("_")?.toLowerCase();
+    const atomicUserFetchData = await usersHelpers.atomicUserFetch({username});
+    if(atomicUserFetchData.status) {
         return {status: false, data: null, message: errorConstants.USERS.USER_ALREADY_EXIST};
     }
 
     // Create caretaker
     return await usersHelpers.createUser({
-        name, phone, email, description, username: createdUsername, role, creator
+        name, phone, email, description, username, role, creator
     });
 };

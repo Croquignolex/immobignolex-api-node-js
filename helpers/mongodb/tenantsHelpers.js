@@ -11,17 +11,17 @@ const databaseUrl = envConstants.DATABASE_URL;
 
 // Fetch all tenants into database
 module.exports.tenants = async () => {
-    // Connection configuration
+    // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
-        // mongodb query execution
         await client.connect();
-        const dbData = await client.db().collection(usersCollection).find().toArray();
-
+        // Query
+        const tenantsData = await client.db().collection(usersCollection).find().toArray();
+        // Format response
         data = [];
         status = true;
-        dbData.forEach(item => data.push(new TenantModel(item).responseFormat));
+        tenantsData.forEach(item => data.push(new TenantModel(item).responseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

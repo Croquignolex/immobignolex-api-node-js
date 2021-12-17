@@ -11,16 +11,17 @@ const databaseUrl = envConstants.DATABASE_URL;
 
 // Fetch all chambers into database
 module.exports.chambers = async () => {
-    // Connection configuration
+    // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
-        // mongodb query execution
         await client.connect();
-        const dbData = await client.db().collection(chambersCollection).find().toArray();
+        // Query
+        const chambersData = await client.db().collection(chambersCollection).find().toArray();
+        // Format response
         data = [];
         status = true;
-        dbData.forEach(item => data.push(new ChamberModel(item).responseFormat));
+        chambersData.forEach(item => data.push(new ChamberModel(item).responseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

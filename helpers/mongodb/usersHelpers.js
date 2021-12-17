@@ -4,7 +4,6 @@ const UserModel = require('../../models/userModel');
 const generalHelpers = require('../generalHelpers');
 const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
-const bcrypt = require("bcryptjs");
 
 // Data
 const usersCollection = "users";
@@ -75,6 +74,7 @@ module.exports.createUser = async ({name, phone, email, username, role, descript
             const enable = true;
             const created_by = creator;
             const created_at = new Date();
+            const bcrypt = require("bcryptjs");
             const permissions = dbRolesData.permissions;
             const password = await bcrypt.hash("000000", 10);
             // Query
@@ -94,20 +94,20 @@ module.exports.createUser = async ({name, phone, email, username, role, descript
     return {data, status, message};
 };
 
-// fetch user by username into database
-module.exports.userByUsername = async (username) => {
-    // Connection configuration
+// Atomic user fetch into database
+module.exports.atomicUserFetch = async (atomicFields) => {
+    // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
-        // mongodb query execution
         await client.connect();
-        const dbData = await client.db().collection(usersCollection).findOne({username});
-        if(dbData !== null) {
+        // Query
+        const atomicUserFetchData = await client.db().collection(usersCollection).findOne({atomicFields});
+        if(atomicUserFetchData !== null) {
             status = true;
-            data = new UserModel(dbData);
+            data = new UserModel(atomicUserFetchData);
         }
-        else message = errorConstants.USERS.NOT_FOUND_BY_USERNAME;
+        else message = errorConstants.USERS.USER_NOT_FOUND;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
@@ -116,20 +116,21 @@ module.exports.userByUsername = async (username) => {
     return {data, status, message};
 };
 
-// Update user token into database
-module.exports.updateUserTokens = async (username, tokens) => {
-    // Connection configuration
+// Atomic user update into database
+module.exports.atomicUserUpdate = async (username, atomicFields) => {
+    // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
-        // mongodb query execution
         await client.connect();
-        const dbData = await client.db().collection(usersCollection).updateOne(
+        // Query
+        const atomicUserUpdateData = await client.db().collection(usersCollection).updateOne(
             {username},
-            {$set: {tokens}}
+            {$set: atomicFields}
         );
-        if(dbData.modifiedCount === 1) status = true;
-        else message = errorConstants.USERS.USER_TOKENS_UPDATE;
+        // Format response
+        if(atomicUserUpdateData.modifiedCount === 1) status = true;
+        else message = errorConstants.USERS.USER_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
@@ -138,68 +139,3 @@ module.exports.updateUserTokens = async (username, tokens) => {
     return {data, status, message};
 };
 
-// Update user avatar into database
-module.exports.updateUserAvatar = async (username, avatar) => {
-    // Connection configuration
-    let client, data = null, status = false, message = "";
-    client = new MongoClient(databaseUrl);
-    try {
-        // mongodb query execution
-        await client.connect();
-        const dbData = await client.db().collection(usersCollection).updateOne(
-            {username},
-            {$set: {avatar}}
-        );
-        if(dbData.modifiedCount === 1) status = true;
-        else message = errorConstants.USERS.USER_AVATAR_UPDATE;
-    } catch (err) {
-        generalHelpers.log("Connection failure to mongodb", err);
-        message = errorConstants.GENERAL.DATABASE;
-    }
-    finally { await client.close(); }
-    return {data, status, message};
-};
-
-// Update user info into database
-module.exports.updateUserInfo = async (username, {name, phone, email, description}) => {
-    // Connection configuration
-    let client, data = null, status = false, message = "";
-    client = new MongoClient(databaseUrl);
-    try {
-        // mongodb query execution
-        await client.connect();
-        const dbData = await client.db().collection(usersCollection).updateOne(
-            {username},
-            {$set: {name, phone, email, description}}
-        );
-        if(dbData.modifiedCount === 1) status = true;
-        else message = errorConstants.USERS.USER_INFO_UPDATE;
-    } catch (err) {
-        generalHelpers.log("Connection failure to mongodb", err);
-        message = errorConstants.GENERAL.DATABASE;
-    }
-    finally { await client.close(); }
-    return {data, status, message};
-};
-
-// Update user password into database
-module.exports.updateUserPassword = async (username, password) => {
-    // Connection configuration
-    let client, data = null, status = false, message = "";
-    client = new MongoClient(databaseUrl);
-    try {
-        // mongodb query execution
-        await client.connect();
-        const dbData = await client.db().collection(usersCollection).updateOne(
-            {username},
-            {$set: {password}}
-        );
-        if(dbData.modifiedCount === 1) status = true;
-        else message = errorConstants.USERS.USER_INFO_UPDATE;
-    } catch (err) {
-        generalHelpers.log("Connection failure to mongodb", err);
-        message = errorConstants.GENERAL.DATABASE;
-    }
-    finally { await client.close(); }
-    return {data, status, message};
-};
