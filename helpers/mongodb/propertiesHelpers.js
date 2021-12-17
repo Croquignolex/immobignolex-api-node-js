@@ -147,10 +147,9 @@ module.exports.updateProperty = async ({id, name, phone, address, caretaker, des
         // mongodb query execution
         await client.connect();
         const _id = new ObjectId(id);
-        // Query
         const dbData = await client.db().collection(propertiesCollection).updateOne(
             {_id},
-            {name, phone, address, description, caretaker}
+            {$set: {name, phone, address, description, caretaker}}
         );
         if(dbData.modifiedCount === 1) status = true;
         else message = errorConstants.PROPERTIES.PROPERTIES_INFO_UPDATE;
