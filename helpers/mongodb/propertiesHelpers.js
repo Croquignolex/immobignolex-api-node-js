@@ -127,7 +127,17 @@ module.exports.createProperty = async ({name, phone, address, caretaker, descrip
         const dbData = await client.db().collection(propertiesCollection).insertOne({
             name, phone, address, enable, description, caretaker, created_by, created_at
         });
-        if(dbData.acknowledged) status = true;
+        if(dbData.acknowledged && dbData.insertedId) {
+            if(caretaker) {
+                // Update caretaker document
+                const dbData = await client.db().collection(usersCollection).updateOne(
+                    {username: caretaker},
+                    {$push: {properties: dbData.insertedId}}
+                );
+                if(dbData.modifiedCount === 1) status = true;
+                else message = errorConstants.USERS.USER_PROPERTIES_UPDATE;
+            } else status = true;
+        }
         else message = errorConstants.PROPERTIES.CREATE_PROPERTY;
     }
     catch (err) {
@@ -151,7 +161,17 @@ module.exports.updateProperty = async ({id, name, phone, address, caretaker, des
             {_id},
             {$set: {name, phone, address, description, caretaker}}
         );
-        if(dbData.modifiedCount === 1) status = true;
+        if(dbData.modifiedCount === 1) {
+            if(caretaker) {
+                // Update caretaker document
+                const dbData = await client.db().collection(usersCollection).updateOne(
+                    {username: caretaker},
+                    {$addToSet: {properties: _id}}
+                );
+                if(dbData.modifiedCount === 1) status = true;
+                else message = errorConstants.USERS.USER_PROPERTIES_UPDATE;
+            } else status = true;
+        }
         else message = errorConstants.PROPERTIES.PROPERTIES_INFO_UPDATE;
     }
     catch (err) {
