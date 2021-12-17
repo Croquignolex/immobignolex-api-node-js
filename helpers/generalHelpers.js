@@ -82,6 +82,16 @@ module.exports.arrayToString = (tab, separator = ", ") => {
     return tab.join(separator);
 };
 
+// Get database lookup unwind
+module.exports.databaseUnwind = (column) => {
+    return {
+        $unwind: {
+            path: column,
+            preserveNullAndEmptyArrays: true
+        }
+    };
+};
+
 // Extract picture from the correct env
 const picturePublicUrl = (picture) => {
     return (

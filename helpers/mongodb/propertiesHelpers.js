@@ -9,6 +9,22 @@ const errorConstants = require('../../constants/errorConstants');
 const usersCollection = "users";
 const propertiesCollection = "properties";
 const databaseUrl = envConstants.DATABASE_URL;
+const propertyCaretakerLookup = {
+    $lookup: {
+        from: usersCollection,
+        localField: "caretaker",
+        foreignField: "username",
+        as: "manager"
+    }
+};
+const propertyCreatorLookup = {
+    $lookup: {
+        from: usersCollection,
+        localField: "created_by",
+        foreignField: "username",
+        as: "creator"
+    },
+};
 
 // Fetch all properties with caretaker into database
 module.exports.propertiesWithCaretaker = async () => {
@@ -19,25 +35,9 @@ module.exports.propertiesWithCaretaker = async () => {
         // mongodb query execution
         await client.connect();
         const dbData = await client.db().collection(propertiesCollection).aggregate([
-            {
-                $lookup: {
-                    from: usersCollection,
-                    localField: "caretaker",
-                    foreignField: "username",
-                    as: "manager"
-                }
-            },
-            {
-                $unwind: {
-                    path: "$manager",
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $match : {
-                    enable: true
-                }
-            }
+            propertyCaretakerLookup,
+            generalHelpers.databaseUnwind("$manager"),
+            { $match : {enable: true} }
         ]).sort({created_at: -1}).toArray();
         data = [];
         status = true;
@@ -61,40 +61,11 @@ module.exports.propertyByIdWithCaretakerAndCreator = async (id) => {
         await client.connect();
         const _id = new ObjectId(id);
         const dbData = await client.db().collection(propertiesCollection).aggregate([
-            {
-                $lookup: {
-                    from: usersCollection,
-                    localField: "caretaker",
-                    foreignField: "username",
-                    as: "manager"
-                },
-            },
-            {
-                $unwind: {
-                    path: "$manager",
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $lookup: {
-                    from: usersCollection,
-                    localField: "created_by",
-                    foreignField: "username",
-                    as: "creator"
-                },
-            },
-            {
-                $unwind: {
-                    path: "$creator",
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $match : {
-                    _id,
-                    enable: true
-                }
-            }
+            propertyCaretakerLookup,
+            generalHelpers.databaseUnwind("$manager"),
+            propertyCreatorLookup,
+            generalHelpers.databaseUnwind("$creator"),
+            { $match : {_id, enable: true} }
         ]).toArray();
         if(dbData.length > 0) {
             status = true;
@@ -157,6 +128,21 @@ module.exports.updateProperty = async ({id, name, phone, address, caretaker, des
         // mongodb query execution
         await client.connect();
         const _id = new ObjectId(id);
+        // Search old caretaker
+        const dbDataExternal = await client.db().collection(propertiesCollection).aggregate([
+            propertyCaretakerLookup,
+            generalHelpers.databaseUnwind("$manager"),
+            { $match : {_id} }
+        ]).toArray();
+
+
+        if(dbData.length > 0) {
+            status = true;
+            data = new PropertyModel(dbData[0]).responseFormat;
+        } else message = errorConstants.PROPERTIES.NOT_FOUND_BY_ID;
+
+
+
         const dbData = await client.db().collection(propertiesCollection).updateOne(
             {_id},
             {$set: {name, phone, address, description, caretaker}}
