@@ -169,21 +169,49 @@ module.exports.updateProperty = async ({id, name, phone, address, caretaker, des
     return {data, status, message};
 };
 
-// Remove property picture into database
-module.exports.addPropertyPicture = async (id, picture) => {
-    // Connection configuration
+
+
+
+
+// Atomic property create into database
+module.exports.atomicPropertyCreate = async (atomicFields) => {
+    // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
-        // mongodb query execution
+        await client.connect();
+        // Query
+        const atomicPropertyCreateData = await client.db().collection(propertiesCollection).insertOne(atomicFields);
+        // Format response
+        if(atomicPropertyCreateData.acknowledged && atomicPropertyCreateData.insertedId) {
+            data = atomicPropertyCreateData.insertedId;
+            status = true;
+        }
+        else message = errorConstants.PROPERTIES.CREATE_PROPERTY;
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
+// Atomic property update into database
+module.exports.atomicPropertyUpdate = async (id, atomicFields) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
         await client.connect();
         const _id = new ObjectId(id);
-        const dbData = await client.db().collection(propertiesCollection).updateOne(
-            {_id},
-            {$push: {pictures: picture}}
+        // Query
+        const atomicPropertyUpdateData = await client.db().collection(propertiesCollection).updateOne(
+            {_id}, atomicFields
         );
-        if(dbData.modifiedCount === 1) status = true;
-        else message = errorConstants.PROPERTIES.PROPERTIES_PICTURES_UPDATE;
+        // Format response
+        if(atomicPropertyUpdateData.modifiedCount === 1) status = true;
+        else message = errorConstants.PROPERTIES.PROPERTY_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
@@ -192,26 +220,4 @@ module.exports.addPropertyPicture = async (id, picture) => {
     return {data, status, message};
 };
 
-// Remove property picture into database
-module.exports.deletePropertyPicture = async (id, pictureId) => {
-    // Connection configuration
-    let client, data = null, status = false, message = "";
-    client = new MongoClient(databaseUrl);
-    try {
-        // mongodb query execution
-        await client.connect()
-        const _id = new ObjectId(id);
-        const dbData = await client.db().collection(propertiesCollection).updateOne(
-            {_id},
-            {$pull: {pictures: {id: pictureId}}}
-        );
-        if(dbData.modifiedCount === 1) status = true;
-        else message = errorConstants.PROPERTIES.PROPERTY_PICTURE_DELETE;
-    } catch (err) {
-        generalHelpers.log("Connection failure to mongodb", err);
-        message = errorConstants.GENERAL.DATABASE;
-    }
-    finally { await client.close(); }
-    return {data, status, message};
-};
 

@@ -27,7 +27,7 @@ module.exports.cloudUpdateUserAvatar = async (user, file) => {
         id: newUserAvatar.public_id,
         secure: newUserAvatar.secure_url,
     };
-    return await usersHelpers.atomicUserUpdate(user.username, {avatar});
+    return await usersHelpers.atomicUserUpdate(user.username, {$set: {avatar}});
 };
 
 // Delete user avatar in cloud
@@ -38,5 +38,5 @@ module.exports.cloudDeleteUserAvatar = async (user) => {
 
     // Cloud call & db save
     await filesHelpers.cloudRemoveFile(oldUserAvatar.id);
-    return await usersHelpers.atomicUserUpdate(user.username, {avatar});
+    return await usersHelpers.atomicUserUpdate(user.username, {$set: {avatar}});
 };

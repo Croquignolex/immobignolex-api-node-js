@@ -66,7 +66,10 @@ module.exports.atomicUserCreate = async (atomicFields) => {
         // Query
         const atomicUserCreateData = await client.db().collection(usersCollection).insertOne(atomicFields);
         // Format response
-        if(atomicUserCreateData.acknowledged) status = true;
+        if(atomicUserCreateData.acknowledged && atomicUserCreateData.insertedId) {
+            data = atomicUserCreateData.insertedId;
+            status = true;
+        }
         else message = errorConstants.USERS.CREATE_USER;
     }
     catch (err) {
@@ -86,8 +89,7 @@ module.exports.atomicUserUpdate = async (username, atomicFields) => {
         await client.connect();
         // Query
         const atomicUserUpdateData = await client.db().collection(usersCollection).updateOne(
-            {username},
-            {$set: atomicFields}
+            {username}, atomicFields
         );
         // Format response
         if(atomicUserUpdateData.modifiedCount === 1) status = true;

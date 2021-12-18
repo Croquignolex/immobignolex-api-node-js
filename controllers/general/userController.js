@@ -55,7 +55,7 @@ module.exports.updateInfo = async (req, res) => {
     const username = req.username;
     const atomicUserUpdateData = await usersHelpers.atomicUserUpdate(
         username,
-        {name, phone, email, description}
+        {$set: {name, phone, email, description}}
     );
     return res.send(atomicUserUpdateData);
 };
@@ -83,6 +83,6 @@ module.exports.updatePassword = async (req, res) => {
 
     // Save user info in the database
     const password = await bcrypt.hash(newPassword, 10);
-    const atomicUserUpdateData = await usersHelpers.atomicUserUpdate(username, {password});
+    const atomicUserUpdateData = await usersHelpers.atomicUserUpdate(username, {$set: {password}});
     return res.send(atomicUserUpdateData);
 };

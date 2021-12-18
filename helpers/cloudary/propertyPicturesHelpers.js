@@ -18,17 +18,17 @@ module.exports.cloudAddPropertyPicture = async (propertyId, file) => {
     const picture = {url: propertyPicture.url, id: propertyPicture.public_id, secure: propertyPicture.secure_url};
 
     // Save into database
-    const addPropertyPictureData = await propertiesHelpers.addPropertyPicture(propertyId, picture);
-    if(!addPropertyPictureData.status) {
-        return addPropertyPictureData;
+    const atomicPropertyUpdateData = await propertiesHelpers.atomicPropertyUpdate(propertyId, {$push: {pictures: picture}});
+    if(!atomicPropertyUpdateData.status) {
+        return atomicPropertyUpdateData;
     }
 
-    return {...addPropertyPictureData, data: generalHelpers.picturePublicUrl(picture)};
+    return {...atomicPropertyUpdateData, data: generalHelpers.picturePublicUrl(picture)};
 };
 
 // Delete property picture in cloud
 module.exports.cloudDeletePropertyPicture = async (propertyId, pictureId) => {
     // Cloud call & db save
     await filesHelpers.cloudRemoveFile(pictureId);
-    return await propertiesHelpers.deletePropertyPicture(propertyId, pictureId);
+    return await propertiesHelpers.atomicPropertyUpdate(propertyId, {$pull: {pictures: {id: pictureId}}});
 };
