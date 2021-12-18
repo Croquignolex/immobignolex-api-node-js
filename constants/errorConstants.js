@@ -18,7 +18,7 @@ module.exports.MIDDLEWARE = {
 
 // Roles
 module.exports.ROLES = {
-    NOT_FOUND_BY_NAME: "ROLE_NOT_FOUND_BY_NAME_ERROR",
+    ROLE_NOT_FOUND: "ROLE_NOT_FOUND_ERROR",
 };
 
 // Users

@@ -7,84 +7,23 @@ const errorConstants = require('../../constants/errorConstants');
 
 // Data
 const usersCollection = "users";
-const rolesCollection = "roles";
 const databaseUrl = envConstants.DATABASE_URL;
 
-// Fetch users into database
-module.exports.users = async (username) => {
-    // Connection configuration
+// Atomic users fetch into database
+module.exports.atomicUsersFetch = async (atomicFields) => {
     let client, data = null, status = false, message = "";
+    // Data
     client = new MongoClient(databaseUrl);
     try {
-        // mongodb query execution
         await client.connect();
-        const dbData = await client.db().collection(usersCollection).find({
-            username: {$ne: username},
-            enable: true,
-        }).sort({created_at: -1}).toArray();
+        // Query
+        const atomicUsersFetchData = await client.db().collection(usersCollection).find(atomicFields).sort(
+            {created_at: -1}
+        ).toArray();
+        // Format response
         data = [];
         status = true;
-        dbData.forEach(item => data.push(new UserModel(item).responseFormat));
-    }
-    catch (err) {
-        generalHelpers.log("Connection failure to mongodb", err);
-        message = errorConstants.GENERAL.DATABASE;
-    }
-    finally { await client.close(); }
-    return {data, status, message};
-};
-
-// Fetch users by role into database
-module.exports.usersByRole = async (role, username) => {
-    // Connection configuration
-    let client, data = null, status = false, message = "";
-    client = new MongoClient(databaseUrl);
-    try {
-        // mongodb query execution
-        await client.connect();
-        const dbData = await client.db().collection(usersCollection).find({
-            role,
-            enable: true,
-            username: {$ne: username}
-        }).sort({created_at: -1}).toArray();
-        data = [];
-        status = true;
-        dbData.forEach(item => data.push(new UserModel(item).responseFormat));
-    }
-    catch (err) {
-        generalHelpers.log("Connection failure to mongodb", err);
-        message = errorConstants.GENERAL.DATABASE;
-    }
-    finally { await client.close(); }
-    return {data, status, message};
-};
-
-// Fetch create user into database
-module.exports.createUser = async ({name, phone, email, username, role, description, creator}) => {
-    // Connection configuration
-    let client, data = null, status = false, message = "";
-    client = new MongoClient(databaseUrl);
-    try {
-        // mongodb query execution
-        await client.connect();
-
-        const dbRolesData = await client.db().collection(rolesCollection).findOne({name: role});
-        if(dbRolesData !== null) {
-            // Role permissions & data
-            const enable = true;
-            const created_by = creator;
-            const created_at = new Date();
-            const bcrypt = require("bcryptjs");
-            const permissions = dbRolesData.permissions;
-            const password = await bcrypt.hash("000000", 10);
-            // Query
-            const dbData = await client.db().collection(usersCollection).insertOne({
-                username, name, password, enable, phone, email, role,
-                description, permissions, created_by, created_at
-            });
-            if(dbData.acknowledged) status = true;
-            else message = errorConstants.USERS.CREATE_USER;
-        } else message = errorConstants.ROLES.NOT_FOUND_BY_NAME;
+        atomicUsersFetchData.forEach(item => data.push(new UserModel(item).responseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
@@ -103,12 +42,34 @@ module.exports.atomicUserFetch = async (atomicFields) => {
         await client.connect();
         // Query
         const atomicUserFetchData = await client.db().collection(usersCollection).findOne({atomicFields});
+        // Format response
         if(atomicUserFetchData !== null) {
             status = true;
             data = new UserModel(atomicUserFetchData);
         }
         else message = errorConstants.USERS.USER_NOT_FOUND;
     } catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
+// Atomic user create into database
+module.exports.atomicUserCreate = async (atomicFields) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const atomicUserCreateData = await client.db().collection(usersCollection).insertOne(atomicFields);
+        // Format response
+        if(atomicUserCreateData.acknowledged) status = true;
+        else message = errorConstants.USERS.CREATE_USER;
+    }
+    catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
     }
