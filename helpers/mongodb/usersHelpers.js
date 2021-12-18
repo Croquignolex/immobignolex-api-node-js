@@ -9,10 +9,59 @@ const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 
 // Data
 const usersCollection = "users";
+const careTakerRole = "Concierge";
 const databaseUrl = envConstants.DATABASE_URL;
+
+// Get user by username
+module.exports.userByUsername = async (username) => {
+    return await atomicUserFetch({username});
+};
+
+// Get users without current user by username
+module.exports.usersWithoutUserByUsername = async (username) => {
+    return await atomicUsersFetch({
+        enable: true, username: {$ne: username}
+    });
+};
+
+// Get caretakers without current user by username
+module.exports.caretakersWithoutUserByUsername = async (username) => {
+    return await atomicUsersFetch({
+        role: careTakerRole, enable: true, username: {$ne: username}
+    });
+};
+
+// Update user avatar by username
+module.exports.updateUserAvatarByUsername = async (username, avatar) => {
+    return await atomicUserUpdate(username, {$set: {avatar}});
+};
+
+// Update user password by username
+module.exports.updateUserPasswordByUsername = async (username, password) => {
+    return await atomicUserUpdate(username, {$set: {password}});
+};
+
+// Update user info by username
+module.exports.updateUserInfoByUsername = async (username, {name, phone, email, description}) => {
+    return await atomicUserUpdate(username, {$set: {name, phone, email, description}});
+};
 
 // Create user
 module.exports.createUser = async ({name, phone, email, role, description, creator}) => {
+    return await userCreateProcess(
+        {name, phone, email, role, description, creator}
+    );
+};
+
+// Create user
+module.exports.createCaretaker = async ({name, phone, email, description, creator}) => {
+    return await userCreateProcess(
+        {name, phone, email, role: careTakerRole, description, creator}
+    );
+};
+
+// User create process
+const userCreateProcess = async ({name, phone, email, role, description, creator}) => {
     // Build username & check
     const username = name?.split(' ')?.join("_")?.toLowerCase();
     const userByUsernameData = await usersHelpers.userByUsername(username);
@@ -38,26 +87,6 @@ module.exports.createUser = async ({name, phone, email, role, description, creat
         username, name, password, enable, phone, email, role,
         description, permissions, created_by, created_at
     });
-};
-
-// Get user by username
-module.exports.userByUsername = async (username) => {
-    return await atomicUserFetch({username});
-};
-
-// Update user avatar by username
-module.exports.updateUserAvatarByUsername = async (username, avatar) => {
-    return await atomicUserUpdate(username, {$set: {avatar}});
-};
-
-// Update user password by username
-module.exports.updateUserPasswordByUsername = async (username, password) => {
-    return await atomicUserUpdate(username, {$set: {password}});
-};
-
-// Update user info by username
-module.exports.updateUserInfoByUsername = async (username, {name, phone, email, description}) => {
-    return await atomicUserUpdate(username, {$set: {name, phone, email, description}});
 };
 
 // Atomic users fetch into database
