@@ -81,44 +81,6 @@ module.exports.propertyByIdWithCaretakerAndCreator = async (id) => {
     return {data, status, message};
 };
 
-// Fetch create property into database
-module.exports.createProperty = async ({name, phone, address, caretaker, description, creator}) => {
-    // Connection configuration
-    let client, data = null, status = false, message = "";
-    client = new MongoClient(databaseUrl);
-    try {
-        // mongodb query execution
-        await client.connect();
-
-        // Data
-        const enable = true;
-        const created_by = creator;
-        const created_at = new Date();
-        // Query
-        const dbData = await client.db().collection(propertiesCollection).insertOne({
-            name, phone, address, enable, description, caretaker, created_by, created_at
-        });
-        if(dbData.acknowledged && dbData.insertedId) {
-            if(caretaker) {
-                // Update caretaker document
-                const dbDataEmbedded = await client.db().collection(usersCollection).updateOne(
-                    {username: caretaker},
-                    {$push: {properties: dbData.insertedId}}
-                );
-                if(dbDataEmbedded.modifiedCount === 1) status = true;
-                else message = errorConstants.USERS.USER_PROPERTIES_UPDATE;
-            } else status = true;
-        }
-        else message = errorConstants.PROPERTIES.CREATE_PROPERTY;
-    }
-    catch (err) {
-        generalHelpers.log("Connection failure to mongodb", err);
-        message = errorConstants.GENERAL.DATABASE;
-    }
-    finally { await client.close(); }
-    return {data, status, message};
-};
-
 // Fetch update property info into database
 module.exports.updateProperty = async ({id, name, phone, address, caretaker, description}) => {
     // Connection configuration
@@ -168,10 +130,6 @@ module.exports.updateProperty = async ({id, name, phone, address, caretaker, des
     finally { await client.close(); }
     return {data, status, message};
 };
-
-
-
-
 
 // Atomic property create into database
 module.exports.atomicPropertyCreate = async (atomicFields) => {

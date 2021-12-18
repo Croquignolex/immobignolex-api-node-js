@@ -9,15 +9,20 @@ const errorConstants = require('../../constants/errorConstants');
 const rolesCollection = "roles";
 const databaseUrl = envConstants.DATABASE_URL;
 
+// Get role by name
+module.exports.roleByName = async (name) => {
+    return await atomicRoleFetch({name});
+};
+
 // Atomic roles fetch into database
-module.exports.atomicRoleFetch = async (atomicFields) => {
+const atomicRoleFetch = async (directives) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
         // Query
-        const atomicUserFetchData = await client.db().collection(rolesCollection).findOne({atomicFields});
+        const atomicUserFetchData = await client.db().collection(rolesCollection).findOne({directives});
         // Format response
         if(atomicUserFetchData !== null) {
             status = true;
@@ -31,3 +36,5 @@ module.exports.atomicRoleFetch = async (atomicFields) => {
     finally { await client.close(); }
     return {data, status, message};
 };
+
+module.exports.atomicRoleFetch = atomicRoleFetch;

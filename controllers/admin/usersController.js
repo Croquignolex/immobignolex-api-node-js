@@ -35,16 +35,10 @@ module.exports.create = async (req, res) => {
     const username = req.username;
     const {name, phone, email, role, description} = req.body;
 
-    // Get role permissions
-    const atomicRoleFetchData = await rolesHelpers.atomicRoleFetch({name: role});
-    if(!atomicRoleFetchData.status) {
-        return res.send(atomicRoleFetchData);
-    }
 
     // Database saving
-    const permissions = atomicRoleFetchData.permissions;
-    return res.send(await saveUser({
-        name: name.trim(), phone, email, description, role, permissions, creator: username
+    return res.send(await usersHelpers.createUser({
+        name: name.trim(), phone, email, description, role, creator: username
     }));
 };
 
@@ -54,38 +48,8 @@ module.exports.createCaretaker = async (req, res) => {
     const username = req.username;
     const {name, phone, email, description} = req.body;
 
-    // Get role permissions
-    const atomicRoleFetchData = await rolesHelpers.atomicRoleFetch({name: careTakerRole});
-    if(!atomicRoleFetchData.status) {
-        return res.send(atomicRoleFetchData);
-    }
-
     // Database saving
-    const permissions = atomicRoleFetchData.permissions;
-    return res.send(await saveUser({
-        name: name.trim(), phone, email, description, permissions, role: careTakerRole, creator: username
+    return res.send(await usersHelpers.createUser({
+        name: name.trim(), phone, email, description, role: careTakerRole, creator: username
     }));
-};
-
-// Save user into database
-const saveUser = async ({name, phone, email, description, role, permissions, creator}) => {
-    // Build username & check
-    const username = name?.split(' ')?.join("_")?.toLowerCase();
-    const atomicUserFetchData = await usersHelpers.atomicUserFetch({username});
-    if(atomicUserFetchData.status) {
-        return {status: false, data: null, message: errorConstants.USERS.USER_ALREADY_EXIST};
-    }
-
-    // Data
-    const enable = true;
-    const created_by = creator;
-    const created_at = new Date();
-    const bcrypt = require("bcryptjs");
-    const password = await bcrypt.hash("000000", 10);
-
-    // Create caretaker
-    return await usersHelpers.atomicUserCreate({
-        username, name, password, enable, phone, email, role,
-        description, permissions, created_by, created_at
-    });
 };

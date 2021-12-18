@@ -4,20 +4,71 @@ const UserModel = require('../../models/userModel');
 const generalHelpers = require('../generalHelpers');
 const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
+const rolesHelpers = require("../../helpers/mongodb/rolesHelpers");
+const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 
 // Data
 const usersCollection = "users";
 const databaseUrl = envConstants.DATABASE_URL;
 
+// Create user
+module.exports.createUser = async ({name, phone, email, role, description, creator}) => {
+    // Build username & check
+    const username = name?.split(' ')?.join("_")?.toLowerCase();
+    const userByUsernameData = await usersHelpers.userByUsername(username);
+    if(userByUsernameData.status) {
+        return {status: false, data: null, message: errorConstants.USERS.USER_ALREADY_EXIST};
+    }
+
+    // Get role permissions
+    const roleByNameData = await rolesHelpers.roleByName(role);
+    if(!roleByNameData.status) {
+        return roleByNameData;
+    }
+
+    const enable = true;
+    const created_by = creator;
+    const created_at = new Date();
+    const bcrypt = require("bcryptjs");
+    const permissions = roleByNameData.permissions;
+    const password = await bcrypt.hash("000000", 10);
+
+    // Keep into database
+    return await atomicUserCreate({
+        username, name, password, enable, phone, email, role,
+        description, permissions, created_by, created_at
+    });
+};
+
+// Get user by username
+module.exports.userByUsername = async (username) => {
+    return await atomicUserFetch({username});
+};
+
+// Update user avatar by username
+module.exports.updateUserAvatarByUsername = async (username, avatar) => {
+    return await atomicUserUpdate(username, {$set: {avatar}});
+};
+
+// Update user password by username
+module.exports.updateUserPasswordByUsername = async (username, password) => {
+    return await atomicUserUpdate(username, {$set: {password}});
+};
+
+// Update user info by username
+module.exports.updateUserInfoByUsername = async (username, {name, phone, email, description}) => {
+    return await atomicUserUpdate(username, {$set: {name, phone, email, description}});
+};
+
 // Atomic users fetch into database
-module.exports.atomicUsersFetch = async (atomicFields) => {
+const atomicUsersFetch = async (directives) => {
     let client, data = null, status = false, message = "";
     // Data
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
         // Query
-        const atomicUsersFetchData = await client.db().collection(usersCollection).find(atomicFields).sort(
+        const atomicUsersFetchData = await client.db().collection(usersCollection).find(directives).sort(
             {created_at: -1}
         ).toArray();
         // Format response
@@ -34,14 +85,14 @@ module.exports.atomicUsersFetch = async (atomicFields) => {
 };
 
 // Atomic user fetch into database
-module.exports.atomicUserFetch = async (atomicFields) => {
+const atomicUserFetch = async (directives) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
         // Query
-        const atomicUserFetchData = await client.db().collection(usersCollection).findOne({atomicFields});
+        const atomicUserFetchData = await client.db().collection(usersCollection).findOne({directives});
         // Format response
         if(atomicUserFetchData !== null) {
             status = true;
@@ -57,14 +108,14 @@ module.exports.atomicUserFetch = async (atomicFields) => {
 };
 
 // Atomic user create into database
-module.exports.atomicUserCreate = async (atomicFields) => {
+const atomicUserCreate = async (directives) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
         // Query
-        const atomicUserCreateData = await client.db().collection(usersCollection).insertOne(atomicFields);
+        const atomicUserCreateData = await client.db().collection(usersCollection).insertOne(directives);
         // Format response
         if(atomicUserCreateData.acknowledged && atomicUserCreateData.insertedId) {
             data = atomicUserCreateData.insertedId;
@@ -81,7 +132,7 @@ module.exports.atomicUserCreate = async (atomicFields) => {
 };
 
 // Atomic user update into database
-module.exports.atomicUserUpdate = async (username, atomicFields) => {
+const atomicUserUpdate = async (username, directives) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -89,7 +140,7 @@ module.exports.atomicUserUpdate = async (username, atomicFields) => {
         await client.connect();
         // Query
         const atomicUserUpdateData = await client.db().collection(usersCollection).updateOne(
-            {username}, atomicFields
+            {username}, directives
         );
         // Format response
         if(atomicUserUpdateData.modifiedCount === 1) status = true;
@@ -102,3 +153,7 @@ module.exports.atomicUserUpdate = async (username, atomicFields) => {
     return {data, status, message};
 };
 
+module.exports.atomicUserFetch = atomicUserFetch;
+module.exports.atomicUserUpdate = atomicUserUpdate;
+module.exports.atomicUserCreate = atomicUserCreate;
+module.exports.atomicUsersFetch = atomicUsersFetch;

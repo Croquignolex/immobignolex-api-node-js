@@ -20,13 +20,13 @@ module.exports.login = async (req, res) => {
     }
 
     // Get user by username
-    const atomicUserFetchData = await usersHelpers.atomicUserFetch({username});
-    if(!atomicUserFetchData.status) {
-        return res.send(atomicUserFetchData);
+    const userByUsernameData = await usersHelpers.userByUsername(username);
+    if(!userByUsernameData.status) {
+        return res.send(userByUsernameData);
     }
 
     // Check user status
-    const databaseUser = atomicUserFetchData.data;
+    const databaseUser = userByUsernameData.data;
     if(!databaseUser.enable) {
         return res.send({status: false, message: errorConstants.USERS.USER_DISABLED, data: null});
     }
@@ -65,13 +65,13 @@ module.exports.logout = async (req, res) => {
     }
 
     // Get user by username
-    const atomicUserFetchData = await usersHelpers.atomicUserFetch({username});
-    if(!atomicUserFetchData.status) {
-        return res.send(atomicUserFetchData);
+    const userByUsernameData = await usersHelpers.userByUsername(username);
+    if(!userByUsernameData.status) {
+        return res.send(userByUsernameData);
     }
 
     // Delete to user token in database
-    const databaseUser = atomicUserFetchData.data;
+    const databaseUser = userByUsernameData.data;
     const removeUserTokenData = await tokensHelpers.removeUserToken(databaseUser, useragent);
     return res.send(removeUserTokenData);
 };
@@ -82,13 +82,13 @@ module.exports.refresh = async (req, res) => {
     const username = req.username;
 
     // Get user by username
-    const atomicUserFetchData = await usersHelpers.atomicUserFetch({username});
-    if(!atomicUserFetchData.status) {
-        return res.send(atomicUserFetchData);
+    const userByUsernameData = await usersHelpers.userByUsername(username);
+    if(!userByUsernameData.status) {
+        return res.send(userByUsernameData);
     }
 
     // Check user status
-    const databaseUser = atomicUserFetchData.data;
+    const databaseUser = userByUsernameData.data;
     if(!databaseUser.enable) {
         return res.send({status: false, message: errorConstants.USERS.USER_DISABLED, data: null});
     }
@@ -109,13 +109,13 @@ module.exports.token = async (req, res) => {
     }
 
     // Get user by username
-    const atomicUserFetchData = await usersHelpers.atomicUserFetch({username});
-    if(!atomicUserFetchData.status) {
-        return res.send(atomicUserFetchData);
+    const userByUsernameData = await usersHelpers.userByUsername(username);
+    if(!userByUsernameData.status) {
+        return res.send(userByUsernameData);
     }
 
     // Delete to user token in database
-    const databaseUser = atomicUserFetchData.data;
+    const databaseUser = userByUsernameData.data;
     const checkUserTokenData = await tokensHelpers.checkUserToken(databaseUser, useragent, token);
     return res.send(checkUserTokenData);
 };
