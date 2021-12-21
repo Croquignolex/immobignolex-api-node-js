@@ -31,6 +31,11 @@ module.exports.caretakersWithoutUserByUsername = async (username) => {
     });
 };
 
+// Add user property by username
+module.exports.addUserPropertyByUsername = async (username, propertyId) => {
+    return await atomicUserUpdate(username, {$push: {properties: propertyId}});
+};
+
 // Update user avatar by username
 module.exports.updateUserAvatarByUsername = async (username, avatar) => {
     return await atomicUserUpdate(username, {$set: {avatar}});
@@ -53,16 +58,16 @@ module.exports.updateUserTokensByUsername = async (username, tokens) => {
 
 // Create user
 module.exports.createUser = async ({name, phone, email, role, description, creator}) => {
-    return await userCreateProcess(
-        {name, phone, email, role, description, creator}
-    );
+    return await userCreateProcess({
+        name, phone, email, role, description, creator
+    });
 };
 
 // Create user
 module.exports.createCaretaker = async ({name, phone, email, description, creator}) => {
-    return await userCreateProcess(
-        {name, phone, email, role: careTakerRole, description, creator}
-    );
+    return await userCreateProcess({
+        name, phone, email, role: careTakerRole, description, creator
+    });
 };
 
 // User create process
@@ -187,5 +192,3 @@ const atomicUserUpdate = async (username, directives) => {
     finally { await client.close(); }
     return {data, status, message};
 };
-
-module.exports.atomicUserUpdate = atomicUserUpdate;

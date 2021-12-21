@@ -1,5 +1,4 @@
 const errorConstants = require("../../constants/errorConstants");
-const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 const propertiesHelpers = require("../../helpers/mongodb/propertiesHelpers");
 const propertyPicturesHelpers = require("../../helpers/cloudary/propertyPicturesHelpers");
 
@@ -26,27 +25,11 @@ module.exports.create = async (req, res) => {
     const username = req.username;
     const {name, phone, address, caretaker, description} = req.body;
 
-    // Create property
-    const enable = true;
-    const created_by = username;
-    const created_at = new Date();
-    const atomicPropertyCreateData = await propertiesHelpers.atomicPropertyCreate({
-        name, phone, address, enable, description, caretaker, created_by, created_at
+    // Database saving
+    const createPropertyData = await propertiesHelpers.createProperty({
+        name, phone, address, description, caretaker, creator: username
     });
-    if(!atomicPropertyCreateData.status) {
-        return res.send(atomicPropertyCreateData);
-    }
-
-    // Push caretaker properties
-    if(caretaker) {
-        const createdPropertyId = atomicPropertyCreateData.data;
-        const atomicUserUpdateData = await usersHelpers.atomicUserUpdate(
-            caretaker, {$push: {properties: createdPropertyId}}
-        );
-        res.send(atomicUserUpdateData);
-    }
-
-    return res.send(atomicPropertyCreateData);
+    return res.send(createPropertyData);
 };
 
 // POST: Update property info
@@ -55,7 +38,7 @@ module.exports.updateInfo = async (req, res) => {
     const {propertyId} = req.params;
     const {name, phone, address, caretaker, description} = req.body;
 
-    // Create property
+    // Update property
     const updatePropertyData = await propertiesHelpers.updateProperty({
         id: propertyId, name, phone, address, caretaker, description
     });

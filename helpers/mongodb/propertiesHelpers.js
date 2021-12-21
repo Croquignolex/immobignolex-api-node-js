@@ -4,6 +4,7 @@ const generalHelpers = require('../generalHelpers');
 const PropertyModel = require('../../models/propertyModel');
 const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
+const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 
 // Data
 const usersCollection = "users";
@@ -50,7 +51,7 @@ module.exports.propertyByIdWithCaretakerAndCreator = async (id) => {
     ]);
 };
 
-// Add property picture by property if
+// Add property picture by property id
 module.exports.addPropertyPictureByPropertyId = async (id, picture) => {
     return await atomicPropertyUpdate(id, {$push: {pictures: picture}});
 };
@@ -60,7 +61,31 @@ module.exports.removePropertyPictureByPropertyId = async (id, pictureId) => {
     return await atomicPropertyUpdate(id, {$pull: {pictures: {id: pictureId}}});
 };
 
-// Fetch update property info into database
+// Create property
+module.exports.createProperty = async ({name, phone, address, description, caretaker, creator}) => {
+    // Data
+    const enable = true;
+    const created_by = creator;
+    const created_at = new Date();
+
+    // Keep into database
+    const atomicPropertyCreateData = await atomicPropertyCreate({
+        name, phone, address, enable, description, caretaker, created_by, created_at
+    });
+    if(!atomicPropertyCreateData.status) {
+        return atomicPropertyCreateData;
+    }
+
+    // Push caretaker properties
+    if(caretaker) {
+        const createdPropertyId = atomicPropertyCreateData.data;
+        return await usersHelpers.addUserPropertyByUsername(caretaker, createdPropertyId);
+    }
+
+    return atomicPropertyCreateData;
+};
+
+// Update property
 module.exports.updateProperty = async ({id, name, phone, address, caretaker, description}) => {
     // Connection configuration
     let client, data = null, status = false, message = "";
@@ -207,5 +232,3 @@ const atomicPropertyUpdate = async (id, atomicFields) => {
     finally { await client.close(); }
     return {data, status, message};
 };
-
-module.exports.atomicPropertyCreate = atomicPropertyCreate;
