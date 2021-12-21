@@ -5,7 +5,6 @@ const PropertyModel = require('../../models/propertyModel');
 const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
 const usersHelpers = require("../../helpers/mongodb/usersHelpers");
-const UserModel = require("../../models/userModel");
 
 // Data
 const usersCollection = "users";
@@ -125,6 +124,12 @@ module.exports.updateProperty = async ({id, name, phone, address, caretaker, des
     }
 
     return atomicPropertyUpdateData;
+};
+
+// Archive property
+module.exports.archivePropertyByPropertyId = async (id) => {
+    // TODO: Implement archive procedures
+    return await atomicPropertyUpdate(id, {$set: {enable: false}});
 };
 
 // Embedded property fetch into database

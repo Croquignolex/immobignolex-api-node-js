@@ -45,6 +45,16 @@ module.exports.updateInfo = async (req, res) => {
     return res.send(updatePropertyData);
 };
 
+// DELETE: Archive property
+module.exports.archiveProperty = async (req, res) => {
+    // Form data & data
+    const {propertyId} = req.params;
+
+    // Update property visibility
+    const archivePropertyByPropertyIdData = await propertiesHelpers.archivePropertyByPropertyId(propertyId);
+    return res.send(archivePropertyByPropertyIdData);
+};
+
 // PUT: Add property picture
 module.exports.addPicture = async (req, res) => {
     // File data from multer (error management)
