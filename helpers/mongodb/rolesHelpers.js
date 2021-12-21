@@ -22,11 +22,11 @@ const atomicRoleFetch = async (directives) => {
     try {
         await client.connect();
         // Query
-        const atomicUserFetchData = await client.db().collection(rolesCollection).findOne({directives});
+        const atomicRoleFetchData = await client.db().collection(rolesCollection).findOne({directives});
         // Format response
-        if(atomicUserFetchData !== null) {
+        if(atomicRoleFetchData !== null) {
             status = true;
-            data = new UserModel(atomicUserFetchData);
+            data = new UserModel(atomicRoleFetchData);
         }
         else message = errorConstants.ROLES.ROLE_NOT_FOUND;
     } catch (err) {
@@ -36,5 +36,3 @@ const atomicRoleFetch = async (directives) => {
     finally { await client.close(); }
     return {data, status, message};
 };
-
-module.exports.atomicRoleFetch = atomicRoleFetch;

@@ -46,6 +46,11 @@ module.exports.updateUserInfoByUsername = async (username, {name, phone, email, 
     return await atomicUserUpdate(username, {$set: {name, phone, email, description}});
 };
 
+// Update user tokens by username
+module.exports.updateUserTokensByUsername = async (username, tokens) => {
+    return await atomicUserUpdate(username, {$set: {tokens}});
+};
+
 // Create user
 module.exports.createUser = async ({name, phone, email, role, description, creator}) => {
     return await userCreateProcess(
@@ -97,13 +102,14 @@ const atomicUsersFetch = async (directives) => {
     try {
         await client.connect();
         // Query
-        const atomicUsersFetchData = await client.db().collection(usersCollection).find(directives).sort(
-            {created_at: -1}
-        ).toArray();
+        const atomicUsersFetchData = await client.db().collection(usersCollection)
+            .find(directives)
+            .sort({created_at: -1})
+            .toArray();
         // Format response
         data = [];
         status = true;
-        atomicUsersFetchData.forEach(item => data.push(new UserModel(item).responseFormat));
+        atomicUsersFetchData.forEach(item => data.push(new UserModel(item).simpleResponseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
@@ -182,7 +188,4 @@ const atomicUserUpdate = async (username, directives) => {
     return {data, status, message};
 };
 
-module.exports.atomicUserFetch = atomicUserFetch;
 module.exports.atomicUserUpdate = atomicUserUpdate;
-module.exports.atomicUserCreate = atomicUserCreate;
-module.exports.atomicUsersFetch = atomicUsersFetch;

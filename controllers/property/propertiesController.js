@@ -91,6 +91,6 @@ module.exports.deletePicture = async (req, res) => {
     const cloudPictureId = pictureId.split('-').join('/');
 
     // Remove picture in the cloud & database
-    const cloudDeletePropertyPictureData = await propertyPicturesHelpers.cloudDeletePropertyPicture(propertyId, cloudPictureId);
-    return res.send(cloudDeletePropertyPictureData);
+    const cloudRemovePropertyPictureData = await propertyPicturesHelpers.cloudRemovePropertyPicture(propertyId, cloudPictureId);
+    return res.send(cloudRemovePropertyPictureData);
 };

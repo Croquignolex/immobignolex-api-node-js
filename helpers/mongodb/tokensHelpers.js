@@ -55,9 +55,9 @@ module.exports.generateUserTokens = async (user, useragent) => {
     }
 
     // Update user tokens
-    const atomicUserUpdateData = await usersHelpers.atomicUserUpdate(user.username, {$set: {tokens}});
-    if(!atomicUserUpdateData.status) {
-        return atomicUserUpdateData;
+    const updateUserTokensByUsernameData = await usersHelpers.updateUserTokensByUsername(user.username, tokens);
+    if(!updateUserTokensByUsernameData.status) {
+        return updateUserTokensByUsernameData;
     }
 
     // Send generated tokens
@@ -82,7 +82,7 @@ module.exports.removeUserToken = async (user, useragent) => {
     ));
 
     // Update user tokens
-    return await usersHelpers.atomicUserUpdate(user.username, {$set: {tokens}});
+    return await usersHelpers.updateUserTokensByUsername(user.username, tokens);
 };
 
 module.exports.checkUserToken = async (user, useragent, refreshToken) => {

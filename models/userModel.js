@@ -18,10 +18,12 @@ module.exports = class UserModel {
             role: this.role,
             email: this.email,
             phone: this.phone,
+            enable: this.enable,
             username: this.username,
             permissions: this.permissions,
             description: this.description,
-            avatar: generalHelpers.filePublicUrl(this.avatar)
+            avatar: generalHelpers.filePublicUrl(this.avatar),
+            properties: this.properties ? this.properties?.length : 0
         };
     };
 

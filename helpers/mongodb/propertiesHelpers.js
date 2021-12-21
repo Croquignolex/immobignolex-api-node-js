@@ -28,57 +28,36 @@ const propertyCreatorLookup = {
 
 // Fetch all properties with caretaker into database
 module.exports.propertiesWithCaretaker = async () => {
-    // Connection configuration
-    let client, data = null, status = false, message = "";
-    client = new MongoClient(databaseUrl);
-    try {
-        // mongodb query execution
-        await client.connect();
-        const dbData = await client.db().collection(propertiesCollection).aggregate([
-            propertyCaretakerLookup,
-            generalHelpers.databaseUnwind("$manager"),
-            { $match : {enable: true} }
-        ]).sort({created_at: -1}).toArray();
-        data = [];
-        status = true;
-        dbData.forEach(item => data.push(new PropertyModel(item).simpleResponseFormat));
-    }
-    catch (err) {
-        generalHelpers.log("Connection failure to mongodb", err);
-        message = errorConstants.GENERAL.DATABASE;
-    }
-    finally { await client.close(); }
-    return {data, status, message};
+    return await embeddedPropertiesFetch([
+        propertyCaretakerLookup,
+        generalHelpers.databaseUnwind("$manager"),
+        { $match : {enable: true} }
+    ]);
 };
 
 // Fetch property with caretaker into database
 module.exports.propertyByIdWithCaretakerAndCreator = async (id) => {
-    // Connection configuration
-    let client, data = null, status = false, message = "";
-    client = new MongoClient(databaseUrl);
-    try {
-        // mongodb query execution
-        await client.connect();
-        const _id = new ObjectId(id);
-        const dbData = await client.db().collection(propertiesCollection).aggregate([
-            propertyCaretakerLookup,
-            generalHelpers.databaseUnwind("$manager"),
-            propertyCreatorLookup,
-            generalHelpers.databaseUnwind("$creator"),
-            { $match : {_id, enable: true} }
-        ]).toArray();
-        if(dbData.length > 0) {
-            status = true;
-            data = new PropertyModel(dbData[0]).responseFormat;
-        }
-        else message = errorConstants.PROPERTIES.NOT_FOUND_BY_ID;
-    }
-    catch (err) {
-        generalHelpers.log("Connection failure to mongodb", err);
-        message = errorConstants.GENERAL.DATABASE;
-    }
-    finally { await client.close(); }
-    return {data, status, message};
+    // Data
+    const _id = new ObjectId(id);
+
+    // Database fetch
+    return await embeddedPropertyFetch([
+        propertyCaretakerLookup,
+        generalHelpers.databaseUnwind("$manager"),
+        propertyCreatorLookup,
+        generalHelpers.databaseUnwind("$creator"),
+        { $match : {_id} }
+    ]);
+};
+
+// Add property picture by property if
+module.exports.addPropertyPictureByPropertyId = async (id, picture) => {
+    return await atomicPropertyUpdate(id, {$push: {pictures: picture}});
+};
+
+// Remove property picture by property if
+module.exports.removePropertyPictureByPropertyId = async (id, pictureId) => {
+    return await atomicPropertyUpdate(id, {$pull: {pictures: {id: pictureId}}});
 };
 
 // Fetch update property info into database
@@ -131,8 +110,59 @@ module.exports.updateProperty = async ({id, name, phone, address, caretaker, des
     return {data, status, message};
 };
 
+// Embedded property fetch into database
+const embeddedPropertyFetch = async (embeddedFields) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const embeddedPropertyFetchData = await client.db().collection(propertiesCollection)
+            .aggregate(embeddedFields)
+            .toArray();
+        // Format response
+        if(embeddedPropertyFetchData.length > 0) {
+            status = true;
+            data = new PropertyModel(embeddedPropertyFetchData[0]).responseFormat;
+        }
+        else message = errorConstants.PROPERTIES.PROPERTY_NOT_FOUND;
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
+// Embedded properties fetch into database
+const embeddedPropertiesFetch = async (embeddedFields) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const embeddedPropertiesFetchData = await client.db().collection(propertiesCollection)
+            .aggregate(embeddedFields)
+            .sort({created_at: -1})
+            .toArray();
+        // Format response
+        data = [];
+        status = true;
+        embeddedPropertiesFetchData.forEach(item => data.push(new PropertyModel(item).simpleResponseFormat));
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
 // Atomic property create into database
-module.exports.atomicPropertyCreate = async (atomicFields) => {
+const atomicPropertyCreate = async (atomicFields) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -156,7 +186,7 @@ module.exports.atomicPropertyCreate = async (atomicFields) => {
 };
 
 // Atomic property update into database
-module.exports.atomicPropertyUpdate = async (id, atomicFields) => {
+const atomicPropertyUpdate = async (id, atomicFields) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -178,4 +208,4 @@ module.exports.atomicPropertyUpdate = async (id, atomicFields) => {
     return {data, status, message};
 };
 
-
+module.exports.atomicPropertyCreate = atomicPropertyCreate;
