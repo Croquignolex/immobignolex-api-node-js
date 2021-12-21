@@ -33,7 +33,12 @@ module.exports.caretakersWithoutUserByUsername = async (username) => {
 
 // Add user property by username
 module.exports.addUserPropertyByUsername = async (username, propertyId) => {
-    return await atomicUserUpdate(username, {$push: {properties: propertyId}});
+    return await atomicUserUpdate(username, {$addToSet: {properties: propertyId}});
+};
+
+// Remove user property by username
+module.exports.removeUserPropertyByUsername = async (username, propertyId) => {
+    return await atomicUserUpdate(username, {$pull: {properties: propertyId}});
 };
 
 // Update user avatar by username
@@ -183,7 +188,10 @@ const atomicUserUpdate = async (username, directives) => {
             {username}, directives
         );
         // Format response
-        if(atomicUserUpdateData.modifiedCount === 1) status = true;
+        if(atomicUserUpdateData.matchedCount === 1 && atomicUserUpdateData.modifiedCount === 0) {
+            message = errorConstants.GENERAL.NO_CHANGES;
+        }
+        else if(atomicUserUpdateData.modifiedCount === 1) status = true;
         else message = errorConstants.USERS.USER_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

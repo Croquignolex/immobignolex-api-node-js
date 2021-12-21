@@ -5,6 +5,7 @@ const PropertyModel = require('../../models/propertyModel');
 const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
 const usersHelpers = require("../../helpers/mongodb/usersHelpers");
+const UserModel = require("../../models/userModel");
 
 // Data
 const usersCollection = "users";
@@ -87,56 +88,47 @@ module.exports.createProperty = async ({name, phone, address, description, caret
 
 // Update property
 module.exports.updateProperty = async ({id, name, phone, address, caretaker, description}) => {
-    // Connection configuration
-    let client, data = null, status = false, message = "";
-    client = new MongoClient(databaseUrl);
-    try {
-        // mongodb query execution
-        await client.connect();
-        const _id = new ObjectId(id);
-        // Search old caretaker
-        const dbDataExternal = await client.db().collection(propertiesCollection).aggregate([
-            propertyCaretakerLookup,
-            generalHelpers.databaseUnwind("$manager"),
-            { $match : {_id} }
-        ]).toArray();
+    // Data
+    const _id = new ObjectId(id);
 
+    // Fetch old property caretaker
+    const atomicPropertyFetchData = await atomicPropertyFetch({_id});
+    if(!atomicPropertyFetchData.status) {
+        return atomicPropertyFetchData;
+    }
 
-        if(dbData.length > 0) {
-            status = true;
-            data = new PropertyModel(dbData[0]).responseFormat;
-        } else message = errorConstants.PROPERTIES.NOT_FOUND_BY_ID;
+    // Update property info
+    const atomicPropertyUpdateData = await atomicPropertyUpdate(_id, {
+        $set: {name, phone, address, description, caretaker}
+    });
+    if(!atomicPropertyUpdateData.status) {
+        return atomicPropertyUpdateData;
+    }
 
-
-
-        const dbData = await client.db().collection(propertiesCollection).updateOne(
-            {_id},
-            {$set: {name, phone, address, description, caretaker}}
-        );
-        if(dbData.matchedCount === 1 && dbData.modifiedCount === 0) message = errorConstants.GENERAL.NO_CHANGES;
-        else if(dbData.modifiedCount === 1) {
-            if(caretaker) {
-                // Update caretaker document
-                const dbDataEmbedded = await client.db().collection(usersCollection).updateOne(
-                    {username: caretaker},
-                    {$addToSet: {properties: _id}}
-                );
-                if(dbDataEmbedded.modifiedCount === 1) status = true;
-                else message = errorConstants.USERS.USER_PROPERTIES_UPDATE;
-            } else status = true;
+    // Old and new caretaker management
+    const oldCaretaker = atomicPropertyFetchData.data.caretaker;
+    if(oldCaretaker !== caretaker) {
+        // Remove old caretaker property id different from new caretaker
+        if(oldCaretaker) {
+            const removeUserPropertyByUsernameData = await usersHelpers.removeUserPropertyByUsername(oldCaretaker, _id);
+            if(!removeUserPropertyByUsernameData.status) {
+                return removeUserPropertyByUsernameData;
+            }
         }
-        else message = errorConstants.PROPERTIES.PROPERTIES_INFO_UPDATE;
+        // Add new caretaker property id different from new caretaker
+        if(caretaker) {
+            const addUserPropertyByUsernameData = await usersHelpers.addUserPropertyByUsername(caretaker, _id);
+            if(!addUserPropertyByUsernameData.status) {
+                return addUserPropertyByUsernameData;
+            }
+        }
     }
-    catch (err) {
-        generalHelpers.log("Connection failure to mongodb", err);
-        message = errorConstants.GENERAL.DATABASE;
-    }
-    finally { await client.close(); }
-    return {data, status, message};
+
+    return atomicPropertyUpdateData;
 };
 
 // Embedded property fetch into database
-const embeddedPropertyFetch = async (embeddedFields) => {
+const embeddedPropertyFetch = async (directives) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -144,7 +136,7 @@ const embeddedPropertyFetch = async (embeddedFields) => {
         await client.connect();
         // Query
         const embeddedPropertyFetchData = await client.db().collection(propertiesCollection)
-            .aggregate(embeddedFields)
+            .aggregate(directives)
             .toArray();
         // Format response
         if(embeddedPropertyFetchData.length > 0) {
@@ -162,7 +154,7 @@ const embeddedPropertyFetch = async (embeddedFields) => {
 };
 
 // Embedded properties fetch into database
-const embeddedPropertiesFetch = async (embeddedFields) => {
+const embeddedPropertiesFetch = async (directives) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -170,7 +162,7 @@ const embeddedPropertiesFetch = async (embeddedFields) => {
         await client.connect();
         // Query
         const embeddedPropertiesFetchData = await client.db().collection(propertiesCollection)
-            .aggregate(embeddedFields)
+            .aggregate(directives)
             .sort({created_at: -1})
             .toArray();
         // Format response
@@ -186,15 +178,39 @@ const embeddedPropertiesFetch = async (embeddedFields) => {
     return {data, status, message};
 };
 
-// Atomic property create into database
-const atomicPropertyCreate = async (atomicFields) => {
+// Atomic property fetch into database
+const atomicPropertyFetch = async (directives) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
         // Query
-        const atomicPropertyCreateData = await client.db().collection(propertiesCollection).insertOne(atomicFields);
+        const atomicPropertyFetchData = await client.db().collection(propertiesCollection).findOne({directives});
+        // Format response
+        if(atomicPropertyFetchData !== null) {
+            status = true;
+            data = new PropertyModel(atomicPropertyFetchData);
+        }
+        else message = errorConstants.PROPERTIES.PROPERTY_NOT_FOUND;
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
+// Atomic property create into database
+const atomicPropertyCreate = async (directives) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const atomicPropertyCreateData = await client.db().collection(propertiesCollection).insertOne(directives);
         // Format response
         if(atomicPropertyCreateData.acknowledged && atomicPropertyCreateData.insertedId) {
             data = atomicPropertyCreateData.insertedId;
@@ -211,7 +227,7 @@ const atomicPropertyCreate = async (atomicFields) => {
 };
 
 // Atomic property update into database
-const atomicPropertyUpdate = async (id, atomicFields) => {
+const atomicPropertyUpdate = async (id, directives) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -220,11 +236,15 @@ const atomicPropertyUpdate = async (id, atomicFields) => {
         const _id = new ObjectId(id);
         // Query
         const atomicPropertyUpdateData = await client.db().collection(propertiesCollection).updateOne(
-            {_id}, atomicFields
+            {_id}, directives
         );
         // Format response
-        if(atomicPropertyUpdateData.modifiedCount === 1) status = true;
-        else message = errorConstants.PROPERTIES.PROPERTY_UPDATE;
+        // Format response
+        if(atomicPropertyUpdateData.matchedCount === 1 && atomicPropertyUpdateData.modifiedCount === 0) {
+            message = errorConstants.GENERAL.NO_CHANGES;
+        }
+        else if(atomicPropertyUpdateData.modifiedCount === 1) status = true;
+        else message = errorConstants.USERS.PROPERTY_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
