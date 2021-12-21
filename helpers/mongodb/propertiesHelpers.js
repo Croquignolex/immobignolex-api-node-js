@@ -129,7 +129,26 @@ module.exports.updateProperty = async ({id, name, phone, address, caretaker, des
 // Archive property
 module.exports.archivePropertyByPropertyId = async (id) => {
     // TODO: Implement archive procedures
-    return await atomicPropertyUpdate(id, {$set: {enable: false}});
+
+    // Data
+    const _id = new ObjectId(id);
+
+    // Fetch old property caretaker
+    const atomicPropertyFetchData = await atomicPropertyFetch({_id});
+    if(!atomicPropertyFetchData.status) {
+        return atomicPropertyFetchData;
+    }
+
+    // Remove old caretaker property id
+    const caretaker = atomicPropertyFetchData.data.caretaker;
+    if(caretaker) {
+        const removeUserPropertyByUsernameData = await usersHelpers.removeUserPropertyByUsername(caretaker, _id);
+        if(!removeUserPropertyByUsernameData.status) {
+            return removeUserPropertyByUsernameData;
+        }
+    }
+
+    return await atomicPropertyUpdate(id, {$set: {enable: false, caretaker: null}});
 };
 
 // Embedded property fetch into database
