@@ -137,7 +137,7 @@ const atomicUserFetch = async (directives) => {
     try {
         await client.connect();
         // Query
-        const atomicUserFetchData = await client.db().collection(usersCollection).findOne({directives});
+        const atomicUserFetchData = await client.db().collection(usersCollection).findOne(directives);
         // Format response
         if(atomicUserFetchData !== null) {
             status = true;

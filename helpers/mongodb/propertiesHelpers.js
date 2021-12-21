@@ -186,7 +186,7 @@ const atomicPropertyFetch = async (directives) => {
     try {
         await client.connect();
         // Query
-        const atomicPropertyFetchData = await client.db().collection(propertiesCollection).findOne({directives});
+        const atomicPropertyFetchData = await client.db().collection(propertiesCollection).findOne(directives);
         // Format response
         if(atomicPropertyFetchData !== null) {
             status = true;

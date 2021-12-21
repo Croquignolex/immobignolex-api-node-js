@@ -22,7 +22,7 @@ const atomicRoleFetch = async (directives) => {
     try {
         await client.connect();
         // Query
-        const atomicRoleFetchData = await client.db().collection(rolesCollection).findOne({directives});
+        const atomicRoleFetchData = await client.db().collection(rolesCollection).findOne(directives);
         // Format response
         if(atomicRoleFetchData !== null) {
             status = true;
