@@ -26,6 +26,7 @@ module.exports.usersWithoutUserByUsername = async (username) => {
 
 // Get caretakers without current user by username
 module.exports.caretakersWithoutUserByUsername = async (username) => {
+    console.log({username})
     return await atomicUsersFetch({
         role: careTakerRole, enable: true, username: {$ne: username}
     });
