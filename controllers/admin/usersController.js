@@ -20,6 +20,16 @@ module.exports.users = async (req, res) => {
     return res.send(usersWithoutUserByUsernameData);
 };
 
+// GET: User
+module.exports.user = async (req, res) => {
+    // Route params
+    const {username} = req.params;
+
+    // Get user
+    const userByUsernameData = await usersHelpers.userByUsername(username);
+    return res.send(userByUsernameData);
+};
+
 // PUT: Create create user
 module.exports.create = async (req, res) => {
     // Form data & data

@@ -6,6 +6,7 @@ const usersController = require('../../../controllers/admin/usersController');
 const basicPermissionMiddleware = require("../../../middlewares/basicPermissionMiddleware");
 
 router.get('', [tokenMiddleware, basicPermissionMiddleware], usersController.users);
+router.get('/:username', [tokenMiddleware, basicPermissionMiddleware], usersController.user);
 router.put('/create', [tokenMiddleware, basicPermissionMiddleware], usersController.create);
 router.get('/caretakers', [tokenMiddleware, basicPermissionMiddleware], usersController.caretakers);
 router.put('/create-caretaker', [tokenMiddleware, basicPermissionMiddleware], usersController.createCaretaker);

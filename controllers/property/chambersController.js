@@ -28,7 +28,7 @@ module.exports.create = async (req, res) => {
 
     // Database saving
     const createChamberData = await chambersHelpers.createChamber({
-        name, phone, rent: parseInt(rent, 10) || 0, type, property, description, creator: username
+        name, phone, type, property, description, creator: username, rent: parseInt(rent, 10) || 0
     });
     return res.send(createChamberData);
 };
