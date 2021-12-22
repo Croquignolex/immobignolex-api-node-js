@@ -5,10 +5,8 @@ const tokenMiddleware = require("../../../middlewares/accessTokenMiddleware");
 const usersController = require('../../../controllers/admin/usersController');
 const basicPermissionMiddleware = require("../../../middlewares/basicPermissionMiddleware");
 
-router.get('', [tokenMiddleware, basicPermissionMiddleware], usersController.users);
-router.put('/create', [tokenMiddleware, basicPermissionMiddleware], usersController.create);
 router.get('/:username/detail', [tokenMiddleware, basicPermissionMiddleware], usersController.user);
-router.get('/caretakers', [tokenMiddleware, basicPermissionMiddleware], usersController.caretakers);
-router.put('/create-caretaker', [tokenMiddleware, basicPermissionMiddleware], usersController.createCaretaker);
+router.get('/administrators', [tokenMiddleware, basicPermissionMiddleware], usersController.administrators);
+router.put('/create-administrator', [tokenMiddleware, basicPermissionMiddleware], usersController.createAdministrator);
 
 module.exports = router;

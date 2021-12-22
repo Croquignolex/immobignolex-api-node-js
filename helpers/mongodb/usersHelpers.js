@@ -9,7 +9,7 @@ const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 
 // Data
 const usersCollection = "users";
-const careTakerRole = "Concierge";
+const administratorsRole = "Administrateur";
 const databaseUrl = envConstants.DATABASE_URL;
 
 // Get user by username
@@ -17,17 +17,10 @@ module.exports.userByUsername = async (username) => {
     return await atomicUserFetch({username});
 };
 
-// Get users without current user by username
-module.exports.usersWithoutUserByUsername = async (username) => {
+// Get administrators without current user by username
+module.exports.administratorsWithoutUserByUsername = async (username) => {
     return await atomicUsersFetch({
-        enable: true, username: {$ne: username}
-    });
-};
-
-// Get caretakers without current user by username
-module.exports.caretakersWithoutUserByUsername = async (username) => {
-    return await atomicUsersFetch({
-        role: careTakerRole, enable: true, username: {$ne: username}
+        role: administratorsRole, enable: true, username: {$ne: username}
     });
 };
 
@@ -69,9 +62,9 @@ module.exports.createUser = async ({name, phone, email, role, description, creat
 };
 
 // Create user
-module.exports.createCaretaker = async ({name, phone, email, description, creator}) => {
+module.exports.createAdministrator = async ({name, phone, email, description, creator}) => {
     return await userCreateProcess({
-        name, phone, email, role: careTakerRole, description, creator
+        name, phone, email, role: administratorsRole, description, creator
     });
 };
 

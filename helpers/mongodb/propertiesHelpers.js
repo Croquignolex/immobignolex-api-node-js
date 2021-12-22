@@ -6,35 +6,23 @@ const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
 const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 const generalConstants = require('../../constants/generalConstants');
-const UserModel = require("../../models/userModel");
 
 // Data
-const usersCollection = "users";
 const propertiesCollection = "properties";
 const databaseUrl = envConstants.DATABASE_URL;
-const propertyCaretakerLookup = {
-    $lookup: {
-        from: usersCollection,
-        localField: "caretaker",
-        foreignField: "username",
-        as: "manager"
-    }
-};
 
 // Fetch all properties into database
 module.exports.properties = async () => {
     return await atomicPropertiesFetch({enable: true});
 };
 
-// Fetch property with caretaker into database
-module.exports.propertyByIdWithCaretakerAndCreator = async (id) => {
+// Fetch property by id with creator into database
+module.exports.propertyByIdWithCreator = async (id) => {
     // Data
     const _id = new ObjectId(id);
 
     // Database fetch
     return await embeddedPropertyFetch([
-        propertyCaretakerLookup,
-        generalHelpers.databaseUnwind("$manager"),
         generalConstants.LOOP_DIRECTIVE.CREATOR,
         generalHelpers.databaseUnwind("$creator"),
         { $match : {_id} }
@@ -155,7 +143,33 @@ const atomicPropertiesFetch = async (directives) => {
         // Format response
         data = [];
         status = true;
-        atomicPropertiesFetchData.forEach(item => data.push(new UserModel(item).simpleResponseFormat));
+        atomicPropertiesFetchData.forEach(item => data.push(new PropertyModel(item).simpleResponseFormat));
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
+// Embedded property fetch into database
+const embeddedPropertyFetch = async (directives) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const embeddedPropertyFetchData = await client.db().collection(propertiesCollection)
+            .aggregate(directives)
+            .toArray();
+        // Format response
+        if(embeddedPropertyFetchData.length > 0) {
+            status = true;
+            data = new PropertyModel(embeddedPropertyFetchData[0]).responseFormat;
+        }
+        else message = errorConstants.PROPERTIES.PROPERTY_NOT_FOUND;
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
