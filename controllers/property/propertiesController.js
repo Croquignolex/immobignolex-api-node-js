@@ -1,6 +1,7 @@
 const errorConstants = require("../../constants/errorConstants");
 const propertiesHelpers = require("../../helpers/mongodb/propertiesHelpers");
 const propertyPicturesHelpers = require("../../helpers/cloudary/propertyPicturesHelpers");
+const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
 
 // GET: All properties
 module.exports.properties = async (req, res) => {
@@ -24,6 +25,11 @@ module.exports.create = async (req, res) => {
     // Form data & data
     const username = req.username;
     const {name, phone, address, description} = req.body;
+
+    // Form checker
+    if(!formCheckerHelpers.requiredChecker(name)) {
+        return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
+    }
 
     // Database saving
     const createPropertyData = await propertiesHelpers.createProperty({

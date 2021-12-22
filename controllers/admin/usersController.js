@@ -1,4 +1,6 @@
+const errorConstants = require("../../constants/errorConstants");
 const usersHelpers = require("../../helpers/mongodb/usersHelpers");
+const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
 
 // GET: administrators
 module.exports.administrators = async (req, res) => {
@@ -25,6 +27,11 @@ module.exports.createAdministrator = async (req, res) => {
     // Form data
     const username = req.username;
     const {name, phone, email, description} = req.body;
+
+    // Form checker
+    if(!formCheckerHelpers.requiredChecker(name)) {
+        return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
+    }
 
     // Database saving
     const createCaretakerData = await usersHelpers.createAdministrator({
