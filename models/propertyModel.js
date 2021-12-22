@@ -21,8 +21,8 @@ module.exports = class PropertyModel {
             address: this.address,
             occupation: this.occupation,
             chambers: this.chambers ? this.chambers?.length : 0,
-            pictures: generalHelpers.picturesPublicUrl(this.pictures),
-            caretaker: this.manager ? new UserModel(this.manager).miniResponseFormat : null
+            employees: this.employees ? this.employees?.length : 0,
+            pictures: generalHelpers.picturesPublicUrl(this.pictures)
         };
     };
 
@@ -36,9 +36,9 @@ module.exports = class PropertyModel {
             occupation: this.occupation,
             description: this.description,
             chambers: this.chambers ? this.chambers?.length : 0,
+            employees: this.employees ? this.employees?.length : 0,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
-            creator: this.creator ? new UserModel(this.creator).miniResponseFormat : null,
-            caretaker: this.manager ? new UserModel(this.manager).miniResponseFormat : null,
+            creator: this.creator ? new UserModel(this.creator).miniResponseFormat : null
         };
     };
 };

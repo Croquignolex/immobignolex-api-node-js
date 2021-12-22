@@ -5,8 +5,8 @@ const propertyPicturesHelpers = require("../../helpers/cloudary/propertyPictures
 // GET: All properties
 module.exports.properties = async (req, res) => {
     // Get properties
-    const propertiesWithCaretakerData = await propertiesHelpers.propertiesWithCaretaker();
-    return res.send(propertiesWithCaretakerData);
+    const propertiesData = await propertiesHelpers.properties();
+    return res.send(propertiesData);
 };
 
 // GET: Property
@@ -23,11 +23,11 @@ module.exports.property = async (req, res) => {
 module.exports.create = async (req, res) => {
     // Form data & data
     const username = req.username;
-    const {name, phone, address, caretaker, description} = req.body;
+    const {name, phone, address, description} = req.body;
 
     // Database saving
     const createPropertyData = await propertiesHelpers.createProperty({
-        name, phone, address, description, caretaker, creator: username
+        name, phone, address, description, creator: username
     });
     return res.send(createPropertyData);
 };

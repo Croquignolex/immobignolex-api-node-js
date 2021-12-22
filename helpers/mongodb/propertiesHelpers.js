@@ -6,6 +6,7 @@ const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
 const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 const generalConstants = require('../../constants/generalConstants');
+const UserModel = require("../../models/userModel");
 
 // Data
 const usersCollection = "users";
@@ -20,13 +21,9 @@ const propertyCaretakerLookup = {
     }
 };
 
-// Fetch all properties with caretaker into database
-module.exports.propertiesWithCaretaker = async () => {
-    return await embeddedPropertiesFetch([
-        propertyCaretakerLookup,
-        generalHelpers.databaseUnwind("$manager"),
-        { $match : {enable: true} }
-    ]);
+// Fetch all properties into database
+module.exports.properties = async () => {
+    return await atomicPropertiesFetch({enable: true});
 };
 
 // Fetch property with caretaker into database
@@ -65,27 +62,16 @@ module.exports.addPropertyChamberByPropertyId = async (id, chamberId) => {
 };
 
 // Create property
-module.exports.createProperty = async ({name, phone, address, description, caretaker, creator}) => {
+module.exports.createProperty = async ({name, phone, address, description, creator}) => {
     // Data
     const enable = true;
     const created_by = creator;
     const created_at = new Date();
 
     // Keep into database
-    const atomicPropertyCreateData = await atomicPropertyCreate({
-        name, phone, address, enable, description, caretaker, created_by, created_at
+    return await atomicPropertyCreate({
+        name, phone, address, enable, description, created_by, created_at
     });
-    if(!atomicPropertyCreateData.status) {
-        return atomicPropertyCreateData;
-    }
-
-    // Push caretaker properties
-    if(caretaker) {
-        const createdPropertyId = atomicPropertyCreateData.data;
-        return await usersHelpers.addUserPropertyByUsername(caretaker, createdPropertyId);
-    }
-
-    return atomicPropertyCreateData;
 };
 
 // Update property
@@ -154,48 +140,22 @@ module.exports.archivePropertyByPropertyId = async (id) => {
     return await atomicPropertyUpdate(id, {$set: {enable: false, caretaker: null}});
 };
 
-// Embedded property fetch into database
-const embeddedPropertyFetch = async (directives) => {
-    // Data
+// Atomic properties fetch into database
+const atomicPropertiesFetch = async (directives) => {
     let client, data = null, status = false, message = "";
+    // Data
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
         // Query
-        const embeddedPropertyFetchData = await client.db().collection(propertiesCollection)
-            .aggregate(directives)
-            .toArray();
-        // Format response
-        if(embeddedPropertyFetchData.length > 0) {
-            status = true;
-            data = new PropertyModel(embeddedPropertyFetchData[0]).responseFormat;
-        }
-        else message = errorConstants.PROPERTIES.PROPERTY_NOT_FOUND;
-    }
-    catch (err) {
-        generalHelpers.log("Connection failure to mongodb", err);
-        message = errorConstants.GENERAL.DATABASE;
-    }
-    finally { await client.close(); }
-    return {data, status, message};
-};
-
-// Embedded properties fetch into database
-const embeddedPropertiesFetch = async (directives) => {
-    // Data
-    let client, data = null, status = false, message = "";
-    client = new MongoClient(databaseUrl);
-    try {
-        await client.connect();
-        // Query
-        const embeddedPropertiesFetchData = await client.db().collection(propertiesCollection)
-            .aggregate(directives)
+        const atomicPropertiesFetchData = await client.db().collection(propertiesCollection)
+            .find(directives)
             .sort({created_at: -1})
             .toArray();
         // Format response
         data = [];
         status = true;
-        embeddedPropertiesFetchData.forEach(item => data.push(new PropertyModel(item).simpleResponseFormat));
+        atomicPropertiesFetchData.forEach(item => data.push(new UserModel(item).simpleResponseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
