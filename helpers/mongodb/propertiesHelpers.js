@@ -5,6 +5,7 @@ const PropertyModel = require('../../models/propertyModel');
 const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
 const usersHelpers = require("../../helpers/mongodb/usersHelpers");
+const generalConstants = require('../../constants/generalConstants');
 
 // Data
 const usersCollection = "users";
@@ -17,14 +18,6 @@ const propertyCaretakerLookup = {
         foreignField: "username",
         as: "manager"
     }
-};
-const propertyCreatorLookup = {
-    $lookup: {
-        from: usersCollection,
-        localField: "created_by",
-        foreignField: "username",
-        as: "creator"
-    },
 };
 
 // Fetch all properties with caretaker into database
@@ -45,7 +38,7 @@ module.exports.propertyByIdWithCaretakerAndCreator = async (id) => {
     return await embeddedPropertyFetch([
         propertyCaretakerLookup,
         generalHelpers.databaseUnwind("$manager"),
-        propertyCreatorLookup,
+        generalConstants.LOOP_DIRECTIVE.CREATOR,
         generalHelpers.databaseUnwind("$creator"),
         { $match : {_id} }
     ]);
@@ -59,6 +52,16 @@ module.exports.addPropertyPictureByPropertyId = async (id, picture) => {
 // Remove property picture by property if
 module.exports.removePropertyPictureByPropertyId = async (id, pictureId) => {
     return await atomicPropertyUpdate(id, {$pull: {pictures: {id: pictureId}}});
+};
+
+// Remove property chamber by property if
+module.exports.removePropertyChamberByPropertyId = async (id, chamberId) => {
+    return await atomicPropertyUpdate(id, {$pull: {chambers: new ObjectId(chamberId)}});
+};
+
+// Add property chamber by property if
+module.exports.addPropertyChamberByPropertyId = async (id, chamberId) => {
+    return await atomicPropertyUpdate(id, {$push: {chambers: new ObjectId(chamberId)}});
 };
 
 // Create property
@@ -268,7 +271,7 @@ const atomicPropertyUpdate = async (id, directives) => {
             message = errorConstants.GENERAL.NO_CHANGES;
         }
         else if(atomicPropertyUpdateData.modifiedCount === 1) status = true;
-        else message = errorConstants.USERS.PROPERTY_UPDATE;
+        else message = errorConstants.PROPERTIES.PROPERTY_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
