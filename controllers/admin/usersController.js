@@ -18,8 +18,8 @@ module.exports.user = async (req, res) => {
     const {username} = req.params;
 
     // Get user
-    const userByUsernameData = await usersHelpers.userByUsername(username);
-    return res.send(userByUsernameData);
+    const userByUsernameWithCreatorData = await usersHelpers.userByUsernameWithCreator(username);
+    return res.send(userByUsernameWithCreatorData);
 };
 
 // PUT: Create administrator

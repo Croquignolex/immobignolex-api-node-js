@@ -6,6 +6,8 @@ const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
 const rolesHelpers = require("../../helpers/mongodb/rolesHelpers");
 const usersHelpers = require("../../helpers/mongodb/usersHelpers");
+const generalConstants = require("../../constants/generalConstants");
+const PropertyModel = require("../../models/propertyModel");
 
 // Data
 const usersCollection = "users";
@@ -17,10 +19,20 @@ module.exports.userByUsername = async (username) => {
     return await atomicUserFetch({username});
 };
 
+// Get user by username with creator
+module.exports.userByUsernameWithCreator = async (username) => {
+    // Database fetch
+    return await embeddedUserFetch([
+        generalConstants.LOOP_DIRECTIVE.CREATOR,
+        generalHelpers.databaseUnwind("$creator"),
+        { $match : {username} }
+    ]);
+};
+
 // Get administrators without current user by username
 module.exports.administratorsWithoutUserByUsername = async (username) => {
     return await atomicUsersFetch({
-        role: administratorsRole, enable: true, username: {$ne: username}
+        role: administratorsRole, username: {$ne: username}
     });
 };
 
@@ -95,6 +107,32 @@ const userCreateProcess = async ({name, phone, email, role, description, creator
         username, name, password, enable, phone, email, role,
         description, permissions, created_by, created_at
     });
+};
+
+// Embedded user fetch into database
+const embeddedUserFetch = async (directives) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const embeddedUserFetchData = await client.db().collection(usersCollection)
+            .aggregate(directives)
+            .toArray();
+        // Format response
+        if(embeddedUserFetchData.length > 0) {
+            status = true;
+            data = new PropertyModel(embeddedUserFetchData[0]).responseFormat;
+        }
+        else message = errorConstants.USERS.USER_NOT_FOUND;
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
 };
 
 // Atomic users fetch into database
