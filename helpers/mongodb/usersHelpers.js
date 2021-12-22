@@ -7,7 +7,6 @@ const errorConstants = require('../../constants/errorConstants');
 const rolesHelpers = require("../../helpers/mongodb/rolesHelpers");
 const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 const generalConstants = require("../../constants/generalConstants");
-const PropertyModel = require("../../models/propertyModel");
 
 // Data
 const usersCollection = "users";
@@ -123,7 +122,7 @@ const embeddedUserFetch = async (directives) => {
         // Format response
         if(embeddedUserFetchData.length > 0) {
             status = true;
-            data = new PropertyModel(embeddedUserFetchData[0]).responseFormat;
+            data = new UserModel(embeddedUserFetchData[0]).responseFormat;
         }
         else message = errorConstants.USERS.USER_NOT_FOUND;
     }

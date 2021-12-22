@@ -41,7 +41,7 @@ module.exports = class UserModel {
             description: this.description,
             avatar: generalHelpers.filePublicUrl(this.avatar),
             properties: this.properties ? this.properties?.length : 0,
-            creator: this.created_by ? new UserModel(this.created_by).miniResponseFormat : null,
+            creator: this.creator ? new UserModel(this.creator).miniResponseFormat : null
         };
     };
 };
