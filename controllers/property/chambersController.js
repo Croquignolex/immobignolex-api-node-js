@@ -2,6 +2,7 @@ const errorConstants = require("../../constants/errorConstants");
 const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
 const propertyPicturesHelpers = require("../../helpers/cloudary/propertyPicturesHelpers");
 
+
 // GET: All chambers
 module.exports.chambers = async (req, res) => {
     // Get chambers
@@ -19,17 +20,17 @@ module.exports.property = async (req, res) => {
     return res.send(propertyByIdWithCaretakerAndCreatorData);
 };
 
-// PUT: Create property
+// PUT: Create chamber
 module.exports.create = async (req, res) => {
     // Form data & data
     const username = req.username;
-    const {name, phone, address, caretaker, description} = req.body;
+    const {name, phone, rent, type, property, description} = req.body;
 
     // Database saving
-    const createPropertyData = await propertiesHelpers.createProperty({
-        name, phone, address, description, caretaker, creator: username
+    const createChamberData = await chambersHelpers.createChamber({
+        name, phone, rent: parseInt(rent, 10) || 0, type, property, description, creator: username
     });
-    return res.send(createPropertyData);
+    return res.send(createChamberData);
 };
 
 // POST: Update property info

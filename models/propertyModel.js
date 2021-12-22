@@ -6,6 +6,13 @@ module.exports = class PropertyModel {
         Object.assign(this, property);
     };
 
+    get miniResponseFormat() {
+        return {
+            id: this._id,
+            name: this.name
+        };
+    };
+
     get simpleResponseFormat() {
         return {
             id: this._id,

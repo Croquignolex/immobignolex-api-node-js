@@ -17,7 +17,7 @@ module.exports = class ChamberModel {
             tenants: this.tenants ? this.tenants?.length : 0,
             furniture: this.furniture ? this.furniture?.length : 0,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
-            property: this.container ? new PropertyModel(this.container).simpleResponseFormat : null
+            property: this.container ? new PropertyModel(this.container).miniResponseFormat : null
         };
     };
 
@@ -33,7 +33,7 @@ module.exports = class ChamberModel {
             furniture: this.furniture ? this.furniture?.length : 0,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
             creator: this.creator ? new UserModel(this.creator).miniResponseFormat : null,
-            property: this.container ? new PropertyModel(this.container).simpleResponseFormat : null
+            property: this.container ? new PropertyModel(this.container).miniResponseFormat : null
         };
     };
 };

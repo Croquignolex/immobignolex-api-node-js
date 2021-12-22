@@ -63,7 +63,7 @@ module.exports.createChamber = async ({name, phone, rent, type, property, descri
 
     // Keep into database
     const atomicChamberCreateData = await atomicChamberCreate({
-        name, phone, rent, enable, description, type, property, created_by, created_at
+        name, phone, rent, enable, description, type, created_by, created_at, property: new ObjectId(property)
     });
     if(!atomicChamberCreateData.status) {
         return atomicChamberCreateData;
