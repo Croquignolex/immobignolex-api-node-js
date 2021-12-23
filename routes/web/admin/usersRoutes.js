@@ -7,6 +7,7 @@ const basicPermissionMiddleware = require("../../../middlewares/basicPermissionM
 
 router.get('/:username/detail', [tokenMiddleware, basicPermissionMiddleware], usersController.user);
 router.get('/administrators', [tokenMiddleware, basicPermissionMiddleware], usersController.administrators);
+router.post('/:username/update-info', [tokenMiddleware, basicPermissionMiddleware], usersController.updateInfo);
 router.put('/administrators/create', [tokenMiddleware, basicPermissionMiddleware], usersController.createAdministrator);
 
 module.exports = router;

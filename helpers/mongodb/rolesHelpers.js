@@ -1,6 +1,6 @@
 const {MongoClient} = require('mongodb');
 
-const UserModel = require('../../models/userModel');
+const RoleModel = require('../../models/roleModel');
 const generalHelpers = require('../generalHelpers');
 const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
@@ -26,7 +26,7 @@ const atomicRoleFetch = async (directives) => {
         // Format response
         if(atomicRoleFetchData !== null) {
             status = true;
-            data = new UserModel(atomicRoleFetchData);
+            data = new RoleModel(atomicRoleFetchData);
         }
         else message = errorConstants.ROLES.ROLE_NOT_FOUND;
     } catch (err) {

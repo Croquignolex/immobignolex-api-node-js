@@ -93,13 +93,12 @@ const userCreateProcess = async ({name, phone, email, role, description, creator
     if(!roleByNameData.status) {
         return roleByNameData;
     }
-
     const enable = true;
     const created_by = creator;
     const created_at = new Date();
     const bcrypt = require("bcryptjs");
-    const permissions = roleByNameData.permissions;
     const password = await bcrypt.hash("000000", 10);
+    const permissions = roleByNameData.data.permissions;
 
     // Keep into database
     return await atomicUserCreate({

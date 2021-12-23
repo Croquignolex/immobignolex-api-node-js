@@ -22,6 +22,20 @@ module.exports.user = async (req, res) => {
     return res.send(userByUsernameWithCreatorData);
 };
 
+// POST: Update user info
+module.exports.updateInfo = async (req, res) => {
+    // Form data & data
+    const {username} = req.params;
+    const {name, phone, email, description} = req.body;
+
+    // Update user
+    const updateUserInfoByUsernameData = await usersHelpers.updateUserInfoByUsername(
+        username,
+        {name, phone, email, description}
+    );
+    return res.send(updateUserInfoByUsernameData);
+};
+
 // PUT: Create administrator
 module.exports.createAdministrator = async (req, res) => {
     // Form data
