@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+const {pictureMiddleware} = require("../../../middlewares/mediaMiddleware");
 const tokenMiddleware = require("../../../middlewares/accessTokenMiddleware");
 const usersController = require('../../../controllers/admin/usersController');
 const basicPermissionMiddleware = require("../../../middlewares/basicPermissionMiddleware");
@@ -9,5 +10,6 @@ router.get('/:username/detail', [tokenMiddleware, basicPermissionMiddleware], us
 router.get('/administrators', [tokenMiddleware, basicPermissionMiddleware], usersController.administrators);
 router.post('/:username/update-info', [tokenMiddleware, basicPermissionMiddleware], usersController.updateInfo);
 router.put('/administrators/create', [tokenMiddleware, basicPermissionMiddleware], usersController.createAdministrator);
+router.post('/:username/update-avatar', [pictureMiddleware, tokenMiddleware, basicPermissionMiddleware], usersController.updateAvatar);
 
 module.exports = router;
