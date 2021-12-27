@@ -55,6 +55,11 @@ module.exports.updateUserPasswordByUsername = async (username, password) => {
     return await atomicUserUpdate(username, {$set: {password}});
 };
 
+// Update user status by username
+module.exports.updateUserStatusByUsername = async (username, status) => {
+    return await atomicUserUpdate(username, {$set: {enable: status}});
+};
+
 // Update user info by username
 module.exports.updateUserInfoByUsername = async (username, {name, phone, email, description}) => {
     return await atomicUserUpdate(username, {$set: {name, phone, email, description}});

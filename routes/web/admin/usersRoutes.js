@@ -10,6 +10,8 @@ const profileController = require("../../../controllers/general/profileControlle
 router.get('/:username/detail', [tokenMiddleware, basicPermissionMiddleware], usersController.user);
 router.get('/administrators', [tokenMiddleware, basicPermissionMiddleware], usersController.administrators);
 router.post('/:username/info-update', [tokenMiddleware, basicPermissionMiddleware], usersController.updateInfo);
+router.post('/:username/status-toggle', [tokenMiddleware, basicPermissionMiddleware], usersController.toggleStatus);
+router.post('/:username/password-reset', [tokenMiddleware, basicPermissionMiddleware], usersController.resetPassword);
 router.delete('/:username/avatar-delete', [tokenMiddleware, basicPermissionMiddleware], usersController.deleteAvatar);
 router.put('/administrators/create', [tokenMiddleware, basicPermissionMiddleware], usersController.createAdministrator);
 router.post('/:username/update-avatar', [pictureMiddleware, tokenMiddleware, basicPermissionMiddleware], usersController.updateAvatar);

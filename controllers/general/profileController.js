@@ -1,5 +1,3 @@
-const bcrypt = require("bcryptjs");
-
 const errorConstants = require('../../constants/errorConstants');
 const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 const avatarsHelpers = require('../../helpers/cloudary/avatarsHelpers');
@@ -75,6 +73,7 @@ module.exports.updatePassword = async (req, res) => {
     }
 
     // Check old password with database password
+    const bcrypt = require("bcryptjs");
     const databaseUser = userByUsernameData.data;
     if(!await bcrypt.compare(oldPassword, databaseUser.password)) {
         return res.send({status: false, message: errorConstants.USERS.PASSWORD_NOT_MATCH, data: null});

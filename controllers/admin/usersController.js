@@ -44,6 +44,37 @@ module.exports.updateInfo = async (req, res) => {
     return res.send(updateUserInfoByUsernameData);
 };
 
+// POST: Toggle user status
+module.exports.toggleStatus = async (req, res) => {
+    // Form data & data
+    const {username} = req.params;
+
+    // Get user by username
+    const userByUsernameData = await usersHelpers.userByUsername(username);
+    if(!userByUsernameData.status) {
+        return res.send(userByUsernameData);
+    }
+
+    // Update user
+    const updateUserStatusByUsernameData = await usersHelpers.updateUserStatusByUsername(
+        username,
+        !userByUsernameData.data?.enable
+    );
+    return res.send(updateUserStatusByUsernameData);
+};
+
+// POST: Reset user password
+module.exports.resetPassword = async (req, res) => {
+    // Form data & data
+    const {username} = req.params;
+
+    // Save user info in the database
+    const bcrypt = require("bcryptjs");
+    const password = await bcrypt.hash("000000", 10);
+    const updateUserPasswordByUsernameData = await usersHelpers.updateUserPasswordByUsername(username, password);
+    return res.send(updateUserPasswordByUsernameData);
+};
+
 // DELETE: Delete user avatar
 module.exports.deleteAvatar = async (req, res) => {
     // Get user by username
