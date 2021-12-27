@@ -37,6 +37,21 @@ module.exports.updateInfo = async (req, res) => {
     return res.send(updateUserInfoByUsernameData);
 };
 
+// DELETE: Delete user avatar
+module.exports.deleteAvatar = async (req, res) => {
+    // Get user by username
+    const {username} = req.params;
+    const userByUsernameData = await usersHelpers.userByUsername(username);
+    if(!userByUsernameData.status) {
+        return res.send(userByUsernameData);
+    }
+
+    // Remove avatar in the cloud & database
+    const databaseUser = userByUsernameData.data;
+    const cloudDeleteUserAvatarData = await avatarsHelpers.cloudDeleteUserAvatar(databaseUser);
+    return res.send(cloudDeleteUserAvatarData);
+};
+
 // POST: Update user avatar
 module.exports.updateAvatar = async (req, res) => {
     // File data from multer (error management)

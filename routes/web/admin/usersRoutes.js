@@ -5,10 +5,12 @@ const {pictureMiddleware} = require("../../../middlewares/mediaMiddleware");
 const tokenMiddleware = require("../../../middlewares/accessTokenMiddleware");
 const usersController = require('../../../controllers/admin/usersController');
 const basicPermissionMiddleware = require("../../../middlewares/basicPermissionMiddleware");
+const profileController = require("../../../controllers/general/profileController");
 
 router.get('/:username/detail', [tokenMiddleware, basicPermissionMiddleware], usersController.user);
 router.get('/administrators', [tokenMiddleware, basicPermissionMiddleware], usersController.administrators);
 router.post('/:username/update-info', [tokenMiddleware, basicPermissionMiddleware], usersController.updateInfo);
+router.delete('/:username/avatar-delete', [tokenMiddleware, basicPermissionMiddleware], usersController.deleteAvatar);
 router.put('/administrators/create', [tokenMiddleware, basicPermissionMiddleware], usersController.createAdministrator);
 router.post('/:username/update-avatar', [pictureMiddleware, tokenMiddleware, basicPermissionMiddleware], usersController.updateAvatar);
 
