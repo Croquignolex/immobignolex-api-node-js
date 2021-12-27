@@ -9,7 +9,7 @@ const profileController = require("../../../controllers/general/profileControlle
 
 router.get('/:username/detail', [tokenMiddleware, basicPermissionMiddleware], usersController.user);
 router.get('/administrators', [tokenMiddleware, basicPermissionMiddleware], usersController.administrators);
-router.post('/:username/update-info', [tokenMiddleware, basicPermissionMiddleware], usersController.updateInfo);
+router.post('/:username/info-update', [tokenMiddleware, basicPermissionMiddleware], usersController.updateInfo);
 router.delete('/:username/avatar-delete', [tokenMiddleware, basicPermissionMiddleware], usersController.deleteAvatar);
 router.put('/administrators/create', [tokenMiddleware, basicPermissionMiddleware], usersController.createAdministrator);
 router.post('/:username/update-avatar', [pictureMiddleware, tokenMiddleware, basicPermissionMiddleware], usersController.updateAvatar);

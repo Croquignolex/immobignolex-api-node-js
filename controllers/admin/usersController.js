@@ -20,6 +20,13 @@ module.exports.user = async (req, res) => {
 
     // Get user
     const userByUsernameWithCreatorData = await usersHelpers.userByUsernameWithCreator(username);
+
+    // Super admin user should not be shown
+    const databaseUser = userByUsernameWithCreatorData.data;
+    if(databaseUser.role === "Propriétaire") {
+        return res.send({status: false, data: null, message: errorConstants.GENERAL.HIGH_LEVEL_DATA});
+    }
+
     return res.send(userByUsernameWithCreatorData);
 };
 
