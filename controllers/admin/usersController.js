@@ -149,8 +149,44 @@ module.exports.createAdministrator = async (req, res) => {
     }
 
     // Database saving
-    const createCaretakerData = await usersHelpers.createAdministrator({
+    const createAdministratorData = await usersHelpers.createAdministrator({
         name: name.trim(), phone, email, description, creator: username
     });
-    return res.send(createCaretakerData);
+    return res.send(createAdministratorData);
+};
+
+// PUT: Create employee
+module.exports.createEmployee = async (req, res) => {
+    // Form data
+    const username = req.username;
+    const {name, phone, email, description, post} = req.body;
+
+    // Form checker
+    if(!formCheckerHelpers.requiredChecker(name) || !formCheckerHelpers.requiredChecker(post)) {
+        return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
+    }
+
+    // Database saving
+    const createEmployeeData = await usersHelpers.createEmployee({
+        name: name.trim(), phone, email, post, description, creator: username
+    });
+    return res.send(createEmployeeData);
+};
+
+// PUT: Create tenant
+module.exports.createTenant = async (req, res) => {
+    // Form data
+    const username = req.username;
+    const {name, phone, email, description} = req.body;
+
+    // Form checker
+    if(!formCheckerHelpers.requiredChecker(name)) {
+        return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
+    }
+
+    // Database saving
+    const createTenantData = await usersHelpers.createTenant({
+        name: name.trim(), phone, email, description, creator: username
+    });
+    return res.send(createTenantData);
 };

@@ -93,10 +93,24 @@ module.exports.createUser = async ({name, phone, email, role, description, creat
     });
 };
 
-// Create user
+// Create admin
 module.exports.createAdministrator = async ({name, phone, email, description, creator}) => {
     return await userCreateProcess({
         name, phone, email, role: administratorsRole, description, creator
+    });
+};
+
+// Create employee
+module.exports.createEmployee = async ({name, phone, email, post, description, creator}) => {
+    return await userCreateProcess({
+        name, phone, email, role: employeesRole, post, description, creator
+    });
+};
+
+// Create tenant
+module.exports.createTenant = async ({name, phone, email, description, creator}) => {
+    return await userCreateProcess({
+        name, phone, email, role: tenantsRole, description, creator
     });
 };
 
