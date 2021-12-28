@@ -54,12 +54,12 @@ module.exports.user = async (req, res) => {
 module.exports.updateInfo = async (req, res) => {
     // Form data & data
     const {username} = req.params;
-    const {name, phone, email, description} = req.body;
+    const {name, phone, email, post, description} = req.body;
 
     // Update user
     const updateUserInfoByUsernameData = await usersHelpers.updateUserInfoByUsername(
         username,
-        {name, phone, email, description}
+        {name, phone, email, post, description}
     );
     return res.send(updateUserInfoByUsernameData);
 };
@@ -162,7 +162,7 @@ module.exports.createEmployee = async (req, res) => {
     const {name, phone, email, description, post} = req.body;
 
     // Form checker
-    if(!formCheckerHelpers.requiredChecker(name) || !formCheckerHelpers.requiredChecker(post)) {
+    if(!formCheckerHelpers.requiredChecker(name)) {
         return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
     }
 

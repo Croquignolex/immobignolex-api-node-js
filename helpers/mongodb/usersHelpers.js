@@ -77,8 +77,8 @@ module.exports.updateUserStatusByUsername = async (username, status) => {
 };
 
 // Update user info by username
-module.exports.updateUserInfoByUsername = async (username, {name, phone, email, description}) => {
-    return await atomicUserUpdate(username, {$set: {name, phone, email, description}});
+module.exports.updateUserInfoByUsername = async (username, {name, phone, email, post, description}) => {
+    return await atomicUserUpdate(username, {$set: {name, phone, email, post, description}});
 };
 
 // Update user tokens by username

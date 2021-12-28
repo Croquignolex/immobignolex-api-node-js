@@ -23,8 +23,7 @@ module.exports = class UserModel {
             username: this.username,
             permissions: this.permissions,
             description: this.description,
-            avatar: generalHelpers.filePublicUrl(this.avatar),
-            properties: this.properties ? this.properties?.length : 0
+            avatar: generalHelpers.filePublicUrl(this.avatar)
         };
     };
 
@@ -42,7 +41,6 @@ module.exports = class UserModel {
             permissions: this.permissions,
             description: this.description,
             avatar: generalHelpers.filePublicUrl(this.avatar),
-            properties: this.properties ? this.properties?.length : 0,
             creator: this.creator ? new UserModel(this.creator).miniResponseFormat : null
         };
     };
