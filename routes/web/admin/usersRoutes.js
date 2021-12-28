@@ -20,6 +20,6 @@ router.post('/:username/info-update', [tokenMiddleware, basicPermissionMiddlewar
 router.post('/:username/status-toggle', [tokenMiddleware, basicPermissionMiddleware], usersController.toggleStatus);
 router.post('/:username/password-reset', [tokenMiddleware, basicPermissionMiddleware], usersController.resetPassword);
 router.delete('/:username/avatar-delete', [tokenMiddleware, basicPermissionMiddleware], usersController.deleteAvatar);
-router.post('/:username/update-avatar', [pictureMiddleware, tokenMiddleware, basicPermissionMiddleware], usersController.updateAvatar);
+router.post('/:username/avatar-update', [pictureMiddleware, tokenMiddleware, basicPermissionMiddleware], usersController.updateAvatar);
 
 module.exports = router;

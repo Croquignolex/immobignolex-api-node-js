@@ -110,12 +110,12 @@ module.exports.createEmployee = async ({name, phone, email, cni, post, descripti
 // Create tenant
 module.exports.createTenant = async ({name, phone, email, cni, description, creator}) => {
     return await userCreateProcess({
-        name, phone, email, cni, role: tenantsRole, description, creator
+        name, phone, email, cni, role: tenantsRole, description, creator, balance: 0
     });
 };
 
 // User create process
-const userCreateProcess = async ({name, phone, email, role, cni, post, description, creator}) => {
+const userCreateProcess = async ({name, phone, email, role, cni, post, balance, description, creator}) => {
     // Build username & check
     const username = name?.split(' ')?.join("_")?.toLowerCase();
     const userByUsernameData = await usersHelpers.userByUsername(username);
@@ -137,8 +137,8 @@ const userCreateProcess = async ({name, phone, email, role, cni, post, descripti
 
     // Keep into database
     return await atomicUserCreate({
-        username, name, password, enable, phone, email, role,
-        cni, post, description, permissions, created_by, created_at
+        username, name, password, enable, phone, email, role, cni,
+        post, balance, description, permissions, created_by, created_at
     });
 };
 
