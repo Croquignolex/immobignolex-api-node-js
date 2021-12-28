@@ -10,6 +10,8 @@ const generalConstants = require("../../constants/generalConstants");
 
 // Data
 const usersCollection = "users";
+const employeesRole = "Employé";
+const tenantsRole = "Locataire";
 const administratorsRole = "Administrateur";
 const databaseUrl = envConstants.DATABASE_URL;
 
@@ -32,6 +34,20 @@ module.exports.userByUsernameWithCreator = async (username) => {
 module.exports.administratorsWithoutUserByUsername = async (username) => {
     return await atomicUsersFetch({
         role: administratorsRole, username: {$ne: username}
+    });
+};
+
+// Get employees without current user by username
+module.exports.employeesWithoutUserByUsername = async (username) => {
+    return await atomicUsersFetch({
+        role: employeesRole, username: {$ne: username}
+    });
+};
+
+// Get tenants without current user by username
+module.exports.tenantsWithoutUserByUsername = async (username) => {
+    return await atomicUsersFetch({
+        role: tenantsRole, username: {$ne: username}
     });
 };
 

@@ -13,6 +13,26 @@ module.exports.administrators = async (req, res) => {
     return res.send(administratorsWithoutUserByUsernameData);
 };
 
+// GET: employees
+module.exports.employees = async (req, res) => {
+    // Request data
+    const username = req.username;
+
+    // Get employees
+    const employeesWithoutUserByUsernameData = await usersHelpers.employeesWithoutUserByUsername(username);
+    return res.send(employeesWithoutUserByUsernameData);
+};
+
+// GET: tenants
+module.exports.tenants = async (req, res) => {
+    // Request data
+    const username = req.username;
+
+    // Get tenants
+    const tenantsWithoutUserByUsernameData = await usersHelpers.tenantsWithoutUserByUsername(username);
+    return res.send(tenantsWithoutUserByUsernameData);
+};
+
 // GET: User
 module.exports.user = async (req, res) => {
     // Route params

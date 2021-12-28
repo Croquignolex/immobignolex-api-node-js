@@ -5,8 +5,9 @@ const {pictureMiddleware} = require("../../../middlewares/mediaMiddleware");
 const tokenMiddleware = require("../../../middlewares/accessTokenMiddleware");
 const usersController = require('../../../controllers/admin/usersController');
 const basicPermissionMiddleware = require("../../../middlewares/basicPermissionMiddleware");
-const profileController = require("../../../controllers/general/profileController");
 
+router.get('/tenants', [tokenMiddleware, basicPermissionMiddleware], usersController.tenants);
+router.get('/employees', [tokenMiddleware, basicPermissionMiddleware], usersController.employees);
 router.get('/:username/detail', [tokenMiddleware, basicPermissionMiddleware], usersController.user);
 router.get('/administrators', [tokenMiddleware, basicPermissionMiddleware], usersController.administrators);
 router.post('/:username/info-update', [tokenMiddleware, basicPermissionMiddleware], usersController.updateInfo);
