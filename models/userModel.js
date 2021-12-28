@@ -15,6 +15,7 @@ module.exports = class UserModel {
     get simpleResponseFormat() {
         return {
             name: this.name,
+            post: this.post,
             role: this.role,
             email: this.email,
             phone: this.phone,
@@ -31,6 +32,7 @@ module.exports = class UserModel {
         return {
             id: this._id,
             name: this.name,
+            post: this.post,
             role: this.role,
             email: this.email,
             phone: this.phone,
