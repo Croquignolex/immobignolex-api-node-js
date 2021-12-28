@@ -77,8 +77,8 @@ module.exports.updateUserStatusByUsername = async (username, status) => {
 };
 
 // Update user info by username
-module.exports.updateUserInfoByUsername = async (username, {name, phone, email, post, description}) => {
-    return await atomicUserUpdate(username, {$set: {name, phone, email, post, description}});
+module.exports.updateUserInfoByUsername = async (username, {name, phone, email, cni, post, description}) => {
+    return await atomicUserUpdate(username, {$set: {name, phone, email, cni, post, description}});
 };
 
 // Update user tokens by username
@@ -94,28 +94,28 @@ module.exports.createUser = async ({name, phone, email, role, description, creat
 };
 
 // Create admin
-module.exports.createAdministrator = async ({name, phone, email, description, creator}) => {
+module.exports.createAdministrator = async ({name, phone, email, cni, description, creator}) => {
     return await userCreateProcess({
-        name, phone, email, role: administratorsRole, description, creator
+        name, phone, email, cni, role: administratorsRole, description, creator
     });
 };
 
 // Create employee
-module.exports.createEmployee = async ({name, phone, email, post, description, creator}) => {
+module.exports.createEmployee = async ({name, phone, email, cni, post, description, creator}) => {
     return await userCreateProcess({
-        name, phone, email, role: employeesRole, post, description, creator
+        name, phone, email, cni, role: employeesRole, post, description, creator
     });
 };
 
 // Create tenant
-module.exports.createTenant = async ({name, phone, email, description, creator}) => {
+module.exports.createTenant = async ({name, phone, email, cni, description, creator}) => {
     return await userCreateProcess({
-        name, phone, email, role: tenantsRole, description, creator
+        name, phone, email, cni, role: tenantsRole, description, creator
     });
 };
 
 // User create process
-const userCreateProcess = async ({name, phone, email, role, post, description, creator}) => {
+const userCreateProcess = async ({name, phone, email, role, cni, post, description, creator}) => {
     // Build username & check
     const username = name?.split(' ')?.join("_")?.toLowerCase();
     const userByUsernameData = await usersHelpers.userByUsername(username);
@@ -138,7 +138,7 @@ const userCreateProcess = async ({name, phone, email, role, post, description, c
     // Keep into database
     return await atomicUserCreate({
         username, name, password, enable, phone, email, role,
-        post, description, permissions, created_by, created_at
+        cni, post, description, permissions, created_by, created_at
     });
 };
 

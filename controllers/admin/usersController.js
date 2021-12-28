@@ -54,12 +54,12 @@ module.exports.user = async (req, res) => {
 module.exports.updateInfo = async (req, res) => {
     // Form data & data
     const {username} = req.params;
-    const {name, phone, email, post, description} = req.body;
+    const {name, phone, email, cni, post, description} = req.body;
 
     // Update user
     const updateUserInfoByUsernameData = await usersHelpers.updateUserInfoByUsername(
         username,
-        {name, phone, email, post, description}
+        {name, phone, email, cni, post, description}
     );
     return res.send(updateUserInfoByUsernameData);
 };
@@ -141,7 +141,7 @@ module.exports.updateAvatar = async (req, res) => {
 module.exports.createAdministrator = async (req, res) => {
     // Form data
     const username = req.username;
-    const {name, phone, email, description} = req.body;
+    const {name, phone, email, cni, description} = req.body;
 
     // Form checker
     if(!formCheckerHelpers.requiredChecker(name)) {
@@ -150,7 +150,7 @@ module.exports.createAdministrator = async (req, res) => {
 
     // Database saving
     const createAdministratorData = await usersHelpers.createAdministrator({
-        name: name.trim(), phone, email, description, creator: username
+        name: name.trim(), phone, email, cni, description, creator: username
     });
     return res.send(createAdministratorData);
 };
@@ -159,7 +159,7 @@ module.exports.createAdministrator = async (req, res) => {
 module.exports.createEmployee = async (req, res) => {
     // Form data
     const username = req.username;
-    const {name, phone, email, description, post} = req.body;
+    const {name, phone, email, cni, description, post} = req.body;
 
     // Form checker
     if(!formCheckerHelpers.requiredChecker(name)) {
@@ -168,7 +168,7 @@ module.exports.createEmployee = async (req, res) => {
 
     // Database saving
     const createEmployeeData = await usersHelpers.createEmployee({
-        name: name.trim(), phone, email, post, description, creator: username
+        name: name.trim(), phone, email, post, cni, description, creator: username
     });
     return res.send(createEmployeeData);
 };
@@ -177,7 +177,7 @@ module.exports.createEmployee = async (req, res) => {
 module.exports.createTenant = async (req, res) => {
     // Form data
     const username = req.username;
-    const {name, phone, email, description} = req.body;
+    const {name, phone, cni, email, description} = req.body;
 
     // Form checker
     if(!formCheckerHelpers.requiredChecker(name)) {
@@ -186,7 +186,7 @@ module.exports.createTenant = async (req, res) => {
 
     // Database saving
     const createTenantData = await usersHelpers.createTenant({
-        name: name.trim(), phone, email, description, creator: username
+        name: name.trim(), phone, cni, email, description, creator: username
     });
     return res.send(createTenantData);
 };

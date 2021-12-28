@@ -14,6 +14,7 @@ module.exports = class UserModel {
 
     get simpleResponseFormat() {
         return {
+            cni: this.cni,
             name: this.name,
             post: this.post,
             role: this.role,
@@ -30,6 +31,7 @@ module.exports = class UserModel {
     get responseFormat() {
         return {
             id: this._id,
+            cni: this.cni,
             name: this.name,
             post: this.post,
             role: this.role,
