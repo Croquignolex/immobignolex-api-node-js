@@ -36,7 +36,6 @@ module.exports = class PropertyModel {
             occupation: this.occupation,
             description: this.description,
             chambers: this.chambers ? this.chambers?.length : 0,
-            employees: this.employees ? this.employees?.length : 0,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
             creator: this.creator ? new UserModel(this.creator).miniResponseFormat : null
         };

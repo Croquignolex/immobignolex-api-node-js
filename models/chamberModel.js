@@ -11,11 +11,11 @@ module.exports = class ChamberModel {
         return {
             id: this._id,
             name: this.name,
+            free: this.free,
             rent: this.rent,
             type: this.type,
             phone: this.phone,
-            tenants: this.tenants ? this.tenants?.length : 0,
-            furniture: this.furniture ? this.furniture?.length : 0,
+            goods: this.goods ? this.goods?.length : 0,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
             property: this.container ? new PropertyModel(this.container).miniResponseFormat : null
         };
@@ -26,11 +26,11 @@ module.exports = class ChamberModel {
             id: this._id,
             name: this.name,
             rent: this.rent,
+            free: this.free,
             type: this.type,
             phone: this.phone,
             created_at: this.created_at,
-            tenants: this.tenants ? this.tenants?.length : 0,
-            furniture: this.furniture ? this.furniture?.length : 0,
+            goods: this.goods ? this.goods?.length : 0,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
             creator: this.creator ? new UserModel(this.creator).miniResponseFormat : null,
             property: this.container ? new PropertyModel(this.container).miniResponseFormat : null
