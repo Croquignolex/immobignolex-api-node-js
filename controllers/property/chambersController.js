@@ -1,16 +1,18 @@
 const errorConstants = require("../../constants/errorConstants");
 const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
 const propertyPicturesHelpers = require("../../helpers/cloudary/propertyPicturesHelpers");
+const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
+const propertiesHelpers = require("../../helpers/mongodb/propertiesHelpers");
 
 
 // GET: All chambers
 module.exports.chambers = async (req, res) => {
     // Get chambers
-    const chambersWithCaretakerData = await chambersHelpers.chambersWithCaretaker();
-    return res.send(chambersWithCaretakerData);
+    const chambersWithPropertyData = await chambersHelpers.chambersWithProperty();
+    return res.send(chambersWithPropertyData);
 };
 
-// GET: Property
+// GET: Chamber
 module.exports.property = async (req, res) => {
     // Route params
     const {propertyId} = req.params;
@@ -26,9 +28,19 @@ module.exports.create = async (req, res) => {
     const username = req.username;
     const {name, phone, rent, type, property, description} = req.body;
 
+    // Form checker
+    if(
+        !formCheckerHelpers.requiredChecker(rent) ||
+        !formCheckerHelpers.requiredChecker(type) ||
+        !formCheckerHelpers.requiredChecker(name) ||
+        !formCheckerHelpers.requiredChecker(property)
+    ) {
+        return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
+    }
+
     // Database saving
     const createChamberData = await chambersHelpers.createChamber({
-        name, phone, type, property, description, creator: username, rent: parseInt(rent, 10) || 0
+        name, phone, type, property, description, creator: username, rent
     });
     return res.send(createChamberData);
 };

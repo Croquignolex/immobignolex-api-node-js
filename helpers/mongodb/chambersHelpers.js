@@ -21,13 +21,41 @@ const chamberPropertyLookup = {
 };
 
 // Fetch all chambers with property into database
-module.exports.chambersWithCaretaker = async () => {
+module.exports.chambersWithProperty = async () => {
     return await embeddedChambersFetch([
         chamberPropertyLookup,
         generalHelpers.databaseUnwind("$container"),
         { $match : {enable: true} }
     ]);
 };
+
+// Create chamber
+module.exports.createChamber = async ({name, phone, rent, type, property, description, creator}) => {
+    // Data
+    const enable = true;
+    const created_by = creator;
+    const created_at = new Date();
+
+    // Keep into database
+    const atomicChamberCreateData = await atomicChamberCreate({
+        name, phone, rent: parseInt(rent, 10) || 0, free: true, enable, description, type,
+        created_by, created_at, property: new ObjectId(property)
+    });
+    if(!atomicChamberCreateData.status) {
+        return atomicChamberCreateData;
+    }
+
+    // Push property chambers
+    if(property) {
+        const createdChamberId = atomicChamberCreateData.data;
+        return await propertiesHelpers.addPropertyChamberByPropertyId(property, createdChamberId);
+    }
+
+    return atomicChamberCreateData;
+};
+
+
+
 
 // Fetch chamber with property into database
 module.exports.chamberByIdWithPropertyAndCreator = async (id) => {
@@ -52,30 +80,6 @@ module.exports.addChamberPictureByChamberId = async (id, picture) => {
 // Remove chamber picture by chamber if
 module.exports.removeChamberPictureByChamberId = async (id, pictureId) => {
     return await atomicChamberUpdate(id, {$pull: {pictures: {id: pictureId}}});
-};
-
-// Create chamber
-module.exports.createChamber = async ({name, phone, rent, type, property, description, creator}) => {
-    // Data
-    const enable = true;
-    const created_by = creator;
-    const created_at = new Date();
-
-    // Keep into database
-    const atomicChamberCreateData = await atomicChamberCreate({
-        name, phone, rent, enable, description, type, created_by, created_at, property: new ObjectId(property)
-    });
-    if(!atomicChamberCreateData.status) {
-        return atomicChamberCreateData;
-    }
-
-    // Push property chambers
-    if(property) {
-        const createdChamberId = atomicChamberCreateData.data;
-        return await propertiesHelpers.addPropertyChamberByPropertyId(property, createdChamberId);
-    }
-
-    return atomicChamberCreateData;
 };
 
 // Update chamber
@@ -144,31 +148,10 @@ module.exports.archiveChamberByChamberId = async (id) => {
     return await atomicChamberUpdate(id, {$set: {enable: false, property: null}});
 };
 
-// Embedded chamber fetch into database
-const embeddedChamberFetch = async (directives) => {
-    // Data
-    let client, data = null, status = false, message = "";
-    client = new MongoClient(databaseUrl);
-    try {
-        await client.connect();
-        // Query
-        const embeddedChamberFetchData = await client.db().collection(chambersCollection)
-            .aggregate(directives)
-            .toArray();
-        // Format response
-        if(embeddedChamberFetchData.length > 0) {
-            status = true;
-            data = new ChamberModel(embeddedChamberFetchData[0]).responseFormat;
-        }
-        else message = errorConstants.CHAMBERS.CHAMBER_NOT_FOUND;
-    }
-    catch (err) {
-        generalHelpers.log("Connection failure to mongodb", err);
-        message = errorConstants.GENERAL.DATABASE;
-    }
-    finally { await client.close(); }
-    return {data, status, message};
-};
+
+
+
+
 
 // Embedded chambers fetch into database
 const embeddedChambersFetch = async (directives) => {
@@ -186,6 +169,32 @@ const embeddedChambersFetch = async (directives) => {
         data = [];
         status = true;
         embeddedChambersFetchData.forEach(item => data.push(new ChamberModel(item).simpleResponseFormat));
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
+// Embedded chamber fetch into database
+const embeddedChamberFetch = async (directives) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const embeddedChamberFetchData = await client.db().collection(chambersCollection)
+            .aggregate(directives)
+            .toArray();
+        // Format response
+        if(embeddedChamberFetchData.length > 0) {
+            status = true;
+            data = new ChamberModel(embeddedChamberFetchData[0]).responseFormat;
+        }
+        else message = errorConstants.CHAMBERS.CHAMBER_NOT_FOUND;
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

@@ -11,13 +11,11 @@ router.put('/create', [tokenMiddleware, basicPermissionMiddleware], chambersCont
 /*
 
 
-router.get('', [tokenMiddleware, basicPermissionMiddleware], propertiesController.properties);
-router.get('/:propertyId', [tokenMiddleware, basicPermissionMiddleware], propertiesController.property);
-router.post('/:propertyId/update-info', [tokenMiddleware, basicPermissionMiddleware], propertiesController.updateInfo);
+router.get('/:propertyId/detail', [tokenMiddleware, basicPermissionMiddleware], propertiesController.property);
+router.post('/:propertyId/info-update', [tokenMiddleware, basicPermissionMiddleware], propertiesController.updateInfo);
 router.delete('/:propertyId/archive', [tokenMiddleware, basicPermissionMiddleware], propertiesController.archiveProperty);
 router.put('/:propertyId/picture-add', [pictureMiddleware, tokenMiddleware, basicPermissionMiddleware], propertiesController.addPicture);
 router.delete('/:propertyId/picture-delete/:pictureId', [tokenMiddleware, basicPermissionMiddleware], propertiesController.deletePicture);
-
 
  */
 
