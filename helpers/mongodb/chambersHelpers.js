@@ -54,10 +54,7 @@ module.exports.createChamber = async ({name, phone, rent, type, property, descri
     return atomicChamberCreateData;
 };
 
-
-
-
-// Fetch chamber with property into database
+// Fetch chamber by id with property & creator into database
 module.exports.chamberByIdWithPropertyAndCreator = async (id) => {
     // Data
     const _id = new ObjectId(id);
@@ -71,6 +68,9 @@ module.exports.chamberByIdWithPropertyAndCreator = async (id) => {
         { $match : {_id} }
     ]);
 };
+
+
+
 
 // Add chamber picture by chamber id
 module.exports.addChamberPictureByChamberId = async (id, picture) => {

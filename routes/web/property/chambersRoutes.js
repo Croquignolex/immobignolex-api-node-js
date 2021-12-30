@@ -7,11 +7,11 @@ const basicPermissionMiddleware = require("../../../middlewares/basicPermissionM
 
 router.get('', [tokenMiddleware, basicPermissionMiddleware], chambersController.chambers);
 router.put('/create', [tokenMiddleware, basicPermissionMiddleware], chambersController.create);
+router.get('/:chamberId/detail', [tokenMiddleware, basicPermissionMiddleware], chambersController.chamber);
 
 /*
 
 
-router.get('/:propertyId/detail', [tokenMiddleware, basicPermissionMiddleware], propertiesController.property);
 router.post('/:propertyId/info-update', [tokenMiddleware, basicPermissionMiddleware], propertiesController.updateInfo);
 router.delete('/:propertyId/archive', [tokenMiddleware, basicPermissionMiddleware], propertiesController.archiveProperty);
 router.put('/:propertyId/picture-add', [pictureMiddleware, tokenMiddleware, basicPermissionMiddleware], propertiesController.addPicture);

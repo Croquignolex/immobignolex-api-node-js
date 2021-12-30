@@ -13,13 +13,13 @@ module.exports.chambers = async (req, res) => {
 };
 
 // GET: Chamber
-module.exports.property = async (req, res) => {
+module.exports.chamber = async (req, res) => {
     // Route params
-    const {propertyId} = req.params;
+    const {chamberId} = req.params;
 
-    // Get property
-    const propertyByIdWithCaretakerAndCreatorData = await propertiesHelpers.propertyByIdWithCaretakerAndCreator(propertyId);
-    return res.send(propertyByIdWithCaretakerAndCreatorData);
+    // Get chamber
+    const chamberByIdWithPropertyAndCreatorData = await chambersHelpers.chamberByIdWithPropertyAndCreator(chamberId);
+    return res.send(chamberByIdWithPropertyAndCreatorData);
 };
 
 // PUT: Create chamber
