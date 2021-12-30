@@ -58,14 +58,14 @@ module.exports.updateInfo = async (req, res) => {
     return res.send(updatePropertyData);
 };
 
-// DELETE: Archive property
-module.exports.archiveProperty = async (req, res) => {
+// DELETE: Archive chamber
+module.exports.archiveChamber = async (req, res) => {
     // Form data & data
-    const {propertyId} = req.params;
+    const {chamberId} = req.params;
 
-    // Update property visibility
-    const archivePropertyByPropertyIdData = await propertiesHelpers.archivePropertyByPropertyId(propertyId);
-    return res.send(archivePropertyByPropertyIdData);
+    // Update chamber visibility
+    const archiveChamberByChamberIdData = await chambersHelpers.archiveChamberByChamberId(chamberId);
+    return res.send(archiveChamberByChamberIdData);
 };
 
 // PUT: Add property picture

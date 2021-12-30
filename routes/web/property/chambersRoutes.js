@@ -8,14 +8,15 @@ const basicPermissionMiddleware = require("../../../middlewares/basicPermissionM
 router.get('', [tokenMiddleware, basicPermissionMiddleware], chambersController.chambers);
 router.put('/create', [tokenMiddleware, basicPermissionMiddleware], chambersController.create);
 router.get('/:chamberId/detail', [tokenMiddleware, basicPermissionMiddleware], chambersController.chamber);
+router.delete('/:chamberId/archive', [tokenMiddleware, basicPermissionMiddleware], chambersController.archiveChamber);
+router.put('/:propertyId/picture-add', [pictureMiddleware, tokenMiddleware, basicPermissionMiddleware], propertiesController.addPicture);
+router.delete('/:propertyId/picture-delete/:pictureId', [tokenMiddleware, basicPermissionMiddleware], propertiesController.deletePicture);
 
 /*
 
 
 router.post('/:propertyId/info-update', [tokenMiddleware, basicPermissionMiddleware], propertiesController.updateInfo);
-router.delete('/:propertyId/archive', [tokenMiddleware, basicPermissionMiddleware], propertiesController.archiveProperty);
-router.put('/:propertyId/picture-add', [pictureMiddleware, tokenMiddleware, basicPermissionMiddleware], propertiesController.addPicture);
-router.delete('/:propertyId/picture-delete/:pictureId', [tokenMiddleware, basicPermissionMiddleware], propertiesController.deletePicture);
+
 
  */
 

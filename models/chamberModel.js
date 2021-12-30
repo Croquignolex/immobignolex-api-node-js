@@ -7,6 +7,13 @@ module.exports = class ChamberModel {
         Object.assign(this, chamber);
     };
 
+    get miniResponseFormat() {
+        return {
+            id: this._id,
+            name: this.name
+        };
+    };
+
     get simpleResponseFormat() {
         return {
             id: this._id,

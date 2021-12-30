@@ -34,17 +34,17 @@ module.exports.addPropertyPictureByPropertyId = async (id, picture) => {
     return await atomicPropertyUpdate(id, {$push: {pictures: picture}});
 };
 
-// Remove property picture by property if
+// Remove property picture by property id
 module.exports.removePropertyPictureByPropertyId = async (id, pictureId) => {
     return await atomicPropertyUpdate(id, {$pull: {pictures: {id: pictureId}}});
 };
 
-// Remove property chamber by property if
+// Remove property chamber by property id
 module.exports.removePropertyChamberByPropertyId = async (id, chamberId) => {
     return await atomicPropertyUpdate(id, {$pull: {chambers: new ObjectId(chamberId)}});
 };
 
-// Add property chamber by property if
+// Add property chamber by property id
 module.exports.addPropertyChamberByPropertyId = async (id, chamberId) => {
     return await atomicPropertyUpdate(id, {$push: {chambers: new ObjectId(chamberId)}});
 };
@@ -239,7 +239,6 @@ const atomicPropertyUpdate = async (id, directives) => {
         const atomicPropertyUpdateData = await client.db().collection(propertiesCollection).updateOne(
             {_id}, directives
         );
-        // Format response
         // Format response
         if(atomicPropertyUpdateData.matchedCount === 1 && atomicPropertyUpdateData.modifiedCount === 0) {
             message = errorConstants.GENERAL.NO_CHANGES;

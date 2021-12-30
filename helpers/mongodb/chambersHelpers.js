@@ -4,6 +4,7 @@ const generalHelpers = require('../generalHelpers');
 const ChamberModel = require('../../models/chamberModel');
 const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
+const goodsHelpers = require("../../helpers/mongodb/goodsHelpers");
 const generalConstants = require("../../constants/generalConstants");
 const propertiesHelpers = require("../../helpers/mongodb/propertiesHelpers");
 
@@ -69,6 +70,12 @@ module.exports.chamberByIdWithPropertyAndCreator = async (id) => {
     ]);
 };
 
+// Remove chamber good by chamber id
+module.exports.removeChamberGoodByChamberId = async (id, goodId) => {
+    return await atomicChamberUpdate(id, {$pull: {goods: new ObjectId(goodId)}});
+};
+
+
 
 
 
@@ -123,6 +130,13 @@ module.exports.updateChamber = async ({id, name, phone, rent, type, property, de
     return atomicChamberUpdateData;
 };
 
+
+
+
+
+
+
+
 // Archive chamber
 module.exports.archiveChamberByChamberId = async (id) => {
     // TODO: Implement archive procedures
@@ -130,13 +144,13 @@ module.exports.archiveChamberByChamberId = async (id) => {
     // Data
     const _id = new ObjectId(id);
 
-    // Fetch old chamber property
+    // Fetch chamber
     const atomicChamberFetchData = await atomicChamberFetch({_id});
     if(!atomicChamberFetchData.status) {
         return atomicChamberFetchData;
     }
 
-    // Remove old caretaker property id
+    // Remove property chamber
     const property = atomicChamberFetchData.data.property;
     if(property) {
         const removePropertyChamberByPropertyIdData = await propertiesHelpers.removePropertyChamberByPropertyId(property, _id);
@@ -145,13 +159,16 @@ module.exports.archiveChamberByChamberId = async (id) => {
         }
     }
 
+    // Archive chamber goods
+    const goods = atomicChamberFetchData.data.goods;
+    if(goods && goods?.length > 0) {
+        for(const good of goods) {
+            await goodsHelpers.simpleArchiveGoodByGoodId(good);
+        }
+    }
+
     return await atomicChamberUpdate(id, {$set: {enable: false, property: null}});
 };
-
-
-
-
-
 
 // Embedded chambers fetch into database
 const embeddedChambersFetch = async (directives) => {
