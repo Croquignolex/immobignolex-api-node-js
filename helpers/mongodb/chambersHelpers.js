@@ -75,19 +75,18 @@ module.exports.removeChamberGoodByChamberId = async (id, goodId) => {
     return await atomicChamberUpdate(id, {$pull: {goods: new ObjectId(goodId)}});
 };
 
-
-
-
-
 // Add chamber picture by chamber id
 module.exports.addChamberPictureByChamberId = async (id, picture) => {
     return await atomicChamberUpdate(id, {$push: {pictures: picture}});
 };
 
-// Remove chamber picture by chamber if
+// Remove chamber picture by chamber id
 module.exports.removeChamberPictureByChamberId = async (id, pictureId) => {
     return await atomicChamberUpdate(id, {$pull: {pictures: {id: pictureId}}});
 };
+
+
+
 
 // Update chamber
 module.exports.updateChamber = async ({id, name, phone, rent, type, property, description}) => {

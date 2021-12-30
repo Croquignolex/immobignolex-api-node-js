@@ -10,6 +10,16 @@ const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
 const goodsCollection = "goods";
 const databaseUrl = envConstants.DATABASE_URL;
 
+// Add good picture by good id
+module.exports.addGoodPictureByGoodId = async (id, picture) => {
+    return await atomicGoodUpdate(id, {$push: {pictures: picture}});
+};
+
+// Remove good picture by good id
+module.exports.removeGoodPictureByGoodId = async (id, pictureId) => {
+    return await atomicGoodUpdate(id, {$pull: {pictures: {id: pictureId}}});
+};
+
 // Simple archive good
 module.exports.simpleArchiveGoodByGoodId = async (id) => {
     return await atomicGoodUpdate(id, {$set: {enable: false}});

@@ -1,9 +1,8 @@
 const errorConstants = require("../../constants/errorConstants");
-const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
-const propertyPicturesHelpers = require("../../helpers/cloudary/propertyPicturesHelpers");
 const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
+const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
 const propertiesHelpers = require("../../helpers/mongodb/propertiesHelpers");
-
+const chamberPicturesHelpers = require("../../helpers/cloudary/chamberPicturesHelpers");
 
 // GET: All chambers
 module.exports.chambers = async (req, res) => {
@@ -68,7 +67,7 @@ module.exports.archiveChamber = async (req, res) => {
     return res.send(archiveChamberByChamberIdData);
 };
 
-// PUT: Add property picture
+// PUT: Add chamber picture
 module.exports.addPicture = async (req, res) => {
     // File data from multer (error management)
     const pictureError = req.picture;
@@ -83,20 +82,20 @@ module.exports.addPicture = async (req, res) => {
     }
 
     // Route params
-    const {propertyId} = req.params;
+    const {chamberId} = req.params;
 
-    // Save property picture in the cloud & database
-    const cloudAddPropertyPictureData = await propertyPicturesHelpers.cloudAddPropertyPicture(propertyId, file);
-    return res.send(cloudAddPropertyPictureData);
+    // Save chamber picture in the cloud & database
+    const cloudAddChamberPictureData = await chamberPicturesHelpers.cloudAddChamberPicture(chamberId, file);
+    return res.send(cloudAddChamberPictureData);
 };
 
-// DELETE: Delete property picture
+// DELETE: Delete chamber picture
 module.exports.deletePicture = async (req, res) => {
     // Route params
-    const {propertyId, pictureId} = req.params;
+    const {chamberId, pictureId} = req.params;
     const cloudPictureId = pictureId.split('-').join('/');
 
     // Remove picture in the cloud & database
-    const cloudRemovePropertyPictureData = await propertyPicturesHelpers.cloudRemovePropertyPicture(propertyId, cloudPictureId);
-    return res.send(cloudRemovePropertyPictureData);
+    const cloudRemoveChamberPictureData = await chamberPicturesHelpers.cloudRemoveChamberPicture(chamberId, cloudPictureId);
+    return res.send(cloudRemoveChamberPictureData);
 };
