@@ -30,5 +30,6 @@ module.exports.cloudAddChamberPicture = async (chamberId, file) => {
 module.exports.cloudRemoveChamberPicture = async (chamberId, pictureId) => {
     // Cloud call & db save
     await filesHelpers.cloudRemoveFile(pictureId);
+    console.log({chamberId, pictureId})
     return await chambersHelpers.removeChamberPictureByChamberId(chamberId, pictureId);
 };
