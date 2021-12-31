@@ -24,7 +24,7 @@ module.exports = class ChamberModel {
             phone: this.phone,
             goods: this.goods ? this.goods?.length : 0,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
-            property: this.container ? new PropertyModel(this.container).miniResponseFormat : null
+            property: this.building ? new PropertyModel(this.building).miniResponseFormat : null
         };
     };
 
@@ -40,7 +40,7 @@ module.exports = class ChamberModel {
             goods: this.goods ? this.goods?.length : 0,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
             creator: this.creator ? new UserModel(this.creator).miniResponseFormat : null,
-            property: this.container ? new PropertyModel(this.container).miniResponseFormat : null
+            property: this.building ? new PropertyModel(this.building).miniResponseFormat : null
         };
     };
 };

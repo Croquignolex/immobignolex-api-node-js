@@ -1,7 +1,6 @@
 const errorConstants = require("../../constants/errorConstants");
 const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
 const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
-const propertiesHelpers = require("../../helpers/mongodb/propertiesHelpers");
 const chamberPicturesHelpers = require("../../helpers/cloudary/chamberPicturesHelpers");
 
 // GET: All chambers
@@ -44,17 +43,17 @@ module.exports.create = async (req, res) => {
     return res.send(createChamberData);
 };
 
-// POST: Update property info
+// POST: Update chamber info
 module.exports.updateInfo = async (req, res) => {
     // Form data & data
-    const {propertyId} = req.params;
-    const {name, phone, address, caretaker, description} = req.body;
+    const {chamberId} = req.params;
+    const {name, phone, rent, type, property, description} = req.body;
 
-    // Update property
-    const updatePropertyData = await propertiesHelpers.updateProperty({
-        id: propertyId, name, phone, address, caretaker, description
+    // Update chamber
+    const updateChamberData = await chambersHelpers.updateChamber({
+        id: chamberId, name, phone, rent, type, property, description
     });
-    return res.send(updatePropertyData);
+    return res.send(updateChamberData);
 };
 
 // DELETE: Archive chamber

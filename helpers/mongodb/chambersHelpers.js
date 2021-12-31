@@ -17,7 +17,7 @@ const chamberPropertyLookup = {
         from: propertiesCollection,
         localField: "property",
         foreignField: "_id",
-        as: "container"
+        as: "building"
     }
 };
 
@@ -85,15 +85,12 @@ module.exports.removeChamberPictureByChamberId = async (id, pictureId) => {
     return await atomicChamberUpdate(id, {$pull: {pictures: {id: pictureId}}});
 };
 
-
-
-
 // Update chamber
 module.exports.updateChamber = async ({id, name, phone, rent, type, property, description}) => {
     // Data
     const _id = new ObjectId(id);
 
-    // Fetch old chamber property
+    // Fetch chamber
     const atomicChamberFetchData = await atomicChamberFetch({_id});
     if(!atomicChamberFetchData.status) {
         return atomicChamberFetchData;
@@ -128,13 +125,6 @@ module.exports.updateChamber = async ({id, name, phone, rent, type, property, de
 
     return atomicChamberUpdateData;
 };
-
-
-
-
-
-
-
 
 // Archive chamber
 module.exports.archiveChamberByChamberId = async (id) => {
