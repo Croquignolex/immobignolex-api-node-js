@@ -4,8 +4,8 @@ const generalHelpers = require('../generalHelpers');
 const PropertyModel = require('../../models/propertyModel');
 const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
-const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 const generalConstants = require('../../constants/generalConstants');
+const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
 
 // Data
 const propertiesCollection = "properties";
@@ -46,7 +46,7 @@ module.exports.removePropertyChamberByPropertyId = async (id, chamberId) => {
 
 // Add property chamber by property id
 module.exports.addPropertyChamberByPropertyId = async (id, chamberId) => {
-    return await atomicPropertyUpdate(id, {$push: {chambers: new ObjectId(chamberId)}});
+    return await atomicPropertyUpdate(id, {$addToSet: {chambers: new ObjectId(chamberId)}});
 };
 
 // Create property
@@ -63,44 +63,11 @@ module.exports.createProperty = async ({name, phone, address, description, creat
 };
 
 // Update property
-module.exports.updateProperty = async ({id, name, phone, address, caretaker, description}) => {
-    // Data
-    const _id = new ObjectId(id);
-
-    // Fetch old property caretaker
-    const atomicPropertyFetchData = await atomicPropertyFetch({_id});
-    if(!atomicPropertyFetchData.status) {
-        return atomicPropertyFetchData;
-    }
-
+module.exports.updateProperty = async ({id, name, phone, address, description}) => {
     // Update property info
-    const atomicPropertyUpdateData = await atomicPropertyUpdate(_id, {
-        $set: {name, phone, address, description, caretaker}
+    return await atomicPropertyUpdate(new ObjectId(id), {
+        $set: {name, phone, address, description}
     });
-    if(!atomicPropertyUpdateData.status) {
-        return atomicPropertyUpdateData;
-    }
-
-    // Old and new caretaker management
-    const oldCaretaker = atomicPropertyFetchData.data.caretaker;
-    if(oldCaretaker !== caretaker) {
-        // Remove old caretaker property id different from new caretaker
-        if(oldCaretaker) {
-            const removeUserPropertyByUsernameData = await usersHelpers.removeUserPropertyByUsername(oldCaretaker, _id);
-            if(!removeUserPropertyByUsernameData.status) {
-                return removeUserPropertyByUsernameData;
-            }
-        }
-        // Add new caretaker property id different from new caretaker
-        if(caretaker) {
-            const addUserPropertyByUsernameData = await usersHelpers.addUserPropertyByUsername(caretaker, _id);
-            if(!addUserPropertyByUsernameData.status) {
-                return addUserPropertyByUsernameData;
-            }
-        }
-    }
-
-    return atomicPropertyUpdateData;
 };
 
 // Archive property
@@ -116,16 +83,15 @@ module.exports.archivePropertyByPropertyId = async (id) => {
         return atomicPropertyFetchData;
     }
 
-    // Remove old caretaker property id
-    const caretaker = atomicPropertyFetchData.data.caretaker;
-    if(caretaker) {
-        const removeUserPropertyByUsernameData = await usersHelpers.removeUserPropertyByUsername(caretaker, _id);
-        if(!removeUserPropertyByUsernameData.status) {
-            return removeUserPropertyByUsernameData;
+    // Archive property chambers
+    const chambers = atomicPropertyFetchData.data.chambers;
+    if(chambers && chambers?.length > 0) {
+        for(const chamber of chambers) {
+            await chambersHelpers.simpleArchiveChamberByChamberId(chamber);
         }
     }
 
-    return await atomicPropertyUpdate(id, {$set: {enable: false, caretaker: null}});
+    return await atomicPropertyUpdate(id, {$set: {enable: false}});
 };
 
 // Atomic properties fetch into database

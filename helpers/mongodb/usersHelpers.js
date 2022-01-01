@@ -51,16 +51,6 @@ module.exports.tenantsWithoutUserByUsername = async (username) => {
     });
 };
 
-// Add user property by username
-module.exports.addUserPropertyByUsername = async (username, propertyId) => {
-    return await atomicUserUpdate(username, {$addToSet: {properties: propertyId}});
-};
-
-// Remove user property by username
-module.exports.removeUserPropertyByUsername = async (username, propertyId) => {
-    return await atomicUserUpdate(username, {$pull: {properties: propertyId}});
-};
-
 // Update user avatar by username
 module.exports.updateUserAvatarByUsername = async (username, avatar) => {
     return await atomicUserUpdate(username, {$set: {avatar}});

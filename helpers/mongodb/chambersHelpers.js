@@ -126,6 +126,30 @@ module.exports.updateChamber = async ({id, name, phone, rent, type, property, de
     return atomicChamberUpdateData;
 };
 
+// Simple archive chamber
+module.exports.simpleArchiveChamberByChamberId = async (id) => {
+    // TODO: Implement archive procedures
+
+    // Data
+    const _id = new ObjectId(id);
+
+    // Fetch chamber
+    const atomicChamberFetchData = await atomicChamberFetch({_id});
+    if(!atomicChamberFetchData.status) {
+        return atomicChamberFetchData;
+    }
+
+    // Archive chamber goods
+    const goods = atomicChamberFetchData.data.goods;
+    if(goods && goods?.length > 0) {
+        for(const good of goods) {
+            await goodsHelpers.simpleArchiveGoodByGoodId(good);
+        }
+    }
+
+    return await atomicChamberUpdate(id, {$set: {enable: false}});
+}
+
 // Archive chamber
 module.exports.archiveChamberByChamberId = async (id) => {
     // TODO: Implement archive procedures

@@ -22,6 +22,8 @@ module.exports.removeGoodPictureByGoodId = async (id, pictureId) => {
 
 // Simple archive good
 module.exports.simpleArchiveGoodByGoodId = async (id) => {
+    // TODO: Implement archive procedures
+
     return await atomicGoodUpdate(id, {$set: {enable: false}});
 }
 
