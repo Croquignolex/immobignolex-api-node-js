@@ -25,7 +25,7 @@ const chamberPropertyLookup = {
 module.exports.chambersWithProperty = async () => {
     return await embeddedChambersFetch([
         chamberPropertyLookup,
-        generalHelpers.databaseUnwind("$container"),
+        generalHelpers.databaseUnwind("$building"),
         { $match : {enable: true} }
     ]);
 };
@@ -63,7 +63,7 @@ module.exports.chamberByIdWithPropertyAndCreator = async (id) => {
     // Database fetch
     return await embeddedChamberFetch([
         chamberPropertyLookup,
-        generalHelpers.databaseUnwind("$container"),
+        generalHelpers.databaseUnwind("$building"),
         generalConstants.LOOP_DIRECTIVE.CREATOR,
         generalHelpers.databaseUnwind("$creator"),
         { $match : {_id} }
