@@ -19,6 +19,7 @@ module.exports = class PropertyModel {
             name: this.name,
             phone: this.phone,
             address: this.address,
+            occupied: this.occupied,
             occupation: this.occupation,
             chambers: this.chambers ? this.chambers?.length : 0,
             employees: this.employees ? this.employees?.length : 0,

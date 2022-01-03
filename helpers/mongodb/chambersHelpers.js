@@ -172,8 +172,9 @@ module.exports.archiveChamberByChamberId = async (id) => {
 
     // Remove property chamber
     const property = atomicChamberFetchData.data.property;
+    const isOccupied = !atomicChamberFetchData.data.free;
     if(property) {
-        const removePropertyChamberByPropertyIdData = await propertiesHelpers.removePropertyChamberByPropertyId(property, id);
+        const removePropertyChamberByPropertyIdData = await propertiesHelpers.removePropertyChamberByPropertyId(property, id, isOccupied);
         if(!removePropertyChamberByPropertyIdData.status) {
             return removePropertyChamberByPropertyIdData;
         }

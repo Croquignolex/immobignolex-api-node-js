@@ -48,10 +48,11 @@ module.exports.removePropertyPictureByPropertyId = async (id, pictureId) => {
 module.exports.removePropertyChamberByPropertyId = async (id, chamberId, isOccupied) => {
     // Calculate occupation
     const atomicPropertyFetchData = await atomicPropertyFetch({_id: new ObjectId(id)});
-    const propertyData = atomicPropertyFetchData.data?.responseFormat;
+    const propertyData = atomicPropertyFetchData.data?.simpleResponseFormat;
     const occupiedChambers = propertyData.occupied;
     const occupied = isOccupied ? occupiedChambers - 1 : occupiedChambers;
-    const occupation = Math.round((occupied * 100) / (propertyData.chambers - 1));
+    const occupation = Math.round((occupied * 100) / (propertyData.chambers - 1)) || 0;
+    console.log(occupied, propertyData.chambers, occupation)
     // Update
     return await atomicPropertyUpdate(id, {$pull: {chambers: new ObjectId(chamberId)}, $set: {occupation, occupied}});
 };
@@ -60,7 +61,7 @@ module.exports.removePropertyChamberByPropertyId = async (id, chamberId, isOccup
 module.exports.addPropertyChamberByPropertyId = async (id, chamberId, isOccupied) => {
     // Calculate occupation
     const atomicPropertyFetchData = await atomicPropertyFetch({_id: new ObjectId(id)});
-    const propertyData = atomicPropertyFetchData.data?.responseFormat;
+    const propertyData = atomicPropertyFetchData.data?.simpleResponseFormat;
     const occupiedChambers = propertyData.occupied;
     const occupied = isOccupied ? occupiedChambers + 1 : occupiedChambers;
     const occupation = Math.round((occupied * 100) / (propertyData.chambers + 1));
