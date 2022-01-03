@@ -48,16 +48,9 @@ module.exports.createChamber = async ({name, phone, rent, type, property, descri
 
     // Push property chambers & update occupation
     if(property) {
-        // Calculate occupation
-        const propertyByIdData = await propertiesHelpers.propertyById(property);
-        const propertyByIdDataResponse = propertyByIdData.data?.responseFormat;
-        const occupation = propertyByIdDataResponse.occupation;
-        const chambers = propertyByIdDataResponse.chambers;
-        const occupyChambers = (chambers * occupation) / 100;
-        const newOccupation = (occupyChambers * 100) / (chambers + 1);
         // Update property occupation
         const createdChamberId = atomicChamberCreateData.data;
-        return await propertiesHelpers.addPropertyChamberAndOccupationByPropertyId(property, createdChamberId, newOccupation);
+        return await propertiesHelpers.addPropertyChamberByPropertyId(property, createdChamberId, false);
     }
 
     return atomicChamberCreateData;
@@ -119,17 +112,18 @@ module.exports.updateChamber = async ({id, name, phone, rent, type, property, de
 
     // Old and new property management
     const oldProperty = atomicChamberFetchData.data.property;
+    const isOccupied = !atomicChamberFetchData.data.free;
     if(oldProperty !== property) {
         // Remove old chamber property id different from new property
         if(oldProperty) {
-            const removePropertyChamberByPropertyIdData = await propertiesHelpers.removePropertyChamberByPropertyId(oldProperty, id);
+            const removePropertyChamberByPropertyIdData = await propertiesHelpers.removePropertyChamberByPropertyId(oldProperty, id, isOccupied);
             if(!removePropertyChamberByPropertyIdData.status) {
                 return removePropertyChamberByPropertyIdData;
             }
         }
         // Add new chamber property id different from new property
         if(property) {
-            const addPropertyChamberByPropertyIdData = await propertiesHelpers.addPropertyChamberByPropertyId(property, id);
+            const addPropertyChamberByPropertyIdData = await propertiesHelpers.addPropertyChamberByPropertyId(property, id, isOccupied);
             if(!addPropertyChamberByPropertyIdData.status) {
                 return addPropertyChamberByPropertyIdData;
             }

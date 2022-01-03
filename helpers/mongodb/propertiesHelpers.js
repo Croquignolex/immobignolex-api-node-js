@@ -45,18 +45,27 @@ module.exports.removePropertyPictureByPropertyId = async (id, pictureId) => {
 };
 
 // Remove property chamber by property id
-module.exports.removePropertyChamberByPropertyId = async (id, chamberId) => {
-    return await atomicPropertyUpdate(id, {$pull: {chambers: new ObjectId(chamberId)}});
+module.exports.removePropertyChamberByPropertyId = async (id, chamberId, isOccupied) => {
+    // Calculate occupation
+    const atomicPropertyFetchData = await atomicPropertyFetch({_id: new ObjectId(id)});
+    const propertyData = atomicPropertyFetchData.data?.responseFormat;
+    const occupiedChambers = propertyData.occupied;
+    const occupied = isOccupied ? occupiedChambers - 1 : occupiedChambers;
+    const occupation = Math.round((occupied * 100) / (propertyData.chambers - 1));
+    // Update
+    return await atomicPropertyUpdate(id, {$pull: {chambers: new ObjectId(chamberId)}, $set: {occupation, occupied}});
 };
 
 // Add property chamber by property id
-module.exports.addPropertyChamberByPropertyId = async (id, chamberId) => {
-    return await atomicPropertyUpdate(id, {$addToSet: {chambers: new ObjectId(chamberId)}});
-};
-
-// Add property chamber & occupation by property id
-module.exports.addPropertyChamberAndOccupationByPropertyId = async (id, chamberId, occupation) => {
-    return await atomicPropertyUpdate(id, {$addToSet: {chambers: new ObjectId(chamberId)}, $set: {occupation}});
+module.exports.addPropertyChamberByPropertyId = async (id, chamberId, isOccupied) => {
+    // Calculate occupation
+    const atomicPropertyFetchData = await atomicPropertyFetch({_id: new ObjectId(id)});
+    const propertyData = atomicPropertyFetchData.data?.responseFormat;
+    const occupiedChambers = propertyData.occupied;
+    const occupied = isOccupied ? occupiedChambers + 1 : occupiedChambers;
+    const occupation = Math.round((occupied * 100) / (propertyData.chambers + 1));
+    // Update
+    return await atomicPropertyUpdate(id, {$addToSet: {chambers: new ObjectId(chamberId)}, $set: {occupation, occupied}});
 };
 
 // Create property
@@ -68,7 +77,7 @@ module.exports.createProperty = async ({name, phone, address, description, creat
 
     // Keep into database
     return await atomicPropertyCreate({
-        name, phone, address, enable, occupation: 0, description, created_by, created_at
+        name, phone, address, enable, occupation: 0, occupied: 0, description, created_by, created_at
     });
 };
 
