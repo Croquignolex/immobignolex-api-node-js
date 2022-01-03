@@ -1,7 +1,7 @@
 const errorConstants = require("../../constants/errorConstants");
 const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 const tokensHelpers = require("../../helpers/mongodb/tokensHelpers");
-const {requiredChecker} = require("../../helpers/formCheckerHelpers");
+const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
 
 // POST: Attempt login
 module.exports.login = async (req, res) => {
@@ -15,7 +15,7 @@ module.exports.login = async (req, res) => {
     }
 
     // Form checker
-    if(!requiredChecker(username) || !requiredChecker(password)) {
+    if(!formCheckerHelpers.requiredChecker(username) || !formCheckerHelpers.requiredChecker(password)) {
         return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
     }
 

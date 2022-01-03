@@ -1,6 +1,7 @@
 const errorConstants = require('../../constants/errorConstants');
 const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 const avatarsHelpers = require('../../helpers/cloudary/avatarsHelpers');
+const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
 
 // POST: Update user avatar
 module.exports.updateAvatar = async (req, res) => {
@@ -49,6 +50,11 @@ module.exports.updateInfo = async (req, res) => {
     // Form data the query
     const {name, phone, email, description} = req.body;
 
+    // Form checker
+    if(!formCheckerHelpers.requiredChecker(name)) {
+        return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
+    }
+
     // Save user info in the database
     const username = req.username;
     const updateUserInfoByUsernameData = await usersHelpers.updateUserInfoByUsername(
@@ -61,6 +67,12 @@ module.exports.updateInfo = async (req, res) => {
 module.exports.updatePassword = async (req, res) => {
     // Form data the query
     const {oldPassword, newPassword} = req.body;
+
+    // Form checker
+    if(!formCheckerHelpers.requiredChecker(oldPassword) || !formCheckerHelpers.requiredChecker(newPassword)) {
+        return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
+    }
+
     if(oldPassword === newPassword) {
         return res.send({status: false, data: null, message: errorConstants.USERS.SAME_PASSWORD});
     }

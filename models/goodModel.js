@@ -17,28 +17,26 @@ module.exports = class GoodModel {
     get simpleResponseFormat() {
         return {
             id: this._id,
-            type: this.type,
             name: this.name,
             color: this.color,
             weigh: this.weigh,
             height: this.height,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
-            chamber: this.container ? new ChamberModel(this.container).miniResponseFormat : null
+            chamber: this.unit ? new ChamberModel(this.unit).miniResponseFormat : null
         };
     };
 
     get responseFormat() {
         return {
             id: this._id,
-            type: this.type,
             name: this.name,
             color: this.color,
             weigh: this.weigh,
             height: this.height,
             created_at: this.created_at,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
-            creator: this.creator ? new UserModel(this.creator).miniResponseFormat : null,
-            chamber: this.container ? new ChamberModel(this.container).miniResponseFormat : null
+            chamber: this.unit ? new ChamberModel(this.unit).miniResponseFormat : null,
+            creator: this.creator ? new UserModel(this.creator).miniResponseFormat : null
         };
     };
 };

@@ -70,6 +70,11 @@ module.exports.chamberByIdWithPropertyAndCreator = async (id) => {
     ]);
 };
 
+// Add chamber good by chamber id
+module.exports.addChamberGoodByChamberId = async (id, goodId) => {
+    return await atomicChamberUpdate(id, {$addToSet: {goods: new ObjectId(goodId)}});
+};
+
 // Remove chamber good by chamber id
 module.exports.removeChamberGoodByChamberId = async (id, goodId) => {
     return await atomicChamberUpdate(id, {$pull: {goods: new ObjectId(goodId)}});
@@ -114,7 +119,7 @@ module.exports.updateChamber = async ({id, name, phone, rent, type, property, de
                 return removePropertyChamberByPropertyIdData;
             }
         }
-        // Add new caretaker property id different from new caretaker
+        // Add new chamber property id different from new property
         if(property) {
             const addPropertyChamberByPropertyIdData = await propertiesHelpers.addPropertyChamberByPropertyId(property, _id);
             if(!addPropertyChamberByPropertyIdData.status) {

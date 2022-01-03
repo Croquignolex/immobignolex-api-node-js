@@ -44,6 +44,11 @@ module.exports.updateInfo = async (req, res) => {
     const {propertyId} = req.params;
     const {name, phone, address, description} = req.body;
 
+    // Form checker
+    if(!formCheckerHelpers.requiredChecker(name)) {
+        return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
+    }
+
     // Update property
     const updatePropertyData = await propertiesHelpers.updateProperty({
         id: propertyId, name, phone, address, description

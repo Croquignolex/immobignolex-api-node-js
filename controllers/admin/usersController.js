@@ -56,6 +56,11 @@ module.exports.updateInfo = async (req, res) => {
     const {username} = req.params;
     const {name, phone, email, cni, post, description} = req.body;
 
+    // Form checker
+    if(!formCheckerHelpers.requiredChecker(name)) {
+        return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
+    }
+
     // Update user
     const updateUserInfoByUsernameData = await usersHelpers.updateUserInfoByUsername(
         username,
