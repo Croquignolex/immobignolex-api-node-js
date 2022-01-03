@@ -34,6 +34,7 @@ module.exports = class GoodModel {
             weigh: this.weigh,
             height: this.height,
             created_at: this.created_at,
+            description: this.description,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
             chamber: this.unit ? new ChamberModel(this.unit).miniResponseFormat : null,
             creator: this.creator ? new UserModel(this.creator).miniResponseFormat : null
