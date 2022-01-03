@@ -66,7 +66,7 @@ module.exports.updateGood = async ({id, name, color, weigh, height, chamber, des
     }
 
     // Update good info
-    const atomicGoodUpdateData = await atomicGoodUpdate(_id, {
+    const atomicGoodUpdateData = await atomicGoodUpdate(id, {
         $set: {name, color, weigh, height, description, chamber: new ObjectId(chamber)}
     });
     if(!atomicGoodUpdateData.status) {
@@ -78,14 +78,14 @@ module.exports.updateGood = async ({id, name, color, weigh, height, chamber, des
     if(oldChamber !== chamber) {
         // Remove old good chamber id different from new chamber
         if(oldChamber) {
-            const removeChamberGoodByChamberIdData = await chambersHelpers.removeChamberGoodByChamberId(oldChamber, _id);
+            const removeChamberGoodByChamberIdData = await chambersHelpers.removeChamberGoodByChamberId(oldChamber, id);
             if(!removeChamberGoodByChamberIdData.status) {
                 return removeChamberGoodByChamberIdData;
             }
         }
         // Add new good chamber id different from new chamber
         if(chamber) {
-            const addChamberGoodByChamberIdData = await chambersHelpers.addChamberGoodByChamberId(chamber, _id);
+            const addChamberGoodByChamberIdData = await chambersHelpers.addChamberGoodByChamberId(chamber, id);
             if(!addChamberGoodByChamberIdData.status) {
                 return addChamberGoodByChamberIdData;
             }
@@ -143,7 +143,7 @@ module.exports.archiveGoodByGoodId = async (id) => {
     // Remove chamber good
     const chamber = atomicGoodFetchData.data.chamber;
     if(chamber) {
-        const removeChamberGoodByChamberIdData = await chambersHelpers.removeChamberGoodByChamberId(chamber, _id);
+        const removeChamberGoodByChamberIdData = await chambersHelpers.removeChamberGoodByChamberId(chamber, id);
         if(!removeChamberGoodByChamberIdData.status) {
             return removeChamberGoodByChamberIdData;
         }

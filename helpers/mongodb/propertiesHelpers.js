@@ -16,6 +16,11 @@ module.exports.properties = async () => {
     return await atomicPropertiesFetch({enable: true});
 };
 
+// Fetch property by id into database
+module.exports.propertyById = async (id) => {
+    return await atomicPropertyFetch({_id: new ObjectId(id)});
+};
+
 // Fetch property by id with creator into database
 module.exports.propertyByIdWithCreator = async (id) => {
     // Data
@@ -49,6 +54,11 @@ module.exports.addPropertyChamberByPropertyId = async (id, chamberId) => {
     return await atomicPropertyUpdate(id, {$addToSet: {chambers: new ObjectId(chamberId)}});
 };
 
+// Add property chamber & occupation by property id
+module.exports.addPropertyChamberAndOccupationByPropertyId = async (id, chamberId, occupation) => {
+    return await atomicPropertyUpdate(id, {$addToSet: {chambers: new ObjectId(chamberId)}, $set: {occupation}});
+};
+
 // Create property
 module.exports.createProperty = async ({name, phone, address, description, creator}) => {
     // Data
@@ -58,14 +68,14 @@ module.exports.createProperty = async ({name, phone, address, description, creat
 
     // Keep into database
     return await atomicPropertyCreate({
-        name, phone, address, enable, description, created_by, created_at
+        name, phone, address, enable, occupation: 0, description, created_by, created_at
     });
 };
 
 // Update property
 module.exports.updateProperty = async ({id, name, phone, address, description}) => {
     // Update property info
-    return await atomicPropertyUpdate(new ObjectId(id), {
+    return await atomicPropertyUpdate(id, {
         $set: {name, phone, address, description}
     });
 };

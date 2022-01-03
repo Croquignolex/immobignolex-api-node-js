@@ -46,10 +46,18 @@ module.exports.createChamber = async ({name, phone, rent, type, property, descri
         return atomicChamberCreateData;
     }
 
-    // Push property chambers
+    // Push property chambers & update occupation
     if(property) {
+        // Calculate occupation
+        const propertyByIdData = await propertiesHelpers.propertyById(property);
+        const propertyByIdDataResponse = propertyByIdData.data?.responseFormat;
+        const occupation = propertyByIdDataResponse.occupation;
+        const chambers = propertyByIdDataResponse.chambers;
+        const occupyChambers = (chambers * occupation) / 100;
+        const newOccupation = (occupyChambers * 100) / (chambers + 1);
+        // Update property occupation
         const createdChamberId = atomicChamberCreateData.data;
-        return await propertiesHelpers.addPropertyChamberByPropertyId(property, createdChamberId);
+        return await propertiesHelpers.addPropertyChamberAndOccupationByPropertyId(property, createdChamberId, newOccupation);
     }
 
     return atomicChamberCreateData;
@@ -102,7 +110,7 @@ module.exports.updateChamber = async ({id, name, phone, rent, type, property, de
     }
 
     // Update chamber info
-    const atomicChamberUpdateData = await atomicChamberUpdate(_id, {
+    const atomicChamberUpdateData = await atomicChamberUpdate(id, {
         $set: {name, phone, rent, description, type, property: new ObjectId(property)}
     });
     if(!atomicChamberUpdateData.status) {
@@ -114,14 +122,14 @@ module.exports.updateChamber = async ({id, name, phone, rent, type, property, de
     if(oldProperty !== property) {
         // Remove old chamber property id different from new property
         if(oldProperty) {
-            const removePropertyChamberByPropertyIdData = await propertiesHelpers.removePropertyChamberByPropertyId(oldProperty, _id);
+            const removePropertyChamberByPropertyIdData = await propertiesHelpers.removePropertyChamberByPropertyId(oldProperty, id);
             if(!removePropertyChamberByPropertyIdData.status) {
                 return removePropertyChamberByPropertyIdData;
             }
         }
         // Add new chamber property id different from new property
         if(property) {
-            const addPropertyChamberByPropertyIdData = await propertiesHelpers.addPropertyChamberByPropertyId(property, _id);
+            const addPropertyChamberByPropertyIdData = await propertiesHelpers.addPropertyChamberByPropertyId(property, id);
             if(!addPropertyChamberByPropertyIdData.status) {
                 return addPropertyChamberByPropertyIdData;
             }
@@ -171,7 +179,7 @@ module.exports.archiveChamberByChamberId = async (id) => {
     // Remove property chamber
     const property = atomicChamberFetchData.data.property;
     if(property) {
-        const removePropertyChamberByPropertyIdData = await propertiesHelpers.removePropertyChamberByPropertyId(property, _id);
+        const removePropertyChamberByPropertyIdData = await propertiesHelpers.removePropertyChamberByPropertyId(property, id);
         if(!removePropertyChamberByPropertyIdData.status) {
             return removePropertyChamberByPropertyIdData;
         }
