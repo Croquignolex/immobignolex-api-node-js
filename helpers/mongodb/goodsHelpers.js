@@ -55,7 +55,7 @@ module.exports.createGood = async ({name, weigh, color, height, chamber, descrip
 };
 
 // Update good
-module.exports.updateGood = async ({id, name, weigh, height, chamber, description}) => {
+module.exports.updateGood = async ({id, name, color, weigh, height, chamber, description}) => {
     // Data
     const _id = new ObjectId(id);
 
@@ -67,7 +67,7 @@ module.exports.updateGood = async ({id, name, weigh, height, chamber, descriptio
 
     // Update good info
     const atomicGoodUpdateData = await atomicGoodUpdate(_id, {
-        $set: {name, weigh, height, description, chamber: new ObjectId(chamber)}
+        $set: {name, color, weigh, height, description, chamber: new ObjectId(chamber)}
     });
     if(!atomicGoodUpdateData.status) {
         return atomicGoodUpdateData;

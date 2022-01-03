@@ -59,7 +59,7 @@ module.exports.updateInfo = async (req, res) => {
 
     // Update good
     const updateGoodData = await goodsHelpers.updateGood({
-        id: goodId, name, weigh, height, chamber, description
+        id: goodId, name, color, weigh, height, chamber, description
     });
     return res.send(updateGoodData);
 };
