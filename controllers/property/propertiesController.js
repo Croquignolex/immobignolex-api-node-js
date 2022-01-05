@@ -2,6 +2,7 @@ const errorConstants = require("../../constants/errorConstants");
 const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
 const propertiesHelpers = require("../../helpers/mongodb/propertiesHelpers");
 const propertyPicturesHelpers = require("../../helpers/cloudary/propertyPicturesHelpers");
+const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
 
 // GET: All properties
 module.exports.properties = async (req, res) => {
@@ -97,4 +98,14 @@ module.exports.deletePicture = async (req, res) => {
     // Remove picture in the cloud & database
     const cloudRemovePropertyPictureData = await propertyPicturesHelpers.cloudRemovePropertyPicture(propertyId, cloudPictureId);
     return res.send(cloudRemovePropertyPictureData);
+};
+
+// GET: All chambers
+module.exports.chambers = async (req, res) => {
+    // Route params
+    const {propertyId} = req.params;
+
+    // Get property chambers
+    const propertyChambersData = await chambersHelpers.propertyChambers(propertyId);
+    return res.send(propertyChambersData);
 };

@@ -30,6 +30,11 @@ module.exports.chambersWithProperty = async () => {
     ]);
 };
 
+// Fetch all property chambers into database
+module.exports.propertyChambers = async (property) => {
+    return await atomicChambersFetch({enable: true, property: new ObjectId(property)});
+};
+
 // Create chamber
 module.exports.createChamber = async ({name, phone, rent, type, property, description, creator}) => {
     // Data
@@ -233,6 +238,31 @@ const embeddedChamberFetch = async (directives) => {
             data = new ChamberModel(embeddedChamberFetchData[0]).responseFormat;
         }
         else message = errorConstants.CHAMBERS.CHAMBER_NOT_FOUND;
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
+// Atomic chambers fetch into database
+const atomicChambersFetch = async (directives) => {
+    let client, data = null, status = false, message = "";
+    // Data
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const atomicChambersFetchData = await client.db().collection(chambersCollection)
+            .find(directives)
+            .sort({created_at: -1})
+            .toArray();
+        // Format response
+        data = [];
+        status = true;
+        atomicChambersFetchData.forEach(item => data.push(new ChamberModel(item).simpleResponseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
