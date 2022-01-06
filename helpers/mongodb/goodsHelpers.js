@@ -29,6 +29,11 @@ module.exports.goodsWithChamber = async () => {
     ]);
 };
 
+// Fetch all chamber goods into database
+module.exports.chamberGoods = async (chamber) => {
+    return await atomicGoodsFetch({enable: true, chamber: new ObjectId(chamber)});
+};
+
 // Create good
 module.exports.createGood = async ({name, weigh, color, height, chamber, description, creator}) => {
     // Data
@@ -194,6 +199,31 @@ const embeddedGoodFetch = async (directives) => {
             data = new GoodModel(embeddedGoodFetchData[0]).responseFormat;
         }
         else message = errorConstants.GOODS.GOOD_NOT_FOUND;
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
+// Atomic goods fetch into database
+const atomicGoodsFetch = async (directives) => {
+    let client, data = null, status = false, message = "";
+    // Data
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const atomicGoodsFetchData = await client.db().collection(goodsCollection)
+            .find(directives)
+            .sort({created_at: -1})
+            .toArray();
+        // Format response
+        data = [];
+        status = true;
+        atomicGoodsFetchData.forEach(item => data.push(new GoodModel(item).simpleResponseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
