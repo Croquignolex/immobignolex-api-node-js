@@ -6,5 +6,6 @@ const leasesController = require('../../../controllers/management/leasesControll
 const basicPermissionMiddleware = require("../../../middlewares/basicPermissionMiddleware");
 
 router.get('', [tokenMiddleware, basicPermissionMiddleware], leasesController.leases);
+router.put('/create', [tokenMiddleware, basicPermissionMiddleware], leasesController.create);
 
 module.exports = router;

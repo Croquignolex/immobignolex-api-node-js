@@ -104,6 +104,12 @@ module.exports.deletePicture = async (req, res) => {
 module.exports.chambers = async (req, res) => {
     // Route params
     const {propertyId} = req.params;
+    const {free} = req.query;
+
+    if(free) {
+        const propertyFreeChambersData = await chambersHelpers.propertyFreeChambers(propertyId);
+        return res.send(propertyFreeChambersData);
+    }
 
     // Get property chambers
     const propertyChambersData = await chambersHelpers.propertyChambers(propertyId);

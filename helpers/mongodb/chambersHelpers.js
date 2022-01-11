@@ -35,6 +35,11 @@ module.exports.propertyChambers = async (property) => {
     return await atomicChambersFetch({enable: true, property: new ObjectId(property)});
 };
 
+// Fetch all property free chambers into database
+module.exports.propertyFreeChambers = async (property) => {
+    return await atomicChambersFetch({enable: true, free: true, property: new ObjectId(property)});
+};
+
 // Create chamber
 module.exports.createChamber = async ({name, phone, rent, type, property, description, creator}) => {
     // Data
