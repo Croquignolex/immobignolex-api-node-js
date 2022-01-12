@@ -43,13 +43,14 @@ module.exports.propertyFreeChambers = async (property) => {
 // Create chamber
 module.exports.createChamber = async ({name, phone, rent, type, property, description, creator}) => {
     // Data
+    const free = true;
     const enable = true;
     const created_by = creator;
     const created_at = new Date();
 
     // Keep into database
     const atomicChamberCreateData = await atomicChamberCreate({
-        name, phone, rent: parseInt(rent, 10) || 0, free: true, enable, description, type,
+        name, phone, rent: parseInt(rent, 10) || 0, free, enable, description, type,
         created_by, created_at, property: new ObjectId(property)
     });
     if(!atomicChamberCreateData.status) {
