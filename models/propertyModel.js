@@ -20,7 +20,7 @@ module.exports = class PropertyModel {
             phone: this.phone,
             address: this.address,
             occupied: this.occupied,
-            occupation: this.occupation,
+            occupation: this.occupied_percentage,
             chambers: this.chambers ? this.chambers?.length : 0,
             employees: this.employees ? this.employees?.length : 0,
             pictures: generalHelpers.picturesPublicUrl(this.pictures)
@@ -34,8 +34,8 @@ module.exports = class PropertyModel {
             phone: this.phone,
             address: this.address,
             created_at: this.created_at,
-            occupation: this.occupation,
             description: this.description,
+            occupied_percentage: this.occupied_percentage,
             chambers: this.chambers ? this.chambers?.length : 0,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
             creator: this.creator ? new UserModel(this.creator).miniResponseFormat : null

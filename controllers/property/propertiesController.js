@@ -1,24 +1,19 @@
 const errorConstants = require("../../constants/errorConstants");
 const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
+const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
 const propertiesHelpers = require("../../helpers/mongodb/propertiesHelpers");
 const propertyPicturesHelpers = require("../../helpers/cloudary/propertyPicturesHelpers");
-const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
 
 // GET: All properties
 module.exports.properties = async (req, res) => {
-    // Get properties
-    const propertiesData = await propertiesHelpers.properties();
-    return res.send(propertiesData);
+    return res.send(await propertiesHelpers.properties());
 };
 
 // GET: Property
 module.exports.property = async (req, res) => {
     // Route params
     const {propertyId} = req.params;
-
-    // Get property
-    const propertyByIdWithCreatorData = await propertiesHelpers.propertyByIdWithCreator(propertyId);
-    return res.send(propertyByIdWithCreatorData);
+    return res.send(await propertiesHelpers.propertyByIdWithCreator(propertyId));
 };
 
 // PUT: Create property
@@ -33,10 +28,9 @@ module.exports.create = async (req, res) => {
     }
 
     // Database saving
-    const createPropertyData = await propertiesHelpers.createProperty({
+    return res.send(await propertiesHelpers.createProperty({
         name, phone, address, description, creator: username
-    });
-    return res.send(createPropertyData);
+    }));
 };
 
 // POST: Update property info
@@ -51,10 +45,9 @@ module.exports.updateInfo = async (req, res) => {
     }
 
     // Update property
-    const updatePropertyData = await propertiesHelpers.updateProperty({
+    return res.send(await propertiesHelpers.updateProperty({
         id: propertyId, name, phone, address, description
-    });
-    return res.send(updatePropertyData);
+    }));
 };
 
 // DELETE: Archive property

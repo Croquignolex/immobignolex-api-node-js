@@ -13,7 +13,7 @@ const databaseUrl = envConstants.DATABASE_URL;
 
 // Fetch all properties into database
 module.exports.properties = async () => {
-    return await atomicPropertiesFetch({enable: true});
+    return await atomicPropertiesFetch({deleted: false});
 };
 
 // Fetch property by id into database
@@ -91,6 +91,12 @@ module.exports.createProperty = async ({name, phone, address, description, creat
 
 // Update property
 module.exports.updateProperty = async ({id, name, phone, address, description}) => {
+    // Updatable check
+    const atomicPropertyFetchData = await atomicPropertyFetch({_id: new ObjectId(id), updatable: true});
+    if(!atomicPropertyFetchData.status) {
+        return {...atomicPropertyFetchData, message: errorConstants.PROPERTIES.UPDATE_PROPERTY}
+    }
+
     // Update property info
     return await atomicPropertyUpdate(id, {
         $set: {name, phone, address, description}
