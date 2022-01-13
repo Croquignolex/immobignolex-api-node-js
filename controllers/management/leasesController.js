@@ -1,3 +1,4 @@
+const generalHelpers = require("../../helpers/generalHelpers");
 const errorConstants = require("../../constants/errorConstants");
 const leasesHelpers = require("../../helpers/mongodb/leasesHelpers");
 const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
@@ -37,7 +38,22 @@ module.exports.create = async (req, res) => {
         return res.send({...propertyHasChamberData, message: errorConstants.CHAMBERS.WRONG_CHAMBER_PROPERTY});
     }
 
-    // check lease period from rent period
+    // Check lease period & retrieve rank
+    const leasePeriodRank = generalHelpers.periodsTypesRank(leasePeriod);
+    if(!leasePeriodRank) {
+        return res.send({data: null, status: false, message: errorConstants.LEASES.WRONG_LEASE_PERIOD});
+    }
+
+    // Check rent period & retrieve rank
+    const rentPeriodRank = generalHelpers.periodsTypesRank(rentPeriod);
+    if(!rentPeriodRank) {
+        return res.send({data: null, status: false, message: errorConstants.CHAMBERS.WRONG_RENT_PERIOD});
+    }
+
+    // Check rent period toward lease period
+    if(rentPeriodRank > leasePeriodRank) {
+        return res.send({data: null, status: false, message: errorConstants.LEASES.RENT_PERIOD_TOO_BIG});
+    }
 
     // Database saving
     const createLeaseData = await leasesHelpers.createLease({

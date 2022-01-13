@@ -92,6 +92,22 @@ module.exports.databaseUnwind = (column) => {
     };
 };
 
+// Find period types rank
+module.exports.periodsTypesRank = (period) => {
+    const found = periodsTypes.find((item) => item.value === period);
+    return found ? found.rank : found;
+};
+
+// Get available app period type
+const periodsTypes = () => {
+    return [
+        {rank: 0, value: "day"},
+        {rank: 1, value: "week"},
+        {rank: 2, value: "month"},
+        {rank: 3,  value: "year"},
+    ];
+};
+
 // Extract picture from the correct env
 const picturePublicUrl = (picture) => {
     return (
