@@ -141,8 +141,6 @@ module.exports.updateChamber = async ({id, name, phone, rent, type, property, de
 
 // Simple archive chamber
 module.exports.simpleArchiveChamberByChamberId = async (id) => {
-    // TODO: Implement archive procedures
-
     // Data
     const _id = new ObjectId(id);
 
@@ -151,6 +149,8 @@ module.exports.simpleArchiveChamberByChamberId = async (id) => {
     if(!atomicChamberFetchData.status) {
         return atomicChamberFetchData;
     }
+
+    // TODO: Implement archive procedures
 
     // Archive chamber goods
     const goods = atomicChamberFetchData.data.goods;

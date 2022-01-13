@@ -54,10 +54,7 @@ module.exports.updateInfo = async (req, res) => {
 module.exports.archiveProperty = async (req, res) => {
     // Form data & data
     const {propertyId} = req.params;
-
-    // Update property visibility
-    const archivePropertyByPropertyIdData = await propertiesHelpers.archivePropertyByPropertyId(propertyId);
-    return res.send(archivePropertyByPropertyIdData);
+    return res.send(await propertiesHelpers.archivePropertyByPropertyId(propertyId));
 };
 
 // PUT: Add property picture
@@ -94,15 +91,11 @@ module.exports.deletePicture = async (req, res) => {
 // GET: All chambers
 module.exports.chambers = async (req, res) => {
     // Route params
-    const {propertyId} = req.params;
     const {free} = req.query;
-
-    if(free) {
-        const propertyFreeChambersData = await chambersHelpers.propertyFreeChambers(propertyId);
-        return res.send(propertyFreeChambersData);
-    }
-
-    // Get property chambers
-    const propertyChambersData = await chambersHelpers.propertyChambers(propertyId);
-    return res.send(propertyChambersData);
+    const {propertyId} = req.params;
+    return res.send(
+        (free)
+            ? await chambersHelpers.propertyFreeChambers(propertyId)
+            : await chambersHelpers.propertyChambers(propertyId)
+    );
 };

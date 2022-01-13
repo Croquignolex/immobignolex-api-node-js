@@ -105,16 +105,16 @@ module.exports.addPropertyChamberByPropertyId = async (id, chamberId, isOccupied
 
 // Archive property
 module.exports.archivePropertyByPropertyId = async (id) => {
-    // TODO: Implement archive procedures
-
     // Data
     const _id = new ObjectId(id);
 
-    // Fetch old property caretaker
-    const atomicPropertyFetchData = await atomicPropertyFetch({_id});
+    // Deletable check
+    const atomicPropertyFetchData = await atomicPropertyFetch({_id, deletable: true});
     if(!atomicPropertyFetchData.status) {
-        return atomicPropertyFetchData;
+        return {...atomicPropertyFetchData, message: errorConstants.PROPERTIES.DELETE_PROPERTY}
     }
+
+    // TODO: Implement archive procedures
 
     // Archive property chambers
     const chambers = atomicPropertyFetchData.data.chambers;
@@ -123,8 +123,7 @@ module.exports.archivePropertyByPropertyId = async (id) => {
             await chambersHelpers.simpleArchiveChamberByChamberId(chamber);
         }
     }
-
-    return await atomicPropertyUpdate(id, {$set: {enable: false}});
+    return await atomicPropertyUpdate(id, {$set: {deleted: false, deleted_at: new Date()}});
 };
 
 // Atomic properties fetch into database

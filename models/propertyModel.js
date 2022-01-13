@@ -19,10 +19,11 @@ module.exports = class PropertyModel {
             name: this.name,
             phone: this.phone,
             address: this.address,
-            occupied: this.occupied,
+            updatable: this.updatable,
+            deletable: this.deletable,
+            description: this.description,
             occupation: this.occupied_percentage,
             chambers: this.chambers ? this.chambers?.length : 0,
-            employees: this.employees ? this.employees?.length : 0,
             pictures: generalHelpers.picturesPublicUrl(this.pictures)
         };
     };
@@ -33,6 +34,9 @@ module.exports = class PropertyModel {
             name: this.name,
             phone: this.phone,
             address: this.address,
+            updatable: this.updatable,
+            deletable: this.deletable,
+            deleted_at: this.deleted_at,
             created_at: this.created_at,
             description: this.description,
             occupied_percentage: this.occupied_percentage,
