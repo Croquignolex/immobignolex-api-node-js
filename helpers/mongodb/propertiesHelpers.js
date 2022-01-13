@@ -52,7 +52,6 @@ module.exports.removePropertyChamberByPropertyId = async (id, chamberId, isOccup
     const occupiedChambers = propertyData.occupied;
     const occupied = isOccupied ? occupiedChambers - 1 : occupiedChambers;
     const occupation = Math.round((occupied * 100) / (propertyData.chambers - 1)) || 0;
-    console.log(occupied, propertyData.chambers, occupation)
     // Update
     return await atomicPropertyUpdate(id, {$pull: {chambers: new ObjectId(chamberId)}, $set: {occupation, occupied}});
 };

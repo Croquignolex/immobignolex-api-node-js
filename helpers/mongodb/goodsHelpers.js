@@ -51,10 +51,8 @@ module.exports.createGood = async ({name, weigh, color, height, chamber, descrip
     }
 
     // Push chamber good
-    if(chamber) {
-        const createdGoodId = atomicGoodCreateData.data;
-        return await chambersHelpers.addChamberGoodByChamberId(chamber, createdGoodId);
-    }
+    const createdGoodId = atomicGoodCreateData.data;
+    (chamber) && await chambersHelpers.addChamberGoodByChamberId(chamber, createdGoodId);
 
     return atomicGoodCreateData;
 };
@@ -82,19 +80,9 @@ module.exports.updateGood = async ({id, name, color, weigh, height, chamber, des
     const oldChamber = atomicGoodFetchData.data.chamber;
     if(oldChamber !== chamber) {
         // Remove old good chamber id different from new chamber
-        if(oldChamber) {
-            const removeChamberGoodByChamberIdData = await chambersHelpers.removeChamberGoodByChamberId(oldChamber, id);
-            if(!removeChamberGoodByChamberIdData.status) {
-                return removeChamberGoodByChamberIdData;
-            }
-        }
+        (oldChamber) && await chambersHelpers.removeChamberGoodByChamberId(oldChamber, id);
         // Add new good chamber id different from new chamber
-        if(chamber) {
-            const addChamberGoodByChamberIdData = await chambersHelpers.addChamberGoodByChamberId(chamber, id);
-            if(!addChamberGoodByChamberIdData.status) {
-                return addChamberGoodByChamberIdData;
-            }
-        }
+        (chamber) && await chambersHelpers.addChamberGoodByChamberId(chamber, id);
     }
 
     return atomicGoodUpdateData;
@@ -147,12 +135,7 @@ module.exports.archiveGoodByGoodId = async (id) => {
 
     // Remove chamber good
     const chamber = atomicGoodFetchData.data.chamber;
-    if(chamber) {
-        const removeChamberGoodByChamberIdData = await chambersHelpers.removeChamberGoodByChamberId(chamber, id);
-        if(!removeChamberGoodByChamberIdData.status) {
-            return removeChamberGoodByChamberIdData;
-        }
-    }
+    (chamber) && await chambersHelpers.removeChamberGoodByChamberId(chamber, id);
 
     return await atomicGoodUpdate(id, {$set: {enable: false, chamber: null}});
 };

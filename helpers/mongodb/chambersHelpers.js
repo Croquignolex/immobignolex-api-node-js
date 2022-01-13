@@ -66,7 +66,7 @@ module.exports.createChamber = async ({name, phone, rent, type, property, descri
     if(property) {
         // Update property occupation
         const createdChamberId = atomicChamberCreateData.data;
-        return await propertiesHelpers.addPropertyChamberByPropertyId(property, createdChamberId, false);
+        await propertiesHelpers.addPropertyChamberByPropertyId(property, createdChamberId, false);
     }
 
     return atomicChamberCreateData;
@@ -127,23 +127,13 @@ module.exports.updateChamber = async ({id, name, phone, rent, type, property, de
     }
 
     // Old and new property management
-    const oldProperty = atomicChamberFetchData.data.property;
     const isOccupied = !atomicChamberFetchData.data.free;
+    const oldProperty = atomicChamberFetchData.data.property;
     if(oldProperty !== property) {
         // Remove old chamber property id different from new property
-        if(oldProperty) {
-            const removePropertyChamberByPropertyIdData = await propertiesHelpers.removePropertyChamberByPropertyId(oldProperty, id, isOccupied);
-            if(!removePropertyChamberByPropertyIdData.status) {
-                return removePropertyChamberByPropertyIdData;
-            }
-        }
+        (oldProperty) && await propertiesHelpers.removePropertyChamberByPropertyId(oldProperty, id, isOccupied);
         // Add new chamber property id different from new property
-        if(property) {
-            const addPropertyChamberByPropertyIdData = await propertiesHelpers.addPropertyChamberByPropertyId(property, id, isOccupied);
-            if(!addPropertyChamberByPropertyIdData.status) {
-                return addPropertyChamberByPropertyIdData;
-            }
-        }
+        (property) && await propertiesHelpers.addPropertyChamberByPropertyId(property, id, isOccupied);
     }
 
     return atomicChamberUpdateData;
@@ -187,14 +177,9 @@ module.exports.archiveChamberByChamberId = async (id) => {
     }
 
     // Remove property chamber
-    const property = atomicChamberFetchData.data.property;
     const isOccupied = !atomicChamberFetchData.data.free;
-    if(property) {
-        const removePropertyChamberByPropertyIdData = await propertiesHelpers.removePropertyChamberByPropertyId(property, id, isOccupied);
-        if(!removePropertyChamberByPropertyIdData.status) {
-            return removePropertyChamberByPropertyIdData;
-        }
-    }
+    const property = atomicChamberFetchData.data.property;
+    (property) && await propertiesHelpers.removePropertyChamberByPropertyId(property, id, isOccupied);
 
     // Archive chamber goods
     const goods = atomicChamberFetchData.data.goods;
