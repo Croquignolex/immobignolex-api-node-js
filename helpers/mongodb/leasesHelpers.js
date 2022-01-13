@@ -5,7 +5,6 @@ const generalHelpers = require('../generalHelpers');
 const LeaseModel = require('../../models/leaseModel');
 const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
-const customParseFormat = require("dayjs/plugin/customParseFormat");
 
 // Data
 const leasesCollection = "leases";
@@ -37,18 +36,21 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
         return atomicLeaseCreateData;
     }
 
+    // Generate invoice for deposit (given rents + given surety)
+
     // Push property contracts
     // Update property occupation
-    // Update chamber contract (chamber no more free)
+    // Push property invoices (deposit)
+
     // Push tenant contracts
+    // Push tenant invoices (deposit)
 
     // Generate rents (also remaining one for the lease)
     // Push rents payments (only the ones of the given rents)
-    // Generate invoice for deposit (given rents + given surety)
 
+    // Update chamber contract (chamber no more free)
     // Push chamber invoices (deposit)
-    // Push property invoices (deposit)
-    // Push tenant invoices (deposit)
+
 
     return atomicLeaseCreateData;
 };
