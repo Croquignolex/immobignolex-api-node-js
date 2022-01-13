@@ -1,9 +1,11 @@
+const dayjs = require('dayjs');
 const {MongoClient, ObjectId} = require('mongodb');
 
 const generalHelpers = require('../generalHelpers');
 const LeaseModel = require('../../models/leaseModel');
 const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
+const customParseFormat = require("dayjs/plugin/customParseFormat");
 
 // Data
 const leasesCollection = "leases";
@@ -19,10 +21,10 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
                                         rent, surety, deposit, leaseStartDate, description, creator}) => {
     // Data
     const enable = true;
-    const end_at = new Date();
     const created_by = creator;
-    const start_at = new Date();
     const created_at = new Date();
+    const start_at = dayjs(leaseStartDate).toDate();
+    const end_at = dayjs(leaseStartDate).add(1, leasePeriod).toDate();
 
     // Keep into database
     const atomicLeaseCreateData = await atomicLeaseCreate({
