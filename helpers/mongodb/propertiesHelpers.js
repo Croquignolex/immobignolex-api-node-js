@@ -34,40 +34,6 @@ module.exports.propertyByIdWithCreator = async (id) => {
     ]);
 };
 
-// Add property picture by property id
-module.exports.addPropertyPictureByPropertyId = async (id, picture) => {
-    return await atomicPropertyUpdate(id, {$push: {pictures: picture}});
-};
-
-// Remove property picture by property id
-module.exports.removePropertyPictureByPropertyId = async (id, pictureId) => {
-    return await atomicPropertyUpdate(id, {$pull: {pictures: {id: pictureId}}});
-};
-
-// Remove property chamber by property id
-module.exports.removePropertyChamberByPropertyId = async (id, chamberId, isOccupied) => {
-    // Calculate occupation
-    const atomicPropertyFetchData = await atomicPropertyFetch({_id: new ObjectId(id)});
-    const propertyData = atomicPropertyFetchData.data?.simpleResponseFormat;
-    const occupiedChambers = propertyData.occupied;
-    const occupied = isOccupied ? occupiedChambers - 1 : occupiedChambers;
-    const occupation = Math.round((occupied * 100) / (propertyData.chambers - 1)) || 0;
-    // Update
-    return await atomicPropertyUpdate(id, {$pull: {chambers: new ObjectId(chamberId)}, $set: {occupation, occupied}});
-};
-
-// Add property chamber by property id
-module.exports.addPropertyChamberByPropertyId = async (id, chamberId, isOccupied) => {
-    // Calculate occupation
-    const atomicPropertyFetchData = await atomicPropertyFetch({_id: new ObjectId(id)});
-    const propertyData = atomicPropertyFetchData.data?.simpleResponseFormat;
-    const occupiedChambers = propertyData.occupied;
-    const occupied = isOccupied ? occupiedChambers + 1 : occupiedChambers;
-    const occupation = Math.round((occupied * 100) / (propertyData.chambers + 1));
-    // Update
-    return await atomicPropertyUpdate(id, {$addToSet: {chambers: new ObjectId(chamberId)}, $set: {occupation, occupied}});
-};
-
 // Create property
 module.exports.createProperty = async ({name, phone, address, description, creator}) => {
     // Data
@@ -101,6 +67,40 @@ module.exports.updateProperty = async ({id, name, phone, address, description}) 
     return await atomicPropertyUpdate(id, {
         $set: {name, phone, address, description}
     });
+};
+
+// Add property picture by property id
+module.exports.addPropertyPictureByPropertyId = async (id, picture) => {
+    return await atomicPropertyUpdate(id, {$push: {pictures: picture}});
+};
+
+// Remove property picture by property id
+module.exports.removePropertyPictureByPropertyId = async (id, pictureId) => {
+    return await atomicPropertyUpdate(id, {$pull: {pictures: {id: pictureId}}});
+};
+
+// Remove property chamber by property id
+module.exports.removePropertyChamberByPropertyId = async (id, chamberId, isOccupied) => {
+    // Calculate occupation
+    const atomicPropertyFetchData = await atomicPropertyFetch({_id: new ObjectId(id)});
+    const propertyData = atomicPropertyFetchData.data?.simpleResponseFormat;
+    const occupiedChambers = propertyData.occupied;
+    const occupied = isOccupied ? occupiedChambers - 1 : occupiedChambers;
+    const occupation = Math.round((occupied * 100) / (propertyData.chambers - 1)) || 0;
+    // Update
+    return await atomicPropertyUpdate(id, {$pull: {chambers: new ObjectId(chamberId)}, $set: {occupation, occupied}});
+};
+
+// Add property chamber by property id
+module.exports.addPropertyChamberByPropertyId = async (id, chamberId, isOccupied) => {
+    // Calculate occupation
+    const atomicPropertyFetchData = await atomicPropertyFetch({_id: new ObjectId(id)});
+    const propertyData = atomicPropertyFetchData.data?.simpleResponseFormat;
+    const occupiedChambers = propertyData.occupied;
+    const occupied = isOccupied ? occupiedChambers + 1 : occupiedChambers;
+    const occupation = Math.round((occupied * 100) / (propertyData.chambers + 1));
+    // Update
+    return await atomicPropertyUpdate(id, {$addToSet: {chambers: new ObjectId(chamberId)}, $set: {occupation, occupied}});
 };
 
 // Archive property

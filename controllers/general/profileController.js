@@ -1,7 +1,7 @@
 const errorConstants = require('../../constants/errorConstants');
 const usersHelpers = require("../../helpers/mongodb/usersHelpers");
-const avatarsHelpers = require('../../helpers/cloudary/avatarsHelpers');
 const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
+const avatarsHelpers = require('../../helpers/cloudary/avatarsHelpers');
 
 // POST: Update user avatar
 module.exports.updateAvatar = async (req, res) => {
@@ -26,8 +26,7 @@ module.exports.updateAvatar = async (req, res) => {
 
     // Save user avatar in the cloud & database
     const databaseUser = userByUsernameData.data;
-    const cloudUpdateUserAvatarData = await avatarsHelpers.cloudUpdateUserAvatar(databaseUser, file);
-    return res.send(cloudUpdateUserAvatarData);
+    return res.send(await avatarsHelpers.cloudUpdateUserAvatar(databaseUser, file));
 };
 
 // DELETE: Delete user avatar
@@ -41,13 +40,13 @@ module.exports.deleteAvatar = async (req, res) => {
 
     // Remove avatar in the cloud & database
     const databaseUser = userByUsernameData.data;
-    const cloudDeleteUserAvatarData = await avatarsHelpers.cloudDeleteUserAvatar(databaseUser);
-    return res.send(cloudDeleteUserAvatarData);
+    return res.send(await avatarsHelpers.cloudDeleteUserAvatar(databaseUser));
 };
 
 // POST: Update user info
 module.exports.updateInfo = async (req, res) => {
-    // Form data the query
+    // Form data & data
+    const username = req.username;
     const {name, phone, email, description} = req.body;
 
     // Form checker
@@ -56,11 +55,9 @@ module.exports.updateInfo = async (req, res) => {
     }
 
     // Save user info in the database
-    const username = req.username;
-    const updateUserInfoByUsernameData = await usersHelpers.updateUserInfoByUsername(
+    return res.send(await usersHelpers.updateUserInfoByUsername(
         username, {name, phone, email, description}
-    );
-    return res.send(updateUserInfoByUsernameData);
+    ));
 };
 
 // POST: Update user password
@@ -93,6 +90,5 @@ module.exports.updatePassword = async (req, res) => {
 
     // Save user info in the database
     const password = await bcrypt.hash(newPassword, 10);
-    const updateUserPasswordByUsernameData = await usersHelpers.updateUserPasswordByUsername(username, password);
-    return res.send(updateUserPasswordByUsernameData);
+    return res.send(await usersHelpers.updateUserPasswordByUsername(username, password));
 };

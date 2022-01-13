@@ -10,10 +10,8 @@ const generalConstants = require("../../constants/generalConstants");
 
 // Data
 const usersCollection = "users";
-const employeesRole = "Employé";
-const tenantsRole = "Locataire";
-const administratorsRole = "Administrateur";
 const databaseUrl = envConstants.DATABASE_URL;
+const roles = {employee: "Employé", tenant: "Locataire", admin: "Administrateur"}
 
 // Get user by username
 module.exports.userByUsername = async (username) => {
@@ -33,21 +31,21 @@ module.exports.userByUsernameWithCreator = async (username) => {
 // Get administrators without current user by username
 module.exports.administratorsWithoutUserByUsername = async (username) => {
     return await atomicUsersFetch({
-        role: administratorsRole, username: {$ne: username}
+        role: roles.admin, username: {$ne: username}
     });
 };
 
 // Get employees without current user by username
 module.exports.employeesWithoutUserByUsername = async (username) => {
     return await atomicUsersFetch({
-        role: employeesRole, username: {$ne: username}
+        role: roles.employee, username: {$ne: username}
     });
 };
 
 // Get tenants without current user by username
 module.exports.tenantsWithoutUserByUsername = async (username) => {
     return await atomicUsersFetch({
-        role: tenantsRole, username: {$ne: username}
+        role: roles.tenant, username: {$ne: username}
     });
 };
 
@@ -86,21 +84,21 @@ module.exports.createUser = async ({name, phone, email, role, description, creat
 // Create admin
 module.exports.createAdministrator = async ({name, phone, email, cni, description, creator}) => {
     return await userCreateProcess({
-        name, phone, email, cni, role: administratorsRole, description, creator
+        name, phone, email, cni, role: roles.admin, description, creator
     });
 };
 
 // Create employee
 module.exports.createEmployee = async ({name, phone, email, cni, post, description, creator}) => {
     return await userCreateProcess({
-        name, phone, email, cni, role: employeesRole, post, description, creator
+        name, phone, email, cni, role: roles.employee, post, description, creator
     });
 };
 
 // Create tenant
 module.exports.createTenant = async ({name, phone, email, cni, description, creator}) => {
     return await userCreateProcess({
-        name, phone, email, cni, role: tenantsRole, description, creator, balance: 0
+        name, phone, email, cni, role: roles.tenant, description, creator, balance: 0
     });
 };
 

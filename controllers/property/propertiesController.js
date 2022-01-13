@@ -78,8 +78,7 @@ module.exports.addPicture = async (req, res) => {
     const {propertyId} = req.params;
 
     // Save property picture in the cloud & database
-    const cloudAddPropertyPictureData = await propertyPicturesHelpers.cloudAddPropertyPicture(propertyId, file);
-    return res.send(cloudAddPropertyPictureData);
+    return res.send(await propertyPicturesHelpers.cloudAddPropertyPicture(propertyId, file));
 };
 
 // DELETE: Delete property picture
@@ -89,8 +88,7 @@ module.exports.deletePicture = async (req, res) => {
     const cloudPictureId = pictureId.split('-').join('/');
 
     // Remove picture in the cloud & database
-    const cloudRemovePropertyPictureData = await propertyPicturesHelpers.cloudRemovePropertyPicture(propertyId, cloudPictureId);
-    return res.send(cloudRemovePropertyPictureData);
+    return res.send(await propertyPicturesHelpers.cloudRemovePropertyPicture(propertyId, cloudPictureId));
 };
 
 // GET: All chambers

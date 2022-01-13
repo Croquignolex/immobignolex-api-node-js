@@ -72,8 +72,7 @@ module.exports.logout = async (req, res) => {
 
     // Delete to user token in database
     const databaseUser = userByUsernameData.data;
-    const removeUserTokenData = await tokensHelpers.removeUserToken(databaseUser, useragent);
-    return res.send(removeUserTokenData);
+    return res.send(await tokensHelpers.removeUserToken(databaseUser, useragent));
 };
 
 // POST: Refresh user data (equivalent to fetch user data)
@@ -116,6 +115,5 @@ module.exports.token = async (req, res) => {
 
     // Delete to user token in database
     const databaseUser = userByUsernameData.data;
-    const checkUserTokenData = await tokensHelpers.checkUserToken(databaseUser, useragent, token);
-    return res.send(checkUserTokenData);
+    return res.send(await tokensHelpers.checkUserToken(databaseUser, useragent, token));
 };
