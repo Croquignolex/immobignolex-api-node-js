@@ -1,6 +1,7 @@
 const errorConstants = require("../../constants/errorConstants");
 const leasesHelpers = require("../../helpers/mongodb/leasesHelpers");
 const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
+const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
 
 // GET: All leases
 module.exports.leases = async (req, res) => {
@@ -30,7 +31,11 @@ module.exports.create = async (req, res) => {
         return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
     }
 
-    // check chamber into property
+    // Check property chamber
+    const propertyHasChamberData = await chambersHelpers.propertyHasChamber(property, chamber);
+    if(!propertyHasChamberData.status) {
+        return res.send({...propertyHasChamberData, message: errorConstants.CHAMBERS.WRONG_CHAMBER_PROPERTY});
+    }
 
     // check lease period from rent period
 
