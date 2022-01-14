@@ -5,7 +5,6 @@ const PropertyModel = require('../../models/propertyModel');
 const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
 const generalConstants = require('../../constants/generalConstants');
-const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
 
 // Data
 const propertiesCollection = "properties";
@@ -23,7 +22,6 @@ module.exports.propertyById = async (id) => {
 
 // Fetch property by id with creator into database
 module.exports.propertyByIdWithCreator = async (id) => {
-    // Database fetch
     return await embeddedPropertyFetch([
         generalConstants.LOOP_DIRECTIVE.CREATOR,
         generalHelpers.databaseUnwind("$creator"),
@@ -51,16 +49,10 @@ module.exports.createProperty = async ({name, phone, address, description, creat
 
 // Update property
 module.exports.updateProperty = async ({id, name, phone, address, description}) => {
-    // Updatable check & fetch
-    const atomicPropertyFetchData = await atomicPropertyFetch({_id: new ObjectId(id), updatable: true});
-    if(!atomicPropertyFetchData.status) {
-        return {...atomicPropertyFetchData, message: errorConstants.PROPERTIES.UPDATE_PROPERTY}
-    }
-
-    // Update property info
-    return await atomicPropertyUpdate(id, {
-        $set: {name, phone, address, description}
-    });
+    return await atomicPropertyUpdate(
+        {_id: new ObjectId(id), updatable: true},
+        {$set: {name, phone, address, description}}
+    );
 };
 
 // Add property picture by property id
@@ -91,20 +83,7 @@ module.exports.updatePropertyChamberByPropertyId = async (id, chamberId, add = t
 
 // Delete property
 module.exports.deletePropertyByPropertyId = async (id) => {
-    // Deletable check
-    const atomicPropertyFetchData = await atomicPropertyFetch({_id: new ObjectId(id), deletable: true});
-    if(!atomicPropertyFetchData.status) {
-        return {...atomicPropertyFetchData, message: errorConstants.PROPERTIES.DELETE_PROPERTY}
-    }
-
-    // Archive property chambers
-    const chambers = atomicPropertyFetchData.data.chambers;
-    if(chambers && chambers?.length > 0) {
-        for(const chamber of chambers) {
-            await chambersHelpers.deleteChamberByChamberId(chamber);
-        }
-    }
-    return await atomicPropertyDelete(id);
+    return await atomicPropertyDelete({_id: new ObjectId(id), deletable: true});
 };
 
 // Atomic properties fetch into database

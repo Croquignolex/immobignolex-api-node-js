@@ -36,7 +36,6 @@ module.exports = class PropertyModel {
             address: this.address,
             updatable: this.updatable,
             deletable: this.deletable,
-            deleted_at: this.deleted_at,
             created_at: this.created_at,
             description: this.description,
             occupied_percentage: this.occupied_percentage,
