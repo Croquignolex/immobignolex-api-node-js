@@ -137,15 +137,12 @@ module.exports.removeChamberPictureByChamberId = async (id, pictureId) => {
     return await atomicChamberUpdate(id, {$pull: {pictures: {id: pictureId}}});
 };
 
-// Simple archive chamber
-module.exports.simpleArchiveChamberByChamberId = async (id) => {
-    // Data
-    const _id = new ObjectId(id);
-
-    // Fetch chamber
-    const atomicChamberFetchData = await atomicChamberFetch({_id});
+// Delete chamber
+module.exports.deleteChamberByChamberId = async (id) => {
+    // Deletable check & fetch
+    const atomicChamberFetchData = await atomicChamberFetch({_id: new ObjectId(id), deletable: true});
     if(!atomicChamberFetchData.status) {
-        return atomicChamberFetchData;
+        return {...atomicChamberFetchData, message: errorConstants.CHAMBERS.DELETE_CHAMBER}
     }
 
     // TODO: Implement archive procedures
@@ -163,21 +160,17 @@ module.exports.simpleArchiveChamberByChamberId = async (id) => {
 
 // Archive chamber
 module.exports.archiveChamberByChamberId = async (id) => {
-    // TODO: Implement archive procedures
-
-    // Data
-    const _id = new ObjectId(id);
-
-    // Fetch chamber
-    const atomicChamberFetchData = await atomicChamberFetch({_id});
+    // Deletable check & fetch
+    const atomicChamberFetchData = await atomicChamberFetch({_id: new ObjectId(id), deletable: true});
     if(!atomicChamberFetchData.status) {
-        return atomicChamberFetchData;
+        return {...atomicChamberFetchData, message: errorConstants.CHAMBERS.DELETE_CHAMBER}
     }
 
+    // TODO: Implement archive procedures
+
     // Remove property chamber
-    const isOccupied = !atomicChamberFetchData.data.free;
     const property = atomicChamberFetchData.data.property;
-    (property) && await propertiesHelpers.updatePropertyChamberByPropertyId(property, id, false);
+    await propertiesHelpers.updatePropertyChamberByPropertyId(property, id, false);
 
     // Archive chamber goods
     const goods = atomicChamberFetchData.data.goods;
@@ -187,7 +180,7 @@ module.exports.archiveChamberByChamberId = async (id) => {
         }
     }
 
-    return await atomicChamberUpdate(id, {$set: {enable: false, property: null}});
+    return await atomicChamberUpdate(id, {$set: {deleted: false, deleted_at: new Date()}});
 };
 
 // Embedded chambers fetch into database

@@ -37,10 +37,8 @@ module.exports.propertyByIdWithCreator = async (id) => {
 // Create property
 module.exports.createProperty = async ({name, phone, address, description, creator}) => {
     // Data
-    const deleted = false;
     const updatable = true;
     const deletable = true;
-    const deleted_at = null;
     const created_by = creator;
     const occupied_chambers = 0;
     const occupied_percentage = 0;
@@ -48,10 +46,9 @@ module.exports.createProperty = async ({name, phone, address, description, creat
 
     // Keep into database
     return await atomicPropertyCreate({
-        name, phone, address,
-        deleted, updatable, deletable,
+        name, phone, address, updatable, deletable,
         occupied_percentage, occupied_chambers,
-        description, created_by, created_at, deleted_at
+        description, created_by, created_at
     });
 };
 
@@ -95,27 +92,22 @@ module.exports.updatePropertyChamberByPropertyId = async (id, chamberId, add = t
     return atomicPropertyFetchData;
 };
 
-// Archive property
-module.exports.archivePropertyByPropertyId = async (id) => {
-    // Data
-    const _id = new ObjectId(id);
-
+// Delete property
+module.exports.deletePropertyByPropertyId = async (id) => {
     // Deletable check
-    const atomicPropertyFetchData = await atomicPropertyFetch({_id, deletable: true});
+    const atomicPropertyFetchData = await atomicPropertyFetch({_id: new ObjectId(id), deletable: true});
     if(!atomicPropertyFetchData.status) {
         return {...atomicPropertyFetchData, message: errorConstants.PROPERTIES.DELETE_PROPERTY}
     }
-
-    // TODO: Implement archive procedures
 
     // Archive property chambers
     const chambers = atomicPropertyFetchData.data.chambers;
     if(chambers && chambers?.length > 0) {
         for(const chamber of chambers) {
-            await chambersHelpers.simpleArchiveChamberByChamberId(chamber);
+            await chambersHelpers.deleteChamberByChamberId(chamber);
         }
     }
-    return await atomicPropertyUpdate(id, {$set: {deleted: false, deleted_at: new Date()}});
+    return await atomicPropertyDelete(id);
 };
 
 // Atomic properties fetch into database
@@ -242,3 +234,28 @@ const atomicPropertyUpdate = async (id, directives) => {
     finally { await client.close(); }
     return {data, status, message};
 };
+
+// Atomic property delete into database
+const atomicPropertyDelete = async (id) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        const _id = new ObjectId(id);
+        // Query
+        const atomicPropertyDeleteData = await client.db().collection(propertiesCollection).deleteOne({_id});
+        // Format response
+        if(atomicPropertyDeleteData.acknowledged && atomicPropertyDeleteData.deletedCount === 0) {
+            message = errorConstants.GENERAL.NO_CHANGES;
+        }
+        else if(atomicPropertyDeleteData.deletedCount === 1) status = true;
+        else message = errorConstants.PROPERTIES.PROPERTY_DELETE;
+    } catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+

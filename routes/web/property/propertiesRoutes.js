@@ -11,7 +11,7 @@ router.put('/create', [tokenMiddleware, basicPermissionMiddleware], propertiesCo
 router.get('/:propertyId/detail', [tokenMiddleware, basicPermissionMiddleware], propertiesController.property);
 router.get('/:propertyId/chambers', [tokenMiddleware, basicPermissionMiddleware], propertiesController.chambers);
 router.post('/:propertyId/info-update', [tokenMiddleware, basicPermissionMiddleware], propertiesController.updateInfo);
-router.delete('/:propertyId/archive', [tokenMiddleware, basicPermissionMiddleware], propertiesController.archiveProperty);
+router.delete('/:propertyId/delete', [tokenMiddleware, basicPermissionMiddleware], propertiesController.deleteProperty);
 router.put('/:propertyId/picture-add', [pictureMiddleware, tokenMiddleware, basicPermissionMiddleware], propertiesController.addPicture);
 router.delete('/:propertyId/picture-delete/:pictureId', [tokenMiddleware, basicPermissionMiddleware], propertiesController.deletePicture);
 

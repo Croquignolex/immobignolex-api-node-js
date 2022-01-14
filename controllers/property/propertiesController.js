@@ -50,8 +50,8 @@ module.exports.updateInfo = async (req, res) => {
     }));
 };
 
-// DELETE: Archive property
-module.exports.archiveProperty = async (req, res) => {
+// DELETE: delete property
+module.exports.deleteProperty = async (req, res) => {
     // Form data & data
     const {propertyId} = req.params;
     return res.send(await propertiesHelpers.archivePropertyByPropertyId(propertyId));
