@@ -13,7 +13,7 @@ const databaseUrl = envConstants.DATABASE_URL;
 
 // Fetch all properties into database
 module.exports.properties = async () => {
-    return await atomicPropertiesFetch({deleted: false});
+    return await atomicPropertiesFetch();
 };
 
 // Fetch property by id into database
@@ -23,14 +23,11 @@ module.exports.propertyById = async (id) => {
 
 // Fetch property by id with creator into database
 module.exports.propertyByIdWithCreator = async (id) => {
-    // Data
-    const _id = new ObjectId(id);
-
     // Database fetch
     return await embeddedPropertyFetch([
         generalConstants.LOOP_DIRECTIVE.CREATOR,
         generalHelpers.databaseUnwind("$creator"),
-        { $match : {_id} }
+        { $match : {_id: new ObjectId(id)} }
     ]);
 };
 
@@ -111,7 +108,7 @@ module.exports.deletePropertyByPropertyId = async (id) => {
 };
 
 // Atomic properties fetch into database
-const atomicPropertiesFetch = async (directives) => {
+const atomicPropertiesFetch = async (filter) => {
     let client, data = null, status = false, message = "";
     // Data
     client = new MongoClient(databaseUrl);
@@ -119,7 +116,7 @@ const atomicPropertiesFetch = async (directives) => {
         await client.connect();
         // Query
         const atomicPropertiesFetchData = await client.db().collection(propertiesCollection)
-            .find(directives)
+            .find(filter || {})
             .sort({created_at: -1})
             .toArray();
         // Format response
@@ -136,16 +133,14 @@ const atomicPropertiesFetch = async (directives) => {
 };
 
 // Embedded property fetch into database
-const embeddedPropertyFetch = async (directives) => {
+const embeddedPropertyFetch = async (pipeline) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
         // Query
-        const embeddedPropertyFetchData = await client.db().collection(propertiesCollection)
-            .aggregate(directives)
-            .toArray();
+        const embeddedPropertyFetchData = await client.db().collection(propertiesCollection).aggregate(pipeline).toArray();
         // Format response
         if(embeddedPropertyFetchData.length > 0) {
             status = true;
@@ -162,14 +157,14 @@ const embeddedPropertyFetch = async (directives) => {
 };
 
 // Atomic property fetch into database
-const atomicPropertyFetch = async (directives) => {
+const atomicPropertyFetch = async (filter) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
         // Query
-        const atomicPropertyFetchData = await client.db().collection(propertiesCollection).findOne(directives);
+        const atomicPropertyFetchData = await client.db().collection(propertiesCollection).findOne(filter);
         // Format response
         if(atomicPropertyFetchData !== null) {
             status = true;
@@ -186,20 +181,20 @@ const atomicPropertyFetch = async (directives) => {
 };
 
 // Atomic property create into database
-const atomicPropertyCreate = async (directives) => {
+const atomicPropertyCreate = async (document) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
         // Query
-        const atomicPropertyCreateData = await client.db().collection(propertiesCollection).insertOne(directives);
+        const atomicPropertyCreateData = await client.db().collection(propertiesCollection).insertOne(document);
         // Format response
-        if(atomicPropertyCreateData.acknowledged && atomicPropertyCreateData.insertedId) {
+        if(atomicPropertyCreateData.acknowledged) {
             data = atomicPropertyCreateData.insertedId;
             status = true;
         }
-        else message = errorConstants.PROPERTIES.CREATE_PROPERTY;
+        else message = errorConstants.PROPERTIES.PROPERTY_CREATE;
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
@@ -210,22 +205,19 @@ const atomicPropertyCreate = async (directives) => {
 };
 
 // Atomic property update into database
-const atomicPropertyUpdate = async (id, directives) => {
+const atomicPropertyUpdate = async (filter, update) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
-        const _id = new ObjectId(id);
         // Query
-        const atomicPropertyUpdateData = await client.db().collection(propertiesCollection).updateOne(
-            {_id}, directives
-        );
+        const atomicPropertyUpdateData = await client.db().collection(propertiesCollection).updateOne(filter, update);
         // Format response
-        if(atomicPropertyUpdateData.matchedCount === 1 && atomicPropertyUpdateData.modifiedCount === 0) {
-            message = errorConstants.GENERAL.NO_CHANGES;
+        if(atomicPropertyUpdateData.acknowledged) {
+            if(atomicPropertyUpdateData.modifiedCount === 0) message = errorConstants.GENERAL.NO_CHANGES;
+            else status = true;
         }
-        else if(atomicPropertyUpdateData.modifiedCount === 1) status = true;
         else message = errorConstants.PROPERTIES.PROPERTY_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
@@ -236,20 +228,19 @@ const atomicPropertyUpdate = async (id, directives) => {
 };
 
 // Atomic property delete into database
-const atomicPropertyDelete = async (id) => {
+const atomicPropertyDelete = async (filter) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
-        const _id = new ObjectId(id);
         // Query
-        const atomicPropertyDeleteData = await client.db().collection(propertiesCollection).deleteOne({_id});
+        const atomicPropertyDeleteData = await client.db().collection(propertiesCollection).deleteOne(filter);
         // Format response
-        if(atomicPropertyDeleteData.acknowledged && atomicPropertyDeleteData.deletedCount === 0) {
-            message = errorConstants.GENERAL.NO_CHANGES;
+        if(atomicPropertyDeleteData.acknowledged) {
+            if(atomicPropertyDeleteData.deletedCount === 0) message = errorConstants.GENERAL.NO_CHANGES;
+            else status = true;
         }
-        else if(atomicPropertyDeleteData.deletedCount === 1) status = true;
         else message = errorConstants.PROPERTIES.PROPERTY_DELETE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

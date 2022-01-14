@@ -54,7 +54,7 @@ module.exports.updateInfo = async (req, res) => {
 module.exports.deleteProperty = async (req, res) => {
     // Form data & data
     const {propertyId} = req.params;
-    return res.send(await propertiesHelpers.archivePropertyByPropertyId(propertyId));
+    return res.send(await propertiesHelpers.deletePropertyByPropertyId(propertyId));
 };
 
 // PUT: Add property picture
