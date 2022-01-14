@@ -1,9 +1,10 @@
+const generalHelpers = require("../../helpers/generalHelpers");
 const errorConstants = require("../../constants/errorConstants");
 const goodsHelpers = require("../../helpers/mongodb/goodsHelpers");
 const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
 const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
+const propertiesHelpers = require("../../helpers/mongodb/propertiesHelpers");
 const chamberPicturesHelpers = require("../../helpers/cloudary/chamberPicturesHelpers");
-const generalHelpers = require("../../helpers/generalHelpers");
 
 // GET: All chambers
 module.exports.chambers = async (req, res) => {
@@ -14,10 +15,7 @@ module.exports.chambers = async (req, res) => {
 module.exports.chamber = async (req, res) => {
     // Route params
     const {chamberId} = req.params;
-
-    // Get chamber
-    const chamberByIdWithPropertyAndCreatorData = await chambersHelpers.chamberByIdWithPropertyAndCreator(chamberId);
-    return res.send(chamberByIdWithPropertyAndCreatorData);
+    return res.send(await chambersHelpers.chamberByIdWithPropertyAndCreator(chamberId));
 };
 
 // PUT: Create chamber
@@ -48,6 +46,12 @@ module.exports.create = async (req, res) => {
         return res.send({data: null, status: false, message: errorConstants.CHAMBERS.WRONG_CHAMBER_RENT});
     }
 
+    // Check property existence
+    const propertyCheck = await propertiesHelpers.propertyById(property);
+    if(!propertyCheck.status) {
+        return res.send(propertyCheck);
+    }
+
     // Database saving
     return res.send(await chambersHelpers.createChamber({
         name, phone, type, property, description, rent: rentCheck, creator: username
@@ -70,11 +74,28 @@ module.exports.updateInfo = async (req, res) => {
         return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
     }
 
+    // Check lease period & retrieve rank
+    const typeCheck = generalHelpers.chambersTypes(type);
+    if(!typeCheck) {
+        return res.send({data: null, status: false, message: errorConstants.CHAMBERS.WRONG_CHAMBER_TYPE});
+    }
+
+    // Check rent format
+    const rentCheck = parseInt(rent, 10);
+    if(!rentCheck) {
+        return res.send({data: null, status: false, message: errorConstants.CHAMBERS.WRONG_CHAMBER_RENT});
+    }
+
+    // Check property existence
+    const propertyCheck = await propertiesHelpers.propertyById(property);
+    if(!propertyCheck.status) {
+        return res.send(propertyCheck);
+    }
+
     // Update chamber
-    const updateChamberData = await chambersHelpers.updateChamber({
-        id: chamberId, name, phone, rent, type, property, description
-    });
-    return res.send(updateChamberData);
+    return res.send(await chambersHelpers.updateChamber({
+        id: chamberId, name, phone, type, property, description, rent: rentCheck
+    }));
 };
 
 // DELETE: Archive chamber

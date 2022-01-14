@@ -30,19 +30,34 @@ module.exports.chambersWithProperty = async () => {
     ]);
 };
 
+// Fetch chamber by id with property & creator into database
+module.exports.chamberByIdWithPropertyAndCreator = async (id) => {
+    // Data
+    const _id = new ObjectId(id);
+
+    // Database fetch
+    return await embeddedChamberFetch([
+        chamberPropertyLookup,
+        generalHelpers.databaseUnwind("$building"),
+        generalConstants.LOOP_DIRECTIVE.CREATOR,
+        generalHelpers.databaseUnwind("$creator"),
+        { $match : {_id} }
+    ]);
+};
+
 // Fetch all property chambers into database
 module.exports.propertyChambers = async (property) => {
-    return await atomicChambersFetch({enable: true, property: new ObjectId(property)});
+    return await atomicChambersFetch({deleted: false, property: new ObjectId(property)});
 };
 
 // Check if property has chamber into database
 module.exports.propertyHasChamber = async (property, chamber) => {
-    return await atomicChamberFetch({_id: new ObjectId(chamber), enable: true, property: new ObjectId(property)});
+    return await atomicChamberFetch({_id: new ObjectId(chamber), deleted: true, property: new ObjectId(property)});
 };
 
 // Fetch all property free chambers into database
 module.exports.propertyFreeChambers = async (property) => {
-    return await atomicChambersFetch({enable: true, free: true, property: new ObjectId(property)});
+    return await atomicChambersFetch({deleted: true, occupied: false, property: new ObjectId(property)});
 };
 
 // Create chamber
@@ -68,27 +83,38 @@ module.exports.createChamber = async ({name, phone, rent, type, property, descri
     }
 
     // Push property chambers & update occupation
-    if(property) {
-        const createdChamberId = atomicChamberCreateData.data;
-        await propertiesHelpers.addPropertyChamberByPropertyId(property, createdChamberId, false);
-    }
+    const createdChamberId = atomicChamberCreateData.data;
+    await propertiesHelpers.updatePropertyChamberByPropertyId(property, createdChamberId);
 
     return atomicChamberCreateData;
 };
 
-// Fetch chamber by id with property & creator into database
-module.exports.chamberByIdWithPropertyAndCreator = async (id) => {
-    // Data
-    const _id = new ObjectId(id);
+// Update chamber
+module.exports.updateChamber = async ({id, name, phone, rent, type, property, description}) => {
+    // Updatable check & fetch
+    const atomicChamberFetchData = await atomicChamberFetch({_id: new ObjectId(id), updatable: true});
+    if(!atomicChamberFetchData.status) {
+        return {...atomicChamberFetchData, message: errorConstants.CHAMBERS.UPDATE_CHAMBER}
+    }
 
-    // Database fetch
-    return await embeddedChamberFetch([
-        chamberPropertyLookup,
-        generalHelpers.databaseUnwind("$building"),
-        generalConstants.LOOP_DIRECTIVE.CREATOR,
-        generalHelpers.databaseUnwind("$creator"),
-        { $match : {_id} }
-    ]);
+    // Update chamber info
+    const atomicChamberUpdateData = await atomicChamberUpdate(id, {
+        $set: {name, phone, rent, description, type, property: new ObjectId(property)}
+    });
+    if(!atomicChamberUpdateData.status) {
+        return atomicChamberUpdateData;
+    }
+
+    // Old and new property management
+    const oldProperty = atomicChamberFetchData.data.property;
+    if(oldProperty !== property) {
+        // Remove old chamber property id different from new property
+        await propertiesHelpers.updatePropertyChamberByPropertyId(oldProperty, id, false);
+        // Add new chamber property id different from new property
+        await propertiesHelpers.updatePropertyChamberByPropertyId(property, id);
+    }
+
+    return atomicChamberUpdateData;
 };
 
 // Add chamber good by chamber id
@@ -109,38 +135,6 @@ module.exports.addChamberPictureByChamberId = async (id, picture) => {
 // Remove chamber picture by chamber id
 module.exports.removeChamberPictureByChamberId = async (id, pictureId) => {
     return await atomicChamberUpdate(id, {$pull: {pictures: {id: pictureId}}});
-};
-
-// Update chamber
-module.exports.updateChamber = async ({id, name, phone, rent, type, property, description}) => {
-    // Data
-    const _id = new ObjectId(id);
-
-    // Fetch chamber
-    const atomicChamberFetchData = await atomicChamberFetch({_id});
-    if(!atomicChamberFetchData.status) {
-        return atomicChamberFetchData;
-    }
-
-    // Update chamber info
-    const atomicChamberUpdateData = await atomicChamberUpdate(id, {
-        $set: {name, phone, rent, description, type, property: new ObjectId(property)}
-    });
-    if(!atomicChamberUpdateData.status) {
-        return atomicChamberUpdateData;
-    }
-
-    // Old and new property management
-    const isOccupied = !atomicChamberFetchData.data.free;
-    const oldProperty = atomicChamberFetchData.data.property;
-    if(oldProperty !== property) {
-        // Remove old chamber property id different from new property
-        (oldProperty) && await propertiesHelpers.removePropertyChamberByPropertyId(oldProperty, id, isOccupied);
-        // Add new chamber property id different from new property
-        (property) && await propertiesHelpers.addPropertyChamberByPropertyId(property, id, isOccupied);
-    }
-
-    return atomicChamberUpdateData;
 };
 
 // Simple archive chamber
@@ -183,7 +177,7 @@ module.exports.archiveChamberByChamberId = async (id) => {
     // Remove property chamber
     const isOccupied = !atomicChamberFetchData.data.free;
     const property = atomicChamberFetchData.data.property;
-    (property) && await propertiesHelpers.removePropertyChamberByPropertyId(property, id, isOccupied);
+    (property) && await propertiesHelpers.updatePropertyChamberByPropertyId(property, id, false);
 
     // Archive chamber goods
     const goods = atomicChamberFetchData.data.goods;

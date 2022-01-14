@@ -57,7 +57,7 @@ module.exports.createProperty = async ({name, phone, address, description, creat
 
 // Update property
 module.exports.updateProperty = async ({id, name, phone, address, description}) => {
-    // Updatable check
+    // Updatable check & fetch
     const atomicPropertyFetchData = await atomicPropertyFetch({_id: new ObjectId(id), updatable: true});
     if(!atomicPropertyFetchData.status) {
         return {...atomicPropertyFetchData, message: errorConstants.PROPERTIES.UPDATE_PROPERTY}
@@ -79,35 +79,17 @@ module.exports.removePropertyPictureByPropertyId = async (id, pictureId) => {
     return await atomicPropertyUpdate(id, {$pull: {pictures: {id: pictureId}}});
 };
 
-// Remove property chamber by property id
-module.exports.removePropertyChamberByPropertyId = async (id, chamberId, isOccupied) => {
-    // Calculate occupation
-    const atomicPropertyFetchData = await atomicPropertyFetch({_id: new ObjectId(id)});
-    const propertyData = atomicPropertyFetchData.data?.simpleResponseFormat;
-    const occupiedChambers = propertyData.occupied;
-    const occupied = isOccupied ? occupiedChambers - 1 : occupiedChambers;
-    const occupation = Math.round((occupied * 100) / (propertyData.chambers - 1)) || 0;
-    // Update
-    return await atomicPropertyUpdate(id, {$pull: {chambers: new ObjectId(chamberId)}, $set: {occupation, occupied}});
-};
-
-// Add property chamber by property id
-module.exports.addPropertyChamberByPropertyId = async (id, chamberId, isOccupied) => {
+// Update property chamber by property id
+module.exports.updatePropertyChamberByPropertyId = async (id, chamberId, add = true) => {
     // Calculate occupation
     const atomicPropertyFetchData = await atomicPropertyFetch({_id: new ObjectId(id)});
     if(atomicPropertyFetchData.status) {
         const propertyData = atomicPropertyFetchData.data?.simpleResponseFormat;
-        const oldOccupiedChambers = propertyData.occupied_chambers;
-        const newOccupiedChambers = isOccupied ? oldOccupiedChambers + 1 : oldOccupiedChambers;
-        const occupiedPercentage = Math.round((newOccupiedChambers * 100) / (propertyData.chambers + 1));
+        const newPropertyChambers = add ? propertyData.chambers + 1 : propertyData.chambers - 1;
+        const occupiedPercentage = Math.round((propertyData.occupied_chambers * 100) / newPropertyChambers);
         return await atomicPropertyUpdate(id, {
             $addToSet: {chambers: new ObjectId(chamberId)},
-            $set: {
-                occupied_percentage: occupiedPercentage,
-                occupied_chambers: newOccupiedChambers,
-                updatable: !isOccupied,
-                deletable: !isOccupied,
-            }
+            $set: {occupied_percentage: occupiedPercentage}
         });
     }
     return atomicPropertyFetchData;

@@ -26,8 +26,8 @@ module.exports.createInvoice = async ({amount, tenant, chamber, property, descri
     }
 
     // Push property chamber
-    const createdInvoiceId = atomicInvoiceCreateData.data;
-    return await propertiesHelpers.addPropertyChamberByPropertyId(property, createdChamberId, false);
+    // const createdInvoiceId = atomicInvoiceCreateData.data;
+    // return await propertiesHelpers.addPropertyChamberByPropertyId(property, createdChamberId, false);
 
     return atomicInvoiceCreateData;
 };
