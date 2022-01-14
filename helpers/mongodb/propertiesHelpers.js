@@ -95,12 +95,22 @@ module.exports.removePropertyChamberByPropertyId = async (id, chamberId, isOccup
 module.exports.addPropertyChamberByPropertyId = async (id, chamberId, isOccupied) => {
     // Calculate occupation
     const atomicPropertyFetchData = await atomicPropertyFetch({_id: new ObjectId(id)});
-    const propertyData = atomicPropertyFetchData.data?.simpleResponseFormat;
-    const occupiedChambers = propertyData.occupied;
-    const occupied = isOccupied ? occupiedChambers + 1 : occupiedChambers;
-    const occupation = Math.round((occupied * 100) / (propertyData.chambers + 1));
-    // Update
-    return await atomicPropertyUpdate(id, {$addToSet: {chambers: new ObjectId(chamberId)}, $set: {occupation, occupied}});
+    if(atomicPropertyFetchData.status) {
+        const propertyData = atomicPropertyFetchData.data?.simpleResponseFormat;
+        const oldOccupiedChambers = propertyData.occupied_chambers;
+        const newOccupiedChambers = isOccupied ? oldOccupiedChambers + 1 : oldOccupiedChambers;
+        const occupiedPercentage = Math.round((newOccupiedChambers * 100) / (propertyData.chambers + 1));
+        return await atomicPropertyUpdate(id, {
+            $addToSet: {chambers: new ObjectId(chamberId)},
+            $set: {
+                occupied_percentage: occupiedPercentage,
+                occupied_chambers: newOccupiedChambers,
+                updatable: !isOccupied,
+                deletable: !isOccupied,
+            }
+        });
+    }
+    return atomicPropertyFetchData;
 };
 
 // Archive property

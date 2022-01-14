@@ -3,12 +3,11 @@ const goodsHelpers = require("../../helpers/mongodb/goodsHelpers");
 const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
 const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
 const chamberPicturesHelpers = require("../../helpers/cloudary/chamberPicturesHelpers");
+const generalHelpers = require("../../helpers/generalHelpers");
 
 // GET: All chambers
 module.exports.chambers = async (req, res) => {
-    // Get chambers
-    const chambersWithPropertyData = await chambersHelpers.chambersWithProperty();
-    return res.send(chambersWithPropertyData);
+    return res.send(await chambersHelpers.chambersWithProperty());
 };
 
 // GET: Chamber
@@ -37,11 +36,22 @@ module.exports.create = async (req, res) => {
         return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
     }
 
+    // Check lease period & retrieve rank
+    const typeCheck = generalHelpers.chambersTypes(type);
+    if(!typeCheck) {
+        return res.send({data: null, status: false, message: errorConstants.CHAMBERS.WRONG_CHAMBER_TYPE});
+    }
+
+    // Check rent format
+    const rentCheck = parseInt(rent, 10);
+    if(!rentCheck) {
+        return res.send({data: null, status: false, message: errorConstants.CHAMBERS.WRONG_CHAMBER_RENT});
+    }
+
     // Database saving
-    const createChamberData = await chambersHelpers.createChamber({
-        name, phone, type, property, description, creator: username, rent
-    });
-    return res.send(createChamberData);
+    return res.send(await chambersHelpers.createChamber({
+        name, phone, type, property, description, rent: rentCheck, creator: username
+    }));
 };
 
 // POST: Update chamber info

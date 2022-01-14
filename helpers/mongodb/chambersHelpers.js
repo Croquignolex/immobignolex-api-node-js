@@ -26,7 +26,7 @@ module.exports.chambersWithProperty = async () => {
     return await embeddedChambersFetch([
         chamberPropertyLookup,
         generalHelpers.databaseUnwind("$building"),
-        { $match : {enable: true} }
+        { $match : {deleted: false} }
     ]);
 };
 
@@ -48,15 +48,20 @@ module.exports.propertyFreeChambers = async (property) => {
 // Create chamber
 module.exports.createChamber = async ({name, phone, rent, type, property, description, creator}) => {
     // Data
-    const free = true;
-    const enable = true;
+    const deleted = false;
+    const occupied = false;
+    const updatable = true;
+    const deletable = true;
+    const deleted_at = null;
     const created_by = creator;
     const created_at = new Date();
 
     // Keep into database
     const atomicChamberCreateData = await atomicChamberCreate({
-        name, phone, rent: parseInt(rent, 10) || 0, free, enable, description, type,
-        created_by, created_at, property: new ObjectId(property)
+        name, phone, rent, type,
+        property: new ObjectId(property),
+        deleted, updatable, deletable, occupied,
+        description, created_by, created_at, deleted_at
     });
     if(!atomicChamberCreateData.status) {
         return atomicChamberCreateData;
@@ -64,7 +69,6 @@ module.exports.createChamber = async ({name, phone, rent, type, property, descri
 
     // Push property chambers & update occupation
     if(property) {
-        // Update property occupation
         const createdChamberId = atomicChamberCreateData.data;
         await propertiesHelpers.addPropertyChamberByPropertyId(property, createdChamberId, false);
     }

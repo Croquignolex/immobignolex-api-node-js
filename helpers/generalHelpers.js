@@ -104,6 +104,11 @@ module.exports.periodsTypesRank = (period) => {
     return found ? found.rank : found;
 };
 
+// Get available app chambers type
+module.exports.chambersTypes = (type) => {
+    return ["Villa", "Studio", "Duplex", "Chambre", "Appartement"].find((item) => item === type);
+};
+
 // Extract picture from the correct env
 const picturePublicUrl = (picture) => {
     return (
