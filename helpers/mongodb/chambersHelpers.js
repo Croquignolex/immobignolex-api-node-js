@@ -119,22 +119,22 @@ module.exports.updateChamber = async ({id, name, phone, rent, type, property, de
 
 // Add chamber good by chamber id
 module.exports.addChamberGoodByChamberId = async (id, goodId) => {
-    return await atomicChamberUpdate(id, {$addToSet: {goods: new ObjectId(goodId)}});
+    return await atomicChamberUpdate({_id: new ObjectId(id)}, {$addToSet: {goods: new ObjectId(goodId)}});
 };
 
 // Remove chamber good by chamber id
 module.exports.removeChamberGoodByChamberId = async (id, goodId) => {
-    return await atomicChamberUpdate(id, {$pull: {goods: new ObjectId(goodId)}});
+    return await atomicChamberUpdate({_id: new ObjectId(id)}, {$pull: {goods: new ObjectId(goodId)}});
 };
 
 // Add chamber picture by chamber id
 module.exports.addChamberPictureByChamberId = async (id, picture) => {
-    return await atomicChamberUpdate(id, {$push: {pictures: picture}});
+    return await atomicChamberUpdate({_id: new ObjectId(id)}, {$push: {pictures: picture}});
 };
 
 // Remove chamber picture by chamber id
 module.exports.removeChamberPictureByChamberId = async (id, pictureId) => {
-    return await atomicChamberUpdate(id, {$pull: {pictures: {id: pictureId}}});
+    return await atomicChamberUpdate({_id: new ObjectId(id)}, {$pull: {pictures: {id: pictureId}}});
 };
 
 // Delete chamber
