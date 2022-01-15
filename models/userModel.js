@@ -23,6 +23,8 @@ module.exports = class UserModel {
             enable: this.enable,
             balance: this.balance,
             username: this.username,
+            updatable: this.updatable,
+            deletable: this.deletable,
             permissions: this.permissions,
             description: this.description,
             avatar: generalHelpers.filePublicUrl(this.avatar)
@@ -41,6 +43,8 @@ module.exports = class UserModel {
             enable: this.enable,
             balance: this.balance,
             username: this.username,
+            updatable: this.updatable,
+            deletable: this.deletable,
             created_at: this.created_at,
             permissions: this.permissions,
             description: this.description,
