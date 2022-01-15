@@ -86,6 +86,32 @@ module.exports.deletePropertyByPropertyId = async (id) => {
     return await atomicPropertyDelete({_id: new ObjectId(id), deletable: true});
 };
 
+// Embedded property fetch into database
+const embeddedPropertyFetch = async (pipeline) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const embeddedPropertyFetchData = await client.db().collection(propertiesCollection)
+            .aggregate(pipeline)
+            .toArray();
+        // Format response
+        if(embeddedPropertyFetchData.length > 0) {
+            status = true;
+            data = new PropertyModel(embeddedPropertyFetchData[0]).responseFormat;
+        }
+        else message = errorConstants.PROPERTIES.PROPERTY_NOT_FOUND;
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
 // Atomic properties fetch into database
 const atomicPropertiesFetch = async (filter) => {
     let client, data = null, status = false, message = "";
@@ -102,30 +128,6 @@ const atomicPropertiesFetch = async (filter) => {
         data = [];
         status = true;
         atomicPropertiesFetchData.forEach(item => data.push(new PropertyModel(item).simpleResponseFormat));
-    }
-    catch (err) {
-        generalHelpers.log("Connection failure to mongodb", err);
-        message = errorConstants.GENERAL.DATABASE;
-    }
-    finally { await client.close(); }
-    return {data, status, message};
-};
-
-// Embedded property fetch into database
-const embeddedPropertyFetch = async (pipeline) => {
-    // Data
-    let client, data = null, status = false, message = "";
-    client = new MongoClient(databaseUrl);
-    try {
-        await client.connect();
-        // Query
-        const embeddedPropertyFetchData = await client.db().collection(propertiesCollection).aggregate(pipeline).toArray();
-        // Format response
-        if(embeddedPropertyFetchData.length > 0) {
-            status = true;
-            data = new PropertyModel(embeddedPropertyFetchData[0]).responseFormat;
-        }
-        else message = errorConstants.PROPERTIES.PROPERTY_NOT_FOUND;
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

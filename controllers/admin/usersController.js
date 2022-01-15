@@ -7,30 +7,21 @@ const avatarsHelpers = require("../../helpers/cloudary/avatarsHelpers");
 module.exports.administrators = async (req, res) => {
     // Request data
     const username = req.username;
-
-    // Get administrators
-    const administratorsWithoutUserByUsernameData = await usersHelpers.administratorsWithoutUserByUsername(username);
-    return res.send(administratorsWithoutUserByUsernameData);
+    return res.send(await usersHelpers.administratorsWithoutUserByUsername(username));
 };
 
 // GET: employees
 module.exports.employees = async (req, res) => {
     // Request data
     const username = req.username;
-
-    // Get employees
-    const employeesWithoutUserByUsernameData = await usersHelpers.employeesWithoutUserByUsername(username);
-    return res.send(employeesWithoutUserByUsernameData);
+    return res.send(await usersHelpers.employeesWithoutUserByUsername(username));
 };
 
 // GET: tenants
 module.exports.tenants = async (req, res) => {
     // Request data
     const username = req.username;
-
-    // Get tenants
-    const tenantsWithoutUserByUsernameData = await usersHelpers.tenantsWithoutUserByUsername(username);
-    return res.send(tenantsWithoutUserByUsernameData);
+    return res.send(await usersHelpers.tenantsWithoutUserByUsername(username));
 };
 
 // GET: User
@@ -62,11 +53,9 @@ module.exports.updateInfo = async (req, res) => {
     }
 
     // Update user
-    const updateUserInfoByUsernameData = await usersHelpers.updateUserInfoByUsername(
-        username,
-        {name, phone, email, cni, post, description}
-    );
-    return res.send(updateUserInfoByUsernameData);
+    return res.send(await usersHelpers.updateUserInfoByUsername({
+        username, name, phone, email, cni, post, description
+    }));
 };
 
 // POST: Toggle user status
@@ -81,11 +70,8 @@ module.exports.toggleStatus = async (req, res) => {
     }
 
     // Update user
-    const updateUserStatusByUsernameData = await usersHelpers.updateUserStatusByUsername(
-        username,
-        !userByUsernameData.data?.enable
-    );
-    return res.send(updateUserStatusByUsernameData);
+    const databaseUser = userByUsernameData.data;
+    return res.send(await usersHelpers.updateUserStatusByUsername(username, !databaseUser?.enable));
 };
 
 // POST: Reset user password
@@ -96,8 +82,7 @@ module.exports.resetPassword = async (req, res) => {
     // Save user info in the database
     const bcrypt = require("bcryptjs");
     const password = await bcrypt.hash("000000", 10);
-    const updateUserPasswordByUsernameData = await usersHelpers.updateUserPasswordByUsername(username, password);
-    return res.send(updateUserPasswordByUsernameData);
+    return res.send(await usersHelpers.updateUserPasswordByUsername(username, password));
 };
 
 // DELETE: Delete user avatar
@@ -111,8 +96,7 @@ module.exports.deleteAvatar = async (req, res) => {
 
     // Remove avatar in the cloud & database
     const databaseUser = userByUsernameData.data;
-    const cloudDeleteUserAvatarData = await avatarsHelpers.cloudDeleteUserAvatar(databaseUser);
-    return res.send(cloudDeleteUserAvatarData);
+    return res.send(await avatarsHelpers.cloudDeleteUserAvatar(databaseUser));
 };
 
 // POST: Update user avatar
@@ -138,8 +122,7 @@ module.exports.updateAvatar = async (req, res) => {
 
     // Save user avatar in the cloud & database
     const databaseUser = userByUsernameData.data;
-    const cloudUpdateUserAvatarData = await avatarsHelpers.cloudUpdateUserAvatar(databaseUser, file);
-    return res.send(cloudUpdateUserAvatarData);
+    return res.send(await avatarsHelpers.cloudUpdateUserAvatar(databaseUser, file));
 };
 
 // PUT: Create administrator
@@ -154,10 +137,9 @@ module.exports.createAdministrator = async (req, res) => {
     }
 
     // Database saving
-    const createAdministratorData = await usersHelpers.createAdministrator({
+    return res.send(await usersHelpers.createAdministrator({
         name: name.trim(), phone, email, cni, description, creator: username
-    });
-    return res.send(createAdministratorData);
+    }));
 };
 
 // PUT: Create employee
@@ -172,10 +154,9 @@ module.exports.createEmployee = async (req, res) => {
     }
 
     // Database saving
-    const createEmployeeData = await usersHelpers.createEmployee({
+    return res.send(await usersHelpers.createEmployee({
         name: name.trim(), phone, email, post, cni, description, creator: username
-    });
-    return res.send(createEmployeeData);
+    }));
 };
 
 // PUT: Create tenant
@@ -190,8 +171,7 @@ module.exports.createTenant = async (req, res) => {
     }
 
     // Database saving
-    const createTenantData = await usersHelpers.createTenant({
+    return res.send(await usersHelpers.createTenant({
         name: name.trim(), phone, cni, email, description, creator: username
-    });
-    return res.send(createTenantData);
+    }));
 };

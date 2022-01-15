@@ -99,7 +99,7 @@ module.exports.updateInfo = async (req, res) => {
 };
 
 // DELETE: Archive chamber
-module.exports.archiveChamber = async (req, res) => {
+module.exports.deleteChamber = async (req, res) => {
     // Form data & data
     const {chamberId} = req.params;
 

@@ -20,7 +20,6 @@ module.exports.userByUsername = async (username) => {
 
 // Get user by username with creator
 module.exports.userByUsernameWithCreator = async (username) => {
-    // Database fetch
     return await embeddedUserFetch([
         generalConstants.LOOP_DIRECTIVE.CREATOR,
         generalHelpers.databaseUnwind("$creator"),
@@ -30,76 +29,71 @@ module.exports.userByUsernameWithCreator = async (username) => {
 
 // Get administrators without current user by username
 module.exports.administratorsWithoutUserByUsername = async (username) => {
-    return await atomicUsersFetch({
-        role: roles.admin, username: {$ne: username}
-    });
+    return await atomicUsersFetch({role: roles.admin, username: {$ne: username}});
 };
 
 // Get employees without current user by username
 module.exports.employeesWithoutUserByUsername = async (username) => {
-    return await atomicUsersFetch({
-        role: roles.employee, username: {$ne: username}
-    });
+    return await atomicUsersFetch({role: roles.employee, username: {$ne: username}});
 };
 
 // Get tenants without current user by username
 module.exports.tenantsWithoutUserByUsername = async (username) => {
-    return await atomicUsersFetch({
-        role: roles.tenant, username: {$ne: username}
-    });
+    return await atomicUsersFetch({role: roles.tenant, username: {$ne: username}});
 };
 
 // Update user avatar by username
 module.exports.updateUserAvatarByUsername = async (username, avatar) => {
-    return await atomicUserUpdate(username, {$set: {avatar}});
+    return await atomicUserUpdate({username}, {$set: {avatar}});
 };
 
 // Update user password by username
 module.exports.updateUserPasswordByUsername = async (username, password) => {
-    return await atomicUserUpdate(username, {$set: {password}});
+    return await atomicUserUpdate({username}, {$set: {password}});
 };
 
 // Update user status by username
 module.exports.updateUserStatusByUsername = async (username, status) => {
-    return await atomicUserUpdate(username, {$set: {enable: status}});
+    return await atomicUserUpdate({username}, {$set: {enable: status}});
 };
 
 // Update user info by username
-module.exports.updateUserInfoByUsername = async (username, {name, phone, email, cni, post, description}) => {
-    return await atomicUserUpdate(username, {$set: {name, phone, email, cni, post, description}});
+module.exports.updateUserInfoByUsername = async ({username, name, phone, email, cni, post, description}) => {
+    return await atomicUserUpdate(
+        {username, updatable: true},
+        {$set: {name, phone, email, cni, post, description}}
+    );
 };
 
 // Update user tokens by username
 module.exports.updateUserTokensByUsername = async (username, tokens) => {
-    return await atomicUserUpdate(username, {$set: {tokens}});
-};
-
-// Create user
-module.exports.createUser = async ({name, phone, email, role, description, creator}) => {
-    return await userCreateProcess({
-        name, phone, email, role, description, creator
-    });
+    return await atomicUserUpdate({username}, {$set: {tokens}});
 };
 
 // Create admin
 module.exports.createAdministrator = async ({name, phone, email, cni, description, creator}) => {
     return await userCreateProcess({
-        name, phone, email, cni, role: roles.admin, description, creator
+        name, phone, email, cni, description, creator, role: roles.admin
     });
 };
 
 // Create employee
 module.exports.createEmployee = async ({name, phone, email, cni, post, description, creator}) => {
     return await userCreateProcess({
-        name, phone, email, cni, role: roles.employee, post, description, creator
+        name, phone, email, cni, post, description, creator, role: roles.employee
     });
 };
 
 // Create tenant
 module.exports.createTenant = async ({name, phone, email, cni, description, creator}) => {
     return await userCreateProcess({
-        name, phone, email, cni, role: roles.tenant, description, creator, balance: 0
+        name, phone, email, cni, description, creator, balance: 0, role: roles.tenant
     });
+};
+
+// Delete user
+module.exports.deleteUserByUsername = async (username) => {
+    return await atomicUserDelete({username, deletable: true});
 };
 
 // User create process
@@ -116,22 +110,28 @@ const userCreateProcess = async ({name, phone, email, role, cni, post, balance, 
     if(!roleByNameData.status) {
         return roleByNameData;
     }
+
+    const bcrypt = require("bcryptjs");
+
+    // Data
     const enable = true;
+    const updatable = true;
+    const deletable = true;
     const created_by = creator;
     const created_at = new Date();
-    const bcrypt = require("bcryptjs");
     const password = await bcrypt.hash("000000", 10);
     const permissions = roleByNameData.data.permissions;
 
     // Keep into database
     return await atomicUserCreate({
-        username, name, password, enable, phone, email, role, cni,
-        post, balance, description, permissions, created_by, created_at
+        username, name, password, phone, email, role, cni,
+        description, permissions, created_by, created_at,
+        enable, updatable, deletable, post, balance
     });
 };
 
 // Embedded user fetch into database
-const embeddedUserFetch = async (directives) => {
+const embeddedUserFetch = async (pipeline) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -139,7 +139,7 @@ const embeddedUserFetch = async (directives) => {
         await client.connect();
         // Query
         const embeddedUserFetchData = await client.db().collection(usersCollection)
-            .aggregate(directives)
+            .aggregate(pipeline)
             .toArray();
         // Format response
         if(embeddedUserFetchData.length > 0) {
@@ -157,7 +157,7 @@ const embeddedUserFetch = async (directives) => {
 };
 
 // Atomic users fetch into database
-const atomicUsersFetch = async (directives) => {
+const atomicUsersFetch = async (filter) => {
     let client, data = null, status = false, message = "";
     // Data
     client = new MongoClient(databaseUrl);
@@ -165,7 +165,7 @@ const atomicUsersFetch = async (directives) => {
         await client.connect();
         // Query
         const atomicUsersFetchData = await client.db().collection(usersCollection)
-            .find(directives)
+            .find(filter || {})
             .sort({created_at: -1})
             .toArray();
         // Format response
@@ -182,14 +182,14 @@ const atomicUsersFetch = async (directives) => {
 };
 
 // Atomic user fetch into database
-const atomicUserFetch = async (directives) => {
+const atomicUserFetch = async (filter) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
         // Query
-        const atomicUserFetchData = await client.db().collection(usersCollection).findOne(directives);
+        const atomicUserFetchData = await client.db().collection(usersCollection).findOne(filter);
         // Format response
         if(atomicUserFetchData !== null) {
             status = true;
@@ -205,16 +205,16 @@ const atomicUserFetch = async (directives) => {
 };
 
 // Atomic user create into database
-const atomicUserCreate = async (directives) => {
+const atomicUserCreate = async (document) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
         // Query
-        const atomicUserCreateData = await client.db().collection(usersCollection).insertOne(directives);
+        const atomicUserCreateData = await client.db().collection(usersCollection).insertOne(document);
         // Format response
-        if(atomicUserCreateData.acknowledged && atomicUserCreateData.insertedId) {
+        if(atomicUserCreateData.acknowledged) {
             data = atomicUserCreateData.insertedId;
             status = true;
         }
@@ -229,22 +229,43 @@ const atomicUserCreate = async (directives) => {
 };
 
 // Atomic user update into database
-const atomicUserUpdate = async (username, directives) => {
+const atomicUserUpdate = async (filter, update) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
         // Query
-        const atomicUserUpdateData = await client.db().collection(usersCollection).updateOne(
-            {username}, directives
-        );
+        const atomicUserUpdateData = await client.db().collection(usersCollection).updateOne(filter, update);
         // Format response
-        if(atomicUserUpdateData.matchedCount === 1 && atomicUserUpdateData.modifiedCount === 0) {
-            message = errorConstants.GENERAL.NO_CHANGES;
+        if(atomicUserUpdateData.acknowledged) {
+            if(atomicUserUpdateData.modifiedCount === 0) message = errorConstants.GENERAL.NO_CHANGES;
+            else status = true;
         }
-        else if(atomicUserUpdateData.modifiedCount === 1) status = true;
         else message = errorConstants.USERS.USER_UPDATE;
+    } catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
+// Atomic user delete into database
+const atomicUserDelete = async (filter) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const atomicUserDeleteData = await client.db().collection(usersCollection).deleteOne(filter);
+        // Format response
+        if(atomicUserDeleteData.acknowledged) {
+            if(atomicUserDeleteData.deletedCount === 0) message = errorConstants.GENERAL.NO_CHANGES;
+            else status = true;
+        }
+        else message = errorConstants.USERS.USER_DELETE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;

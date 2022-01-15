@@ -15,14 +15,14 @@ module.exports.roleByName = async (name) => {
 };
 
 // Atomic roles fetch into database
-const atomicRoleFetch = async (directives) => {
+const atomicRoleFetch = async (filter) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
         // Query
-        const atomicRoleFetchData = await client.db().collection(rolesCollection).findOne(directives);
+        const atomicRoleFetchData = await client.db().collection(rolesCollection).findOne(filter);
         // Format response
         if(atomicRoleFetchData !== null) {
             status = true;
