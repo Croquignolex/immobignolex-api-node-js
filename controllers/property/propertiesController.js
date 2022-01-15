@@ -71,10 +71,8 @@ module.exports.addPicture = async (req, res) => {
         return res.send({status: false, data: null, message: errorConstants.GENERAL.FORM_DATA});
     }
 
-    // Route params
-    const {propertyId} = req.params;
-
     // Save property picture in the cloud & database
+    const {propertyId} = req.params;
     return res.send(await propertyPicturesHelpers.cloudAddPropertyPicture(propertyId, file));
 };
 
@@ -93,9 +91,8 @@ module.exports.chambers = async (req, res) => {
     // Route params
     const {free} = req.query;
     const {propertyId} = req.params;
-    return res.send(
-        (free)
-            ? await chambersHelpers.propertyFreeChambers(propertyId)
-            : await chambersHelpers.propertyChambers(propertyId)
-    );
+
+    // Fetch correspondent chambers
+    if(free) return res.send(await chambersHelpers.propertyFreeChambers(propertyId));
+    return res.send(await chambersHelpers.propertyChambers(propertyId));
 };

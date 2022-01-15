@@ -4,7 +4,6 @@ const generalHelpers = require('../generalHelpers');
 const ChamberModel = require('../../models/chamberModel');
 const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
-const goodsHelpers = require("../../helpers/mongodb/goodsHelpers");
 const generalConstants = require("../../constants/generalConstants");
 const propertiesHelpers = require("../../helpers/mongodb/propertiesHelpers");
 
@@ -25,8 +24,7 @@ const chamberPropertyLookup = {
 module.exports.chambersWithProperty = async () => {
     return await embeddedChambersFetch([
         chamberPropertyLookup,
-        generalHelpers.databaseUnwind("$building"),
-        { $match : {deleted: false} }
+        generalHelpers.databaseUnwind("$building")
     ]);
 };
 
@@ -47,36 +45,34 @@ module.exports.chamberByIdWithPropertyAndCreator = async (id) => {
 
 // Fetch all property chambers into database
 module.exports.propertyChambers = async (property) => {
-    return await atomicChambersFetch({deleted: false, property: new ObjectId(property)});
+    return await atomicChambersFetch({property: new ObjectId(property)});
 };
 
 // Check if property has chamber into database
 module.exports.propertyHasChamber = async (property, chamber) => {
-    return await atomicChamberFetch({_id: new ObjectId(chamber), deleted: true, property: new ObjectId(property)});
+    return await atomicChamberFetch({_id: new ObjectId(chamber), property: new ObjectId(property)});
 };
 
 // Fetch all property free chambers into database
 module.exports.propertyFreeChambers = async (property) => {
-    return await atomicChambersFetch({deleted: true, occupied: false, property: new ObjectId(property)});
+    return await atomicChambersFetch({occupied: false, property: new ObjectId(property)});
 };
 
 // Create chamber
 module.exports.createChamber = async ({name, phone, rent, type, property, description, creator}) => {
     // Data
-    const deleted = false;
     const occupied = false;
     const updatable = true;
     const deletable = true;
-    const deleted_at = null;
     const created_by = creator;
     const created_at = new Date();
 
     // Keep into database
     const atomicChamberCreateData = await atomicChamberCreate({
         name, phone, rent, type,
+        updatable, deletable, occupied,
         property: new ObjectId(property),
-        deleted, updatable, deletable, occupied,
-        description, created_by, created_at, deleted_at
+        description, created_by, created_at
     });
     if(!atomicChamberCreateData.status) {
         return atomicChamberCreateData;
@@ -84,23 +80,27 @@ module.exports.createChamber = async ({name, phone, rent, type, property, descri
 
     // Push property chambers & update occupation
     const createdChamberId = atomicChamberCreateData.data;
-    await propertiesHelpers.updatePropertyChamberByPropertyId(property, createdChamberId);
+    await propertiesHelpers.addPropertyChamberByPropertyId(property, createdChamberId);
 
     return atomicChamberCreateData;
 };
 
 // Update chamber
 module.exports.updateChamber = async ({id, name, phone, rent, type, property, description}) => {
+    //Data
+    const _id = new ObjectId(id);
+
     // Updatable check & fetch
-    const atomicChamberFetchData = await atomicChamberFetch({_id: new ObjectId(id), updatable: true});
+    const atomicChamberFetchData = await atomicChamberFetch({_id});
     if(!atomicChamberFetchData.status) {
-        return {...atomicChamberFetchData, message: errorConstants.CHAMBERS.UPDATE_CHAMBER}
+        return atomicChamberFetchData
     }
 
     // Update chamber info
-    const atomicChamberUpdateData = await atomicChamberUpdate(id, {
-        $set: {name, phone, rent, description, type, property: new ObjectId(property)}
-    });
+    const atomicChamberUpdateData = await atomicChamberUpdate(
+        {_id, updatable: true},
+        {$set: {name, phone, rent, description, type, property: new ObjectId(property)}}
+    );
     if(!atomicChamberUpdateData.status) {
         return atomicChamberUpdateData;
     }
@@ -109,9 +109,9 @@ module.exports.updateChamber = async ({id, name, phone, rent, type, property, de
     const oldProperty = atomicChamberFetchData.data.property;
     if(oldProperty !== property) {
         // Remove old chamber property id different from new property
-        await propertiesHelpers.updatePropertyChamberByPropertyId(oldProperty, id, false);
+        await propertiesHelpers.removePropertyChamberByPropertyId(oldProperty, id);
         // Add new chamber property id different from new property
-        await propertiesHelpers.updatePropertyChamberByPropertyId(property, id);
+        await propertiesHelpers.addPropertyChamberByPropertyId(property, id);
     }
 
     return atomicChamberUpdateData;
@@ -139,52 +139,11 @@ module.exports.removeChamberPictureByChamberId = async (id, pictureId) => {
 
 // Delete chamber
 module.exports.deleteChamberByChamberId = async (id) => {
-    // Deletable check & fetch
-    const atomicChamberFetchData = await atomicChamberFetch({_id: new ObjectId(id), deletable: true});
-    if(!atomicChamberFetchData.status) {
-        return {...atomicChamberFetchData, message: errorConstants.CHAMBERS.DELETE_CHAMBER}
-    }
-
-    // TODO: Implement archive procedures
-
-    // Archive chamber goods
-    const goods = atomicChamberFetchData.data.goods;
-    if(goods && goods?.length > 0) {
-        for(const good of goods) {
-            await goodsHelpers.simpleArchiveGoodByGoodId(good);
-        }
-    }
-
-    return await atomicChamberUpdate(id, {$set: {enable: false}});
-}
-
-// Archive chamber
-module.exports.archiveChamberByChamberId = async (id) => {
-    // Deletable check & fetch
-    const atomicChamberFetchData = await atomicChamberFetch({_id: new ObjectId(id), deletable: true});
-    if(!atomicChamberFetchData.status) {
-        return {...atomicChamberFetchData, message: errorConstants.CHAMBERS.DELETE_CHAMBER}
-    }
-
-    // TODO: Implement archive procedures
-
-    // Remove property chamber
-    const property = atomicChamberFetchData.data.property;
-    await propertiesHelpers.updatePropertyChamberByPropertyId(property, id, false);
-
-    // Archive chamber goods
-    const goods = atomicChamberFetchData.data.goods;
-    if(goods && goods?.length > 0) {
-        for(const good of goods) {
-            await goodsHelpers.simpleArchiveGoodByGoodId(good);
-        }
-    }
-
-    return await atomicChamberUpdate(id, {$set: {deleted: false, deleted_at: new Date()}});
+    return await atomicChamberDelete({_id: new ObjectId(id), deletable: true});
 };
 
 // Embedded chambers fetch into database
-const embeddedChambersFetch = async (directives) => {
+const embeddedChambersFetch = async (pipeline) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -192,7 +151,7 @@ const embeddedChambersFetch = async (directives) => {
         await client.connect();
         // Query
         const embeddedChambersFetchData = await client.db().collection(chambersCollection)
-            .aggregate(directives)
+            .aggregate(pipeline)
             .sort({created_at: -1})
             .toArray();
         // Format response
@@ -209,7 +168,7 @@ const embeddedChambersFetch = async (directives) => {
 };
 
 // Embedded chamber fetch into database
-const embeddedChamberFetch = async (directives) => {
+const embeddedChamberFetch = async (pipeline) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
@@ -217,7 +176,7 @@ const embeddedChamberFetch = async (directives) => {
         await client.connect();
         // Query
         const embeddedChamberFetchData = await client.db().collection(chambersCollection)
-            .aggregate(directives)
+            .aggregate(pipeline)
             .toArray();
         // Format response
         if(embeddedChamberFetchData.length > 0) {
@@ -235,7 +194,7 @@ const embeddedChamberFetch = async (directives) => {
 };
 
 // Atomic chambers fetch into database
-const atomicChambersFetch = async (directives) => {
+const atomicChambersFetch = async (filter) => {
     let client, data = null, status = false, message = "";
     // Data
     client = new MongoClient(databaseUrl);
@@ -243,7 +202,7 @@ const atomicChambersFetch = async (directives) => {
         await client.connect();
         // Query
         const atomicChambersFetchData = await client.db().collection(chambersCollection)
-            .find(directives)
+            .find(filter || {})
             .sort({created_at: -1})
             .toArray();
         // Format response
@@ -260,14 +219,14 @@ const atomicChambersFetch = async (directives) => {
 };
 
 // Atomic chamber fetch into database
-const atomicChamberFetch = async (directives) => {
+const atomicChamberFetch = async (filter) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
         // Query
-        const atomicChamberFetchData = await client.db().collection(chambersCollection).findOne(directives);
+        const atomicChamberFetchData = await client.db().collection(chambersCollection).findOne(filter);
         // Format response
         if(atomicChamberFetchData !== null) {
             status = true;
@@ -284,20 +243,20 @@ const atomicChamberFetch = async (directives) => {
 };
 
 // Atomic chamber create into database
-const atomicChamberCreate = async (directives) => {
+const atomicChamberCreate = async (document) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
         // Query
-        const atomicChamberCreateData = await client.db().collection(chambersCollection).insertOne(directives);
+        const atomicChamberCreateData = await client.db().collection(chambersCollection).insertOne(document);
         // Format response
-        if(atomicChamberCreateData.acknowledged && atomicChamberCreateData.insertedId) {
+        if(atomicChamberCreateData.acknowledged) {
             data = atomicChamberCreateData.insertedId;
             status = true;
         }
-        else message = errorConstants.CHAMBERS.CREATE_CHAMBER;
+        else message = errorConstants.CHAMBERS.CHAMBER_CREATE;
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
@@ -308,22 +267,19 @@ const atomicChamberCreate = async (directives) => {
 };
 
 // Atomic chamber update into database
-const atomicChamberUpdate = async (id, directives) => {
+const atomicChamberUpdate = async (filter, update) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
-        const _id = new ObjectId(id);
         // Query
-        const atomicChamberUpdateData = await client.db().collection(chambersCollection).updateOne(
-            {_id}, directives
-        );
+        const atomicChamberUpdateData = await client.db().collection(chambersCollection).updateOne(filter, update);
         // Format response
-        if(atomicChamberUpdateData.matchedCount === 1 && atomicChamberUpdateData.modifiedCount === 0) {
-            message = errorConstants.GENERAL.NO_CHANGES;
+        if(atomicChamberUpdateData.acknowledged) {
+            if(atomicChamberUpdateData.modifiedCount === 0) message = errorConstants.GENERAL.NO_CHANGES;
+            else status = true;
         }
-        else if(atomicChamberUpdateData.modifiedCount === 1) status = true;
         else message = errorConstants.CHAMBERS.CHAMBER_UPDATE;
     } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
@@ -332,3 +288,27 @@ const atomicChamberUpdate = async (id, directives) => {
     finally { await client.close(); }
     return {data, status, message};
 };
+
+// Atomic chamber delete into database
+const atomicChamberDelete = async (filter) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const atomicChamberDeleteData = await client.db().collection(chambersCollection).deleteOne(filter);
+        // Format response
+        if(atomicChamberDeleteData.acknowledged) {
+            if(atomicChamberDeleteData.deletedCount === 0) message = errorConstants.GENERAL.NO_CHANGES;
+            else status = true;
+        }
+        else message = errorConstants.CHAMBERS.CHAMBER_DELETE;
+    } catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+

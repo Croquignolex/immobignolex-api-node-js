@@ -102,10 +102,7 @@ module.exports.updateInfo = async (req, res) => {
 module.exports.deleteChamber = async (req, res) => {
     // Form data & data
     const {chamberId} = req.params;
-
-    // Update chamber visibility
-    const archiveChamberByChamberIdData = await chambersHelpers.archiveChamberByChamberId(chamberId);
-    return res.send(archiveChamberByChamberIdData);
+    return res.send(await chambersHelpers.deleteChamberByChamberId(chamberId));
 };
 
 // PUT: Add chamber picture
@@ -122,12 +119,9 @@ module.exports.addPicture = async (req, res) => {
         return res.send({status: false, data: null, message: errorConstants.GENERAL.FORM_DATA});
     }
 
-    // Route params
-    const {chamberId} = req.params;
-
     // Save chamber picture in the cloud & database
-    const cloudAddChamberPictureData = await chamberPicturesHelpers.cloudAddChamberPicture(chamberId, file);
-    return res.send(cloudAddChamberPictureData);
+    const {chamberId} = req.params;
+    return res.send(await chamberPicturesHelpers.cloudAddChamberPicture(chamberId, file));
 };
 
 // DELETE: Delete chamber picture
@@ -137,16 +131,12 @@ module.exports.deletePicture = async (req, res) => {
     const cloudPictureId = pictureId.split('-').join('/');
 
     // Remove picture in the cloud & database
-    const cloudRemoveChamberPictureData = await chamberPicturesHelpers.cloudRemoveChamberPicture(chamberId, cloudPictureId);
-    return res.send(cloudRemoveChamberPictureData);
+    return res.send(await chamberPicturesHelpers.cloudRemoveChamberPicture(chamberId, cloudPictureId));
 };
 
 // GET: All goods
 module.exports.goods = async (req, res) => {
     // Route params
     const {chamberId} = req.params;
-
-    // Get chamber goods
-    const chamberGoodsData = await goodsHelpers.chamberGoods(chamberId);
-    return res.send(chamberGoodsData);
+    return res.send(await goodsHelpers.chamberGoods(chamberId));
 };
