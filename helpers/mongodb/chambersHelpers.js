@@ -117,6 +117,33 @@ module.exports.updateChamber = async ({id, name, phone, rent, type, property, de
     return atomicChamberUpdateData;
 };
 
+// Delete chamber
+module.exports.deleteChamberByChamberId = async (id) => {
+    //Data
+    const _id = new ObjectId(id);
+
+    // Deletable check & fetch
+    const atomicChamberFetchData = await atomicChamberFetch({_id});
+    if(!atomicChamberFetchData.status) {
+        return atomicChamberFetchData
+    }
+
+    // Delete chamber info
+    const atomicChamberDeleteData = await atomicChamberDelete({_id: new ObjectId(id), deletable: true});
+    if(!atomicChamberDeleteData.status) {
+        return atomicChamberDeleteData;
+    }
+
+    // Old and new property management
+    const oldProperty = atomicChamberFetchData.data.property;
+    if(oldProperty) {
+        // Remove old chamber property id different from new property
+        await propertiesHelpers.removePropertyChamberByPropertyId(oldProperty, id);
+    }
+
+    return atomicChamberDeleteData;
+};
+
 // Add chamber good by chamber id
 module.exports.addChamberGoodByChamberId = async (id, goodId) => {
     return await atomicChamberUpdate({_id: new ObjectId(id)}, {$addToSet: {goods: new ObjectId(goodId)}});
@@ -135,11 +162,6 @@ module.exports.addChamberPictureByChamberId = async (id, picture) => {
 // Remove chamber picture by chamber id
 module.exports.removeChamberPictureByChamberId = async (id, pictureId) => {
     return await atomicChamberUpdate({_id: new ObjectId(id)}, {$pull: {pictures: {id: pictureId}}});
-};
-
-// Delete chamber
-module.exports.deleteChamberByChamberId = async (id) => {
-    return await atomicChamberDelete({_id: new ObjectId(id), deletable: true});
 };
 
 // Embedded chambers fetch into database

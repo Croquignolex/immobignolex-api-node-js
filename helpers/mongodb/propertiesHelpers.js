@@ -95,12 +95,15 @@ module.exports.removePropertyChamberByPropertyId = async (id, chamberId) => {
     const atomicPropertyFetchData = await atomicPropertyFetch({_id});
     if(atomicPropertyFetchData.status) {
         const propertyData = atomicPropertyFetchData.data?.simpleResponseFormat;
-        const occupiedPercentage = Math.round((propertyData.occupied_chambers * 100) / propertyData.chambers - 1);
+        const chambers = propertyData.chambers - 1;
+        const deletable = (chambers === 0);
+        const updatable = (chambers === 0) ? true : propertyData.updatable;
+        const occupiedPercentage = (chambers === 0) ? 0 : Math.round((propertyData.occupied_chambers * 100) / chambers);
         return await atomicPropertyUpdate(
             {_id},
             {
                 $pull: {chambers: new ObjectId(chamberId)},
-                $set: {occupied_percentage: occupiedPercentage, deletable: false}
+                $set: {occupied_percentage: occupiedPercentage, deletable, updatable}
             }
         );
     }
