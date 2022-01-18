@@ -9,7 +9,7 @@ const basicPermissionMiddleware = require("../../../middlewares/basicPermissionM
 router.get('', [tokenMiddleware, basicPermissionMiddleware], goodsController.goods);
 router.put('/create', [tokenMiddleware, basicPermissionMiddleware], goodsController.create);
 router.get('/:goodId/detail', [tokenMiddleware, basicPermissionMiddleware], goodsController.good);
-router.delete('/:goodId/archive', [tokenMiddleware, basicPermissionMiddleware], goodsController.archiveGood);
+router.delete('/:goodId/delete', [tokenMiddleware, basicPermissionMiddleware], goodsController.deleteGood);
 router.post('/:goodId/info-update', [tokenMiddleware, basicPermissionMiddleware], goodsController.updateInfo);
 router.put('/:goodId/picture-add', [pictureMiddleware, tokenMiddleware, basicPermissionMiddleware], goodsController.addPicture);
 router.delete('/:goodId/picture-delete/:pictureId', [tokenMiddleware, basicPermissionMiddleware], goodsController.deletePicture);

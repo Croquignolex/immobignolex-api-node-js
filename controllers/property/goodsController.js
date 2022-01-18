@@ -1,23 +1,20 @@
+const generalHelpers = require("../../helpers/generalHelpers");
 const errorConstants = require("../../constants/errorConstants");
 const goodsHelpers = require("../../helpers/mongodb/goodsHelpers");
 const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
+const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
 const goodPicturesHelpers = require("../../helpers/cloudary/goodPicturesHelpers");
 
 // GET: All goods
 module.exports.goods = async (req, res) => {
-    // Get goods
-    const goodsWithChamberData = await goodsHelpers.goodsWithChamber();
-    return res.send(goodsWithChamberData);
+    return res.send(await goodsHelpers.goodsWithChamber());
 };
 
 // GET: Good
 module.exports.good = async (req, res) => {
     // Route params
     const {goodId} = req.params;
-
-    // Get good
-    const goodByIdWithChamberAndCreatorData = await goodsHelpers.goodByIdWithChamberAndCreator(goodId);
-    return res.send(goodByIdWithChamberAndCreatorData);
+    return res.send(await goodsHelpers.goodByIdWithChamberAndCreator(goodId));
 };
 
 // PUT: Create good
@@ -35,11 +32,22 @@ module.exports.create = async (req, res) => {
         return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
     }
 
+    // Check good color
+    const colorCheck = generalHelpers.goodsColors(color);
+    if(!colorCheck) {
+        return res.send({data: null, status: false, message: errorConstants.GOODS.WRONG_GOOD_COLOR});
+    }
+
+    // Check chamber existence
+    const chamberCheck = await chambersHelpers.chamberById(chamber);
+    if(!chamberCheck.status) {
+        return res.send(chamberCheck);
+    }
+
     // Database saving
-    const createGoodData = await goodsHelpers.createGood({
+    return res.send(await goodsHelpers.createGood({
         name, weigh, color, height, chamber, description, creator: username
-    });
-    return res.send(createGoodData);
+    }));
 };
 
 // POST: Update good info
@@ -57,21 +65,29 @@ module.exports.updateInfo = async (req, res) => {
         return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
     }
 
+    // Check good color
+    const colorCheck = generalHelpers.goodsColors(color);
+    if(!colorCheck) {
+        return res.send({data: null, status: false, message: errorConstants.GOODS.WRONG_GOOD_COLOR});
+    }
+
+    // Check chamber existence
+    const chamberCheck = await chambersHelpers.chamberById(chamber);
+    if(!chamberCheck.status) {
+        return res.send(chamberCheck);
+    }
+
     // Update good
-    const updateGoodData = await goodsHelpers.updateGood({
+    return res.send(await goodsHelpers.updateGood({
         id: goodId, name, color, weigh, height, chamber, description
-    });
-    return res.send(updateGoodData);
+    }));
 };
 
 // DELETE: Archive good
-module.exports.archiveGood = async (req, res) => {
+module.exports.deleteGood = async (req, res) => {
     // Form data & data
     const {goodId} = req.params;
-
-    // Update good visibility
-    const archiveGoodByGoodIdData = await goodsHelpers.archiveGoodByGoodId(goodId);
-    return res.send(archiveGoodByGoodIdData);
+    return res.send(await goodsHelpers.deleteGoodByGoodId(goodId));
 };
 
 // PUT: Add good picture
@@ -88,12 +104,9 @@ module.exports.addPicture = async (req, res) => {
         return res.send({status: false, data: null, message: errorConstants.GENERAL.FORM_DATA});
     }
 
-    // Route params
-    const {goodId} = req.params;
-
     // Save good picture in the cloud & database
-    const cloudAddGoodPictureData = await goodPicturesHelpers.cloudAddGoodPicture(goodId, file);
-    return res.send(cloudAddGoodPictureData);
+    const {goodId} = req.params;
+    return res.send(await goodPicturesHelpers.cloudAddGoodPicture(goodId, file));
 };
 
 // DELETE: Delete good picture
@@ -103,6 +116,5 @@ module.exports.deletePicture = async (req, res) => {
     const cloudPictureId = pictureId.split('-').join('/');
 
     // Remove picture in the cloud & database
-    const cloudRemovePropertyPictureData = await goodPicturesHelpers.cloudRemovePropertyPicture(goodId, cloudPictureId);
-    return res.send(cloudRemovePropertyPictureData);
+    return res.send(await goodPicturesHelpers.cloudRemovePropertyPicture(goodId, cloudPictureId));
 };

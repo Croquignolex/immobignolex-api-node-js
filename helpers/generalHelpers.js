@@ -109,6 +109,11 @@ module.exports.chambersTypes = (type) => {
     return ["Villa", "Studio", "Duplex", "Chambre", "Appartement"].find((item) => item === type);
 };
 
+// Get available app goods color
+module.exports.goodsColors = (type) => {
+    return ["dark", "info", "success", "danger", "warning", "secondary", "primary"].find((item) => item === type);
+};
+
 // Extract picture from the correct env
 const picturePublicUrl = (picture) => {
     return (

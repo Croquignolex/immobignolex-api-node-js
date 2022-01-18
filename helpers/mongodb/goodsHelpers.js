@@ -121,7 +121,7 @@ module.exports.simpleArchiveGoodByGoodId = async (id) => {
 }
 
 // Archive good
-module.exports.archiveGoodByGoodId = async (id) => {
+module.exports.deleteGoodByGoodId = async (id) => {
     // TODO: Implement archive procedures
 
     // Data

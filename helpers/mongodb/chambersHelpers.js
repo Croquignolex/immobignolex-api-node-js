@@ -43,6 +43,11 @@ module.exports.chamberByIdWithPropertyAndCreator = async (id) => {
     ]);
 };
 
+// Fetch chamber by id into database
+module.exports.chamberById = async (id) => {
+    return await atomicChamberFetch({_id: new ObjectId(id)});
+};
+
 // Fetch all property chambers into database
 module.exports.propertyChambers = async (property) => {
     return await atomicChambersFetch({property: new ObjectId(property)});

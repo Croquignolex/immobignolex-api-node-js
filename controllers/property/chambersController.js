@@ -34,7 +34,7 @@ module.exports.create = async (req, res) => {
         return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
     }
 
-    // Check lease period & retrieve rank
+    // Check chamber type
     const typeCheck = generalHelpers.chambersTypes(type);
     if(!typeCheck) {
         return res.send({data: null, status: false, message: errorConstants.CHAMBERS.WRONG_CHAMBER_TYPE});
