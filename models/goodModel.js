@@ -21,6 +21,8 @@ module.exports = class GoodModel {
             color: this.color,
             weigh: this.weigh,
             height: this.height,
+            updatable: this.updatable,
+            deletable: this.deletable,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
             chamber: this.unit ? new ChamberModel(this.unit).miniResponseFormat : null
         };

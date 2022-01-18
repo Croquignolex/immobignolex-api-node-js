@@ -151,12 +151,36 @@ module.exports.deleteChamberByChamberId = async (id) => {
 
 // Add chamber good by chamber id
 module.exports.addChamberGoodByChamberId = async (id, goodId) => {
-    return await atomicChamberUpdate({_id: new ObjectId(id)}, {$addToSet: {goods: new ObjectId(goodId)}});
+    return await atomicChamberUpdate(
+        {_id: new ObjectId(id)},
+        {
+            $addToSet: {goods: new ObjectId(goodId)},
+            $set: {deletable: false}
+        }
+    );
 };
 
 // Remove chamber good by chamber id
 module.exports.removeChamberGoodByChamberId = async (id, goodId) => {
-    return await atomicChamberUpdate({_id: new ObjectId(id)}, {$pull: {goods: new ObjectId(goodId)}});
+    // Data
+    const _id = new ObjectId(id);
+
+    //
+    const atomicChamberFetchData = await atomicChamberFetch({_id});
+    if(atomicChamberFetchData.status) {
+        const chamberData = atomicChamberFetchData.data?.simpleResponseFormat;
+        const goods = chamberData.goods - 1;
+        const deletable = (goods === 0);
+        const updatable = (goods === 0) ? true : chamberData.updatable;
+        return await atomicChamberUpdate(
+            {_id},
+            {
+                $pull: {goods: new ObjectId(goodId)},
+                $set: {deletable, updatable}
+            }
+        );
+    }
+    return atomicChamberFetchData;
 };
 
 // Add chamber picture by chamber id
