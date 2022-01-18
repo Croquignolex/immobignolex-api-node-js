@@ -23,6 +23,7 @@ module.exports = class GoodModel {
             height: this.height,
             updatable: this.updatable,
             deletable: this.deletable,
+            description: this.description,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
             chamber: this.unit ? new ChamberModel(this.unit).miniResponseFormat : null
         };
@@ -35,6 +36,8 @@ module.exports = class GoodModel {
             color: this.color,
             weigh: this.weigh,
             height: this.height,
+            updatable: this.updatable,
+            deletable: this.deletable,
             created_at: this.created_at,
             description: this.description,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
