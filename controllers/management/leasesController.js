@@ -32,11 +32,25 @@ module.exports.create = async (req, res) => {
         return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
     }
 
-    // Check property chamber
-    const propertyHasChamberData = await chambersHelpers.propertyHasChamber(property, chamber);
-    if(!propertyHasChamberData.status) {
-        return res.send({...propertyHasChamberData, message: errorConstants.CHAMBERS.WRONG_CHAMBER_PROPERTY});
+    // Check rent format
+    const rentCheck = parseInt(rent, 10);
+    if(!rentCheck) {
+        return res.send({data: null, status: false, message: errorConstants.LEASES.WRONG_LEASE_RENT});
     }
+
+    // Check surety format
+    const suretyCheck = parseInt(surety, 10);
+    if(!suretyCheck) {
+        return res.send({data: null, status: false, message: errorConstants.LEASES.WRONG_LEASE_SURETY});
+    }
+
+    // Check deposit format
+    const depositCheck = parseInt(rent, 10);
+    if(!depositCheck) {
+        return res.send({data: null, status: false, message: errorConstants.LEASES.WRONG_LEASE_DEPOSIT});
+    }
+
+    // Check start date with regex (date format)
 
     // Check lease period & retrieve rank
     const leasePeriodRank = generalHelpers.periodsTypesRank(leasePeriod);
@@ -55,10 +69,15 @@ module.exports.create = async (req, res) => {
         return res.send({data: null, status: false, message: errorConstants.LEASES.RENT_PERIOD_TOO_BIG});
     }
 
+    // Check property chamber
+    const propertyHasChamberData = await chambersHelpers.propertyHasChamber(property, chamber);
+    if(!propertyHasChamberData.status) {
+        return res.send({...propertyHasChamberData, message: errorConstants.CHAMBERS.WRONG_CHAMBER_PROPERTY});
+    }
+
     // Database saving
-    const createLeaseData = await leasesHelpers.createLease({
-        commercial, property, chamber, tenant, leasePeriod, rentPeriod, rent, surety,
-        deposit, leaseStartDate, description, creator: username
-    });
-    return res.send(createLeaseData);
+    return res.send(await leasesHelpers.createLease({
+        commercial, property, chamber, tenant, leasePeriod, rentPeriod, leaseStartDate, description,
+        rent: rentCheck, surety: suretyCheck, deposit: depositCheck, creator: username
+    }));
 };

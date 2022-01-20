@@ -34,16 +34,16 @@ module.exports.create = async (req, res) => {
         return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
     }
 
-    // Check chamber type
-    const typeCheck = generalHelpers.chambersTypes(type);
-    if(!typeCheck) {
-        return res.send({data: null, status: false, message: errorConstants.CHAMBERS.WRONG_CHAMBER_TYPE});
-    }
-
     // Check rent format
     const rentCheck = parseInt(rent, 10);
     if(!rentCheck) {
         return res.send({data: null, status: false, message: errorConstants.CHAMBERS.WRONG_CHAMBER_RENT});
+    }
+
+    // Check chamber type
+    const typeCheck = generalHelpers.chambersTypes(type);
+    if(!typeCheck) {
+        return res.send({data: null, status: false, message: errorConstants.CHAMBERS.WRONG_CHAMBER_TYPE});
     }
 
     // Check property existence
@@ -74,16 +74,16 @@ module.exports.updateInfo = async (req, res) => {
         return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
     }
 
-    // Check lease period & retrieve rank
-    const typeCheck = generalHelpers.chambersTypes(type);
-    if(!typeCheck) {
-        return res.send({data: null, status: false, message: errorConstants.CHAMBERS.WRONG_CHAMBER_TYPE});
-    }
-
     // Check rent format
     const rentCheck = parseInt(rent, 10);
     if(!rentCheck) {
         return res.send({data: null, status: false, message: errorConstants.CHAMBERS.WRONG_CHAMBER_RENT});
+    }
+
+    // Check lease period & retrieve rank
+    const typeCheck = generalHelpers.chambersTypes(type);
+    if(!typeCheck) {
+        return res.send({data: null, status: false, message: errorConstants.CHAMBERS.WRONG_CHAMBER_TYPE});
     }
 
     // Check property existence
