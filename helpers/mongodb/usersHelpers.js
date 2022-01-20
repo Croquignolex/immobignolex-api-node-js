@@ -1,4 +1,4 @@
-const {MongoClient} = require('mongodb');
+const {MongoClient, ObjectId} = require('mongodb');
 
 const UserModel = require('../../models/userModel');
 const generalHelpers = require('../generalHelpers');
@@ -16,6 +16,11 @@ const roles = {employee: "Employé", tenant: "Locataire", admin: "Administrateur
 // Get user by username
 module.exports.userByUsername = async (username) => {
     return await atomicUserFetch({username});
+};
+
+// Get tenant by username
+module.exports.tenantByUsername = async (username) => {
+    return await atomicUserFetch({username, role: roles.tenant});
 };
 
 // Get user by username with creator
@@ -94,6 +99,17 @@ module.exports.createTenant = async ({name, phone, email, cni, description, crea
 // Delete user
 module.exports.deleteUserByUsername = async (username) => {
     return await atomicUserDelete({username, deletable: true});
+};
+
+// Add tenant invoice by tenant username
+module.exports.addTenantInvoiceByTenantUsername = async (username, invoiceId) => {
+    return await atomicUserUpdate(
+        {username, role: roles.tenant},
+        {
+            $addToSet: {invoices: new ObjectId(invoiceId)},
+            $set: {deletable: false, updatable: false}
+        }
+    );
 };
 
 // User create process

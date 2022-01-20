@@ -110,6 +110,17 @@ module.exports.removePropertyChamberByPropertyId = async (id, chamberId) => {
     return atomicPropertyFetchData;
 };
 
+// Add property invoice by property id
+module.exports.addPropertyInvoiceByPropertyId = async (id, invoiceId) => {
+    return await atomicPropertyUpdate(
+        {_id: new ObjectId(id)},
+        {
+            $addToSet: {invoices: new ObjectId(invoiceId)},
+            $set: {deletable: false, updatable: false}
+        }
+    );
+};
+
 // Delete property
 module.exports.deletePropertyByPropertyId = async (id) => {
     return await atomicPropertyDelete({_id: new ObjectId(id), deletable: true});

@@ -1,52 +1,61 @@
 const {MongoClient, ObjectId} = require('mongodb');
 
 const generalHelpers = require('../generalHelpers');
+const usersHelpers = require('../mongodb/usersHelpers');
 const envConstants = require('../../constants/envConstants');
+const chambersHelpers = require('../mongodb/chambersHelpers');
 const errorConstants = require('../../constants/errorConstants');
-const propertiesHelpers = require("../../helpers/mongodb/propertiesHelpers");
+const propertiesHelpers = require('../mongodb/propertiesHelpers');
 
 // Data
 const invoicesCollection = "invoices";
 const databaseUrl = envConstants.DATABASE_URL;
 
 // Create chamber
-module.exports.createInvoice = async ({amount, tenant, chamber, property, description, creator}) => {
+module.exports.createInvoice = async ({amount, tenant, chamber, property, lease, reference, creator}) => {
     // Data
-    const enable = true;
+    const payed = false;
+    const advance = false;
+    const canceled = false;
+    const updatable = false;
+    const deletable = false;
     const created_by = creator;
     const created_at = new Date();
 
     // Keep into database
     const atomicInvoiceCreateData = await atomicInvoiceCreate({
-        created_by, created_at, amount: parseInt(amount, 10) || 0, enable, description,
-        property: new ObjectId(property), tenant: new ObjectId(tenant), chamber: new ObjectId(chamber),
+        payed, advance, deletable, updatable, canceled,
+        created_by, created_at, amount, tenant, reference,
+        property: new ObjectId(property), chamber: new ObjectId(chamber), lease: new ObjectId(lease),
     });
     if(!atomicInvoiceCreateData.status) {
         return atomicInvoiceCreateData;
     }
 
-    // Push property chamber
-    // const createdInvoiceId = atomicInvoiceCreateData.data;
-    // return await propertiesHelpers.addPropertyChamberByPropertyId(property, createdChamberId, false);
+    // Push property, chamber & tenant invoice
+    const createdInvoiceId = atomicInvoiceCreateData.data;
+    await chambersHelpers.addChamberInvoiceByChamberId(chamber, createdInvoiceId);
+    await usersHelpers.addTenantInvoiceByTenantUsername(chamber, createdInvoiceId);
+    await propertiesHelpers.addPropertyInvoiceByPropertyId(chamber, createdInvoiceId);
 
     return atomicInvoiceCreateData;
 };
 
 // Atomic invoice create into database
-const atomicInvoiceCreate = async (directives) => {
+const atomicInvoiceCreate = async (document) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
         // Query
-        const atomicInvoiceCreateData = await client.db().collection(invoicesCollection).insertOne(directives);
+        const atomicInvoiceCreateData = await client.db().collection(invoicesCollection).insertOne(document);
         // Format response
-        if(atomicInvoiceCreateData.acknowledged && atomicInvoiceCreateData.insertedId) {
+        if(atomicInvoiceCreateData.acknowledged) {
             data = atomicInvoiceCreateData.insertedId;
             status = true;
         }
-        else message = errorConstants.LEASES.CREATE_LEASE;
+        else message = errorConstants.INVOICES.INVOICE_CREATE;
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

@@ -4,6 +4,7 @@ const {MongoClient, ObjectId} = require('mongodb');
 const generalHelpers = require('../generalHelpers');
 const LeaseModel = require('../../models/leaseModel');
 const envConstants = require('../../constants/envConstants');
+const invoicesHelpers = require('../mongodb/invoicesHelpers');
 const errorConstants = require('../../constants/errorConstants');
 
 // Data
@@ -19,7 +20,9 @@ module.exports.leases = async () => {
 module.exports.createLease = async ({commercial, property, chamber, tenant, leasePeriod, rentPeriod,
                                         rent, surety, deposit, leaseStartDate, description, creator}) => {
     // Data
-    const enable = true;
+    const canceled = false;
+    const updatable = false;
+    const deletable = false;
     const created_by = creator;
     const created_at = new Date();
     const start_at = dayjs(leaseStartDate).toDate();
@@ -27,15 +30,37 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
 
     // Keep into database
     const atomicLeaseCreateData = await atomicLeaseCreate({
-        created_by, created_at, start_at, end_at, rent, surety, deposit,
-        commercial, enable, description, leasePeriod, rentPeriod, tenant,
         property: new ObjectId(property), chamber: new ObjectId(chamber),
+        created_by, created_at, start_at, end_at, rent, surety, deposit, tenant,
+        commercial, canceled, updatable, deletable, description, leasePeriod, rentPeriod,
     });
     if(!atomicLeaseCreateData.status) {
         return atomicLeaseCreateData;
     }
 
-    // Generate invoice for deposit (given rents + given surety)
+    // Push property, chamber & tenant lease
+    const createdLeaseId = atomicLeaseCreateData.data;
+
+    // Generate invoice for surety
+    if(surety > 0) {
+        const suretyAmount = surety * rent;
+        const reference = `Caution sur contract de bail de reference ${createdLeaseId}`;
+        const createdInvoiceId = invoicesHelpers.createInvoice({
+            lease: createdLeaseId, amount: suretyAmount,
+            tenant, chamber, property,creator, reference,
+        });
+    }
+
+    // Generate invoice for deposit
+    if(deposit > 0) {
+        const depositAmount = deposit * rent;
+        const reference = `Avance sur loyer sur contract de bail de reference ${createdLeaseId}`;
+        const createdInvoiceId = invoicesHelpers.createInvoice({
+            lease: createdLeaseId, amount: depositAmount,
+            tenant, chamber, property,creator, reference,
+        });
+    }
+
 
     // Push property contracts
     // Update property occupation
@@ -54,9 +79,8 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
     return atomicLeaseCreateData;
 };
 
-
 // Atomic leases fetch into database
-const atomicLeasesFetch = async (directives) => {
+const atomicLeasesFetch = async (filter) => {
     let client, data = null, status = false, message = "";
     // Data
     client = new MongoClient(databaseUrl);
@@ -64,7 +88,7 @@ const atomicLeasesFetch = async (directives) => {
         await client.connect();
         // Query
         const atomicLeasesFetchData = await client.db().collection(leasesCollection)
-            .find(directives)
+            .find(filter || {})
             .sort({created_at: -1})
             .toArray();
         // Format response
@@ -81,20 +105,20 @@ const atomicLeasesFetch = async (directives) => {
 };
 
 // Atomic lease create into database
-const atomicLeaseCreate = async (directives) => {
+const atomicLeaseCreate = async (document) => {
     // Data
     let client, data = null, status = false, message = "";
     client = new MongoClient(databaseUrl);
     try {
         await client.connect();
         // Query
-        const leasesCollectionData = await client.db().collection(leasesCollection).insertOne(directives);
+        const leasesCollectionData = await client.db().collection(leasesCollection).insertOne(document);
         // Format response
-        if(leasesCollectionData.acknowledged && leasesCollectionData.insertedId) {
+        if(leasesCollectionData.acknowledged) {
             data = leasesCollectionData.insertedId;
             status = true;
         }
-        else message = errorConstants.CHAMBERS.CREATE_CHAMBER;
+        else message = errorConstants.LEASES.LEASE_CREATE;
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

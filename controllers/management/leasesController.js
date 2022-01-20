@@ -84,9 +84,9 @@ module.exports.create = async (req, res) => {
     }
 
     // Check tenant
-    const userByUsernameData = await usersHelpers.userByUsername(tenant);
-    if(!userByUsernameData.status) {
-        return res.send(userByUsernameData);
+    const tenantByUsernameData = await usersHelpers.tenantByUsername(tenant);
+    if(!tenantByUsernameData.status) {
+        return res.send(tenantByUsernameData);
     }
 
     // Database saving
