@@ -27,9 +27,9 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
 
     // Keep into database
     const atomicLeaseCreateData = await atomicLeaseCreate({
-        commercial, enable, description, leasePeriod, rentPeriod,
         created_by, created_at, start_at, end_at, rent, surety, deposit,
-        property: new ObjectId(property), chamber: new ObjectId(chamber), tenant: new ObjectId(tenant)
+        commercial, enable, description, leasePeriod, rentPeriod, tenant,
+        property: new ObjectId(property), chamber: new ObjectId(chamber),
     });
     if(!atomicLeaseCreateData.status) {
         return atomicLeaseCreateData;

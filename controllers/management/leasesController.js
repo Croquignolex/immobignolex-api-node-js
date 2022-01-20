@@ -1,5 +1,8 @@
+const dayjs = require("dayjs");
+
 const generalHelpers = require("../../helpers/generalHelpers");
 const errorConstants = require("../../constants/errorConstants");
+const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 const leasesHelpers = require("../../helpers/mongodb/leasesHelpers");
 const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
 const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
@@ -69,10 +72,21 @@ module.exports.create = async (req, res) => {
         return res.send({data: null, status: false, message: errorConstants.LEASES.RENT_PERIOD_TOO_BIG});
     }
 
+    // Check lease start date
+    if(!dayjs(leaseStartDate).isValid()) {
+        return res.send({data: null, status: false, message: errorConstants.LEASES.WRONG_LEASE_START_DATE});
+    }
+
     // Check property chamber
     const propertyHasChamberData = await chambersHelpers.propertyHasChamber(property, chamber);
     if(!propertyHasChamberData.status) {
         return res.send({...propertyHasChamberData, message: errorConstants.CHAMBERS.WRONG_CHAMBER_PROPERTY});
+    }
+
+    // Check tenant
+    const userByUsernameData = await usersHelpers.userByUsername(tenant);
+    if(!userByUsernameData.status) {
+        return res.send(userByUsernameData);
     }
 
     // Database saving
