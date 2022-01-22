@@ -110,6 +110,17 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
     return atomicLeaseCreateData;
 };
 
+// Add property payment by property id
+module.exports.addLeaseRentByRentId = async (id, paymentId) => {
+    return await atomicPropertyUpdate(
+        {_id: new ObjectId(id)},
+        {
+            $addToSet: {payments: new ObjectId(paymentId)},
+            $set: {deletable: false, updatable: false}
+        }
+    );
+};
+
 // Atomic leases fetch into database
 const atomicLeasesFetch = async (filter) => {
     let client, data = null, status = false, message = "";

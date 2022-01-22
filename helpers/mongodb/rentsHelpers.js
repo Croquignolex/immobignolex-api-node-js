@@ -2,9 +2,9 @@ const {MongoClient, ObjectId} = require('mongodb');
 
 const generalHelpers = require('../generalHelpers');
 const usersHelpers = require('../mongodb/usersHelpers');
+const leasesHelpers = require('../mongodb/leasesHelpers');
 const envConstants = require('../../constants/envConstants');
 const chambersHelpers = require('../mongodb/chambersHelpers');
-const paymentsHelpers = require('../mongodb/paymentsHelpers');
 const errorConstants = require('../../constants/errorConstants');
 const propertiesHelpers = require('../mongodb/propertiesHelpers');
 
@@ -25,6 +25,7 @@ module.exports.createRent = async ({amount, tenant, chamber, property, lease, st
 
     // Keep into database
     const atomicRentCreateData = await atomicRentCreate({
+        start_at: start, end_at: end,
         payed, advance, deletable, updatable, canceled,
         created_by, created_at, amount, tenant, cancelable,
         property: new ObjectId(property), chamber: new ObjectId(chamber), lease: new ObjectId(lease),
@@ -33,20 +34,13 @@ module.exports.createRent = async ({amount, tenant, chamber, property, lease, st
         return atomicRentCreateData;
     }
 
-    // Push property, chamber & tenant invoice
-    const createdInvoiceId = atomicInvoiceCreateData.data;
-    await chambersHelpers.addChamberInvoiceByChamberId(chamber, createdInvoiceId);
-    await usersHelpers.addTenantInvoiceByTenantUsername(chamber, createdInvoiceId);
-    await propertiesHelpers.addPropertyInvoiceByPropertyId(chamber, createdInvoiceId);
+    // Push lease, chamber & tenant rent
+    const createdRentId = atomicRentCreateData.data;
+    await chambersHelpers.addChamberRentByChamberId(chamber, createdRentId);
+    await usersHelpers.addTenantRentByTenantUsername(chamber, createdRentId);
+    await leasesHelpers.addPropertyInvoiceByPropertyId(chamber, createdInvoiceId);
 
-    if(withPayment) {
-        // Create payment
-        await paymentsHelpers.createPayment({
-            amount, tenant, chamber, property, lease, reference, creator
-        });
-    }
-
-    return atomicInvoiceCreateData;
+    return atomicRentCreateData;
 };
 
 // Atomic rent create into database

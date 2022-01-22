@@ -182,6 +182,17 @@ module.exports.addChamberPaymentByChamberId = async (id, paymentId) => {
     );
 };
 
+// Add chamber rent by chamber id
+module.exports.addChamberRentByChamberId = async (id, rentId) => {
+    return await atomicChamberUpdate(
+        {_id: new ObjectId(id)},
+        {
+            $addToSet: {rents: new ObjectId(rentId)},
+            $set: {deletable: false, updatable: false}
+        }
+    );
+};
+
 // Remove chamber good by chamber id
 module.exports.removeChamberGoodByChamberId = async (id, goodId) => {
     // Data
