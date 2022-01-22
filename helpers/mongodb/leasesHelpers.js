@@ -4,9 +4,12 @@ const {MongoClient, ObjectId} = require('mongodb');
 const generalHelpers = require('../generalHelpers');
 const LeaseModel = require('../../models/leaseModel');
 const rentsHelpers = require('../mongodb/rentsHelpers');
+const usersHelpers = require("../mongodb/usersHelpers");
 const envConstants = require('../../constants/envConstants');
+const chambersHelpers = require("../mongodb/chambersHelpers");
 const invoicesHelpers = require('../mongodb/invoicesHelpers');
 const errorConstants = require('../../constants/errorConstants');
+const propertiesHelpers = require("../mongodb/propertiesHelpers");
 
 // Data
 const leasesCollection = "leases";
@@ -46,7 +49,6 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
         return atomicLeaseCreateData;
     }
 
-    // Push property, chamber & tenant lease
     const createdLeaseId = atomicLeaseCreateData.data;
 
     // Generate invoice & payment for surety
@@ -93,21 +95,13 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
         });
     }
 
+    // Push property, chamber & tenant lease
+    await chambersHelpers.addChamberLeaseByChamberId(chamber, createdLeaseId);
+    await usersHelpers.addTenantLeaseByTenantUsername(tenant, createdLeaseId);
+    await propertiesHelpers.addPropertyLeaseByPropertyId(property, createdLeaseId);
 
-
-    // Push property contracts
-    // Update property occupation
-    // Push property invoices (deposit)
-
-    // Push tenant contracts
-    // Push tenant invoices (deposit)
-
-    // Generate rents (also remaining one for the lease)
-    // Push rents payments (only the ones of the given rents)
-
-    // Update chamber contract (chamber no more free)
-    // Push chamber invoices (deposit)
-
+    // Occupy chamber & property occupation
+    await chambersHelpers.occupiedChamberByChamberId(chamber, property);
 
     return atomicLeaseCreateData;
 };
@@ -118,6 +112,28 @@ module.exports.addLeaseRentByLeaseId = async (id, rentId) => {
         {_id: new ObjectId(id)},
         {
             $addToSet: {rents: new ObjectId(rentId)},
+            $set: {deletable: false, updatable: false}
+        }
+    );
+};
+
+// Add lease invoice by lease id
+module.exports.addLeaseInvoiceByLeaseId = async (id, invoiceId) => {
+    return await atomicLeaseUpdate(
+        {_id: new ObjectId(id)},
+        {
+            $addToSet: {invoices: new ObjectId(invoiceId)},
+            $set: {deletable: false, updatable: false}
+        }
+    );
+};
+
+// Add lease payment by lease id
+module.exports.addLeasePaymentsByLeaseId = async (id, paymentId) => {
+    return await atomicLeaseUpdate(
+        {_id: new ObjectId(id)},
+        {
+            $addToSet: {payments: new ObjectId(paymentId)},
             $set: {deletable: false, updatable: false}
         }
     );

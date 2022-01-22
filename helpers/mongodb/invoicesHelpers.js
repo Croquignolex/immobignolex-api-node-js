@@ -2,6 +2,7 @@ const {MongoClient, ObjectId} = require('mongodb');
 
 const generalHelpers = require('../generalHelpers');
 const usersHelpers = require('../mongodb/usersHelpers');
+const leasesHelpers = require('../mongodb/leasesHelpers');
 const envConstants = require('../../constants/envConstants');
 const chambersHelpers = require('../mongodb/chambersHelpers');
 const paymentsHelpers = require('../mongodb/paymentsHelpers');
@@ -36,6 +37,7 @@ module.exports.createInvoice = async ({amount, tenant, chamber, property, lease,
 
     // Push property, chamber & tenant invoice
     const createdInvoiceId = atomicInvoiceCreateData.data;
+    await leasesHelpers.addLeaseInvoiceByLeaseId(lease, createdInvoiceId);
     await chambersHelpers.addChamberInvoiceByChamberId(chamber, createdInvoiceId);
     await usersHelpers.addTenantInvoiceByTenantUsername(tenant, createdInvoiceId);
     await propertiesHelpers.addPropertyInvoiceByPropertyId(property, createdInvoiceId);

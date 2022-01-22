@@ -134,6 +134,17 @@ module.exports.addTenantRentByTenantUsername = async (username, rentId) => {
     );
 };
 
+// Add tenant lease by tenant username
+module.exports.addTenantLeaseByTenantUsername = async (username, leaseId) => {
+    return await atomicUserUpdate(
+        {username, role: roles.tenant},
+        {
+            $addToSet: {leases: new ObjectId(leaseId)},
+            $set: {deletable: false, updatable: false}
+        }
+    );
+};
+
 // User create process
 const userCreateProcess = async ({name, phone, email, role, cni, post, balance, description, creator}) => {
     // Build username & check

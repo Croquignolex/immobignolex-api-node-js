@@ -65,6 +65,31 @@ module.exports.removePropertyPictureByPropertyId = async (id, pictureId) => {
     return await atomicPropertyUpdate({_id: new ObjectId(id)}, {$pull: {pictures: {id: pictureId}}});
 };
 
+// Add property occupied chamber by property id
+module.exports.addPropertyOccupiedChamberByPropertyId = async (id) => {
+    // Data
+    const _id = new ObjectId(id);
+
+    // Calculate occupation
+    const atomicPropertyFetchData = await atomicPropertyFetch({_id});
+    if(atomicPropertyFetchData.status) {
+        const propertyData = atomicPropertyFetchData.data?.simpleResponseFormat;
+        const occupiedChambers = propertyData.occupied_chambers + 1;
+        const occupiedPercentage = Math.round((occupiedChambers * 100) / propertyData.chambers);
+        return await atomicPropertyUpdate(
+            {_id},
+            {
+                $set: {
+                    occupied_percentage: occupiedPercentage,
+                    deletable: false,
+                    updatable: false
+                }
+            }
+        );
+    }
+    return atomicPropertyFetchData;
+};
+
 // Add property chamber by property id
 module.exports.addPropertyChamberByPropertyId = async (id, chamberId) => {
     // Data
@@ -138,6 +163,17 @@ module.exports.addPropertyRentByPropertyId = async (id, rentId) => {
         {_id: new ObjectId(id)},
         {
             $addToSet: {rents: new ObjectId(rentId)},
+            $set: {deletable: false, updatable: false}
+        }
+    );
+};
+
+// Add property lease by property id
+module.exports.addPropertyLeaseByPropertyId = async (id, leaseId) => {
+    return await atomicPropertyUpdate(
+        {_id: new ObjectId(id)},
+        {
+            $addToSet: {leases: new ObjectId(leaseId)},
             $set: {deletable: false, updatable: false}
         }
     );

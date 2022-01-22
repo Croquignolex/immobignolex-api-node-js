@@ -122,6 +122,32 @@ module.exports.updateChamber = async ({id, name, phone, rent, type, property, de
     return atomicChamberUpdateData;
 };
 
+// Occupied chamber by chamber id
+module.exports.occupiedChamberByChamberId = async (id, property) => {
+    //Data
+    const _id = new ObjectId(id);
+
+    // Update chamber info
+    const atomicChamberUpdateData = await atomicChamberUpdate(
+        {_id},
+        {
+            $set: {
+                occupied: true,
+                deletable: false,
+                updatable: false
+            }
+        }
+    );
+    if(!atomicChamberUpdateData.status) {
+        return atomicChamberUpdateData;
+    }
+
+    // Update property occupation
+    await propertiesHelpers.addPropertyOccupiedChamberByPropertyId(property);
+
+    return atomicChamberUpdateData;
+};
+
 // Delete chamber
 module.exports.deleteChamberByChamberId = async (id) => {
     //Data
@@ -188,6 +214,17 @@ module.exports.addChamberRentByChamberId = async (id, rentId) => {
         {_id: new ObjectId(id)},
         {
             $addToSet: {rents: new ObjectId(rentId)},
+            $set: {deletable: false, updatable: false}
+        }
+    );
+};
+
+// Add chamber lease by chamber id
+module.exports.addChamberLeaseByChamberId = async (id, leaseId) => {
+    return await atomicChamberUpdate(
+        {_id: new ObjectId(id)},
+        {
+            $addToSet: {leases: new ObjectId(leaseId)},
             $set: {deletable: false, updatable: false}
         }
     );
