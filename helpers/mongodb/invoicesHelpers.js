@@ -37,8 +37,8 @@ module.exports.createInvoice = async ({amount, tenant, chamber, property, lease,
     // Push property, chamber & tenant invoice
     const createdInvoiceId = atomicInvoiceCreateData.data;
     await chambersHelpers.addChamberInvoiceByChamberId(chamber, createdInvoiceId);
-    await usersHelpers.addTenantInvoiceByTenantUsername(chamber, createdInvoiceId);
-    await propertiesHelpers.addPropertyInvoiceByPropertyId(chamber, createdInvoiceId);
+    await usersHelpers.addTenantInvoiceByTenantUsername(tenant, createdInvoiceId);
+    await propertiesHelpers.addPropertyInvoiceByPropertyId(property, createdInvoiceId);
 
     if(withPayment) {
         // Create payment

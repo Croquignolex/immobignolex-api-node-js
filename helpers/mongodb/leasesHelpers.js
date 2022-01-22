@@ -71,12 +71,12 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
 
     // Date config
     const isLeapYear = require('dayjs/plugin/isLeapYear');
-    const isoWeeksInYear = require('dayjs/plugin/isoWeeksInYear')
+    const isoWeeksInYear = require('dayjs/plugin/isoWeeksInYear');
     dayjs.extend(isLeapYear);
     dayjs.extend(isoWeeksInYear);
 
     // Generate rents
-    let rentsNumber = 0;
+    let rentsNumber;
     const start = dayjs(leaseStartDate).startOf(rentPeriod);
     const end = dayjs(leaseStartDate).add(1, leasePeriod).endOf(rentPeriod);
 
@@ -84,7 +84,7 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
     else rentsNumber = start.diff(end, rentPeriod);
 
     for(let i = 1; i <= rentsNumber; i++) {
-        const createdRentId =  await rentsHelpers.createRent({
+        await rentsHelpers.createRent({
             payed: (i <= deposit),
             tenant, chamber, property, creator,
             lease: createdLeaseId, amount: rent,
@@ -92,6 +92,8 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
             end: end.subtract(rentsNumber + i - 1, rentPeriod),
         });
     }
+
+
 
     // Push property contracts
     // Update property occupation
@@ -110,12 +112,12 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
     return atomicLeaseCreateData;
 };
 
-// Add property payment by property id
-module.exports.addLeaseRentByRentId = async (id, paymentId) => {
-    return await atomicPropertyUpdate(
+// Add lease rent by lease id
+module.exports.addLeaseRentByLeaseId = async (id, rentId) => {
+    return await atomicLeaseUpdate(
         {_id: new ObjectId(id)},
         {
-            $addToSet: {payments: new ObjectId(paymentId)},
+            $addToSet: {rents: new ObjectId(rentId)},
             $set: {deletable: false, updatable: false}
         }
     );
@@ -139,6 +141,29 @@ const atomicLeasesFetch = async (filter) => {
         atomicLeasesFetchData.forEach(item => data.push(new LeaseModel(item).simpleResponseFormat));
     }
     catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
+// Atomic lease update into database
+const atomicLeaseUpdate = async (filter, update) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const atomicLeaseUpdateData = await client.db().collection(leasesCollection).updateOne(filter, update);
+        // Format response
+        if(atomicLeaseUpdateData.acknowledged) {
+            if(atomicLeaseUpdateData.modifiedCount === 0) message = errorConstants.GENERAL.NO_CHANGES;
+            else status = true;
+        }
+        else message = errorConstants.LEASES.LEASE_UPDATE;
+    } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
     }

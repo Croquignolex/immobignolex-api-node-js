@@ -36,9 +36,10 @@ module.exports.createRent = async ({amount, tenant, chamber, property, lease, st
 
     // Push lease, chamber & tenant rent
     const createdRentId = atomicRentCreateData.data;
+    await leasesHelpers.addLeaseRentByLeaseId(lease, createdRentId);
     await chambersHelpers.addChamberRentByChamberId(chamber, createdRentId);
-    await usersHelpers.addTenantRentByTenantUsername(chamber, createdRentId);
-    await leasesHelpers.addPropertyInvoiceByPropertyId(chamber, createdInvoiceId);
+    await usersHelpers.addTenantRentByTenantUsername(tenant, createdRentId);
+    await propertiesHelpers.addPropertyRentByPropertyId(property, createdRentId);
 
     return atomicRentCreateData;
 };

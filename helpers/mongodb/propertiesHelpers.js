@@ -132,6 +132,17 @@ module.exports.addPropertyPaymentByPropertyId = async (id, paymentId) => {
     );
 };
 
+// Add property rent by property id
+module.exports.addPropertyRentByPropertyId = async (id, rentId) => {
+    return await atomicPropertyUpdate(
+        {_id: new ObjectId(id)},
+        {
+            $addToSet: {rents: new ObjectId(rentId)},
+            $set: {deletable: false, updatable: false}
+        }
+    );
+};
+
 // Delete property
 module.exports.deletePropertyByPropertyId = async (id) => {
     return await atomicPropertyDelete({_id: new ObjectId(id), deletable: true});

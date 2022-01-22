@@ -34,8 +34,8 @@ module.exports.createPayment = async ({amount, tenant, chamber, property, lease,
     // Push property, chamber & tenant payment
     const createdPaymentId = atomicPaymentCreateData.data;
     await chambersHelpers.addChamberPaymentByChamberId(chamber, createdPaymentId);
-    await usersHelpers.addTenantPaymentByTenantUsername(chamber, createdPaymentId);
-    await propertiesHelpers.addPropertyPaymentByPropertyId(chamber, createdPaymentId);
+    await usersHelpers.addTenantPaymentByTenantUsername(tenant, createdPaymentId);
+    await propertiesHelpers.addPropertyPaymentByPropertyId(property, createdPaymentId);
 
     return atomicPaymentCreateData;
 };
