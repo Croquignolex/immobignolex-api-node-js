@@ -3,10 +3,10 @@ const {MongoClient, ObjectId} = require('mongodb');
 
 const generalHelpers = require('../generalHelpers');
 const LeaseModel = require('../../models/leaseModel');
+const rentsHelpers = require('../mongodb/rentsHelpers');
 const envConstants = require('../../constants/envConstants');
 const invoicesHelpers = require('../mongodb/invoicesHelpers');
 const errorConstants = require('../../constants/errorConstants');
-const ChamberModel = require("../../models/chamberModel");
 
 // Data
 const leasesCollection = "leases";
@@ -53,9 +53,9 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
     if(surety > 0) {
         const suretyAmount = surety * rent;
         const reference = `Caution sur contract de bail de reference ${createdLeaseId}`;
-        const createdInvoiceId = invoicesHelpers.createInvoice({
+        await invoicesHelpers.createInvoice({
             lease: createdLeaseId, amount: suretyAmount,
-            tenant, chamber, property,creator, reference, withPayment: true
+            tenant, chamber, property, creator, reference, withPayment: true
         });
     }
 
@@ -63,12 +63,35 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
     if(deposit > 0) {
         const depositAmount = deposit * rent;
         const reference = `Avance sur loyer sur contract de bail de reference ${createdLeaseId}`;
-        const createdInvoiceId = invoicesHelpers.createInvoice({
+        await invoicesHelpers.createInvoice({
             lease: createdLeaseId, amount: depositAmount,
             tenant, chamber, property,creator, reference, withPayment: true
         });
     }
 
+    // Date config
+    const isLeapYear = require('dayjs/plugin/isLeapYear');
+    const isoWeeksInYear = require('dayjs/plugin/isoWeeksInYear')
+    dayjs.extend(isLeapYear);
+    dayjs.extend(isoWeeksInYear);
+
+    // Generate rents
+    let rentsNumber = 0;
+    const start = dayjs(leaseStartDate).startOf(rentPeriod);
+    const end = dayjs(leaseStartDate).add(1, leasePeriod).endOf(rentPeriod);
+
+    if(leasePeriod === rentPeriod) rentsNumber = 1;
+    else rentsNumber = start.diff(end, rentPeriod);
+
+    for(let i = 1; i <= rentsNumber; i++) {
+        const createdRentId =  await rentsHelpers.createRent({
+            payed: (i <= deposit),
+            tenant, chamber, property, creator,
+            lease: createdLeaseId, amount: rent,
+            start: start.add(i - 1, rentPeriod),
+            end: end.subtract(rentsNumber + i - 1, rentPeriod),
+        });
+    }
 
     // Push property contracts
     // Update property occupation

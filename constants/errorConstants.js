@@ -91,6 +91,11 @@ module.exports.PAYMENTS = {
     PAYMENT_CREATE: "PAYMENT_CREATE_ERROR"
 };
 
+// Rents
+module.exports.RENTS = {
+    RENT_CREATE: "RENT_CREATE_ERROR"
+};
+
 
 
 
