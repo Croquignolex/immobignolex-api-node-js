@@ -53,8 +53,6 @@ module.exports.create = async (req, res) => {
         return res.send({data: null, status: false, message: errorConstants.LEASES.WRONG_LEASE_DEPOSIT});
     }
 
-    // Check start date with regex (date format)
-
     // Check lease period & retrieve rank
     const leasePeriodRank = generalHelpers.periodsTypesRank(leasePeriod);
     if(!leasePeriodRank) {
@@ -87,6 +85,16 @@ module.exports.create = async (req, res) => {
     const tenantByUsernameData = await usersHelpers.tenantByUsername(tenant);
     if(!tenantByUsernameData.status) {
         return res.send(tenantByUsernameData);
+    }
+
+    // Check that current chamber do not have any active lease (chamber is free)
+    const chamberByIdData = await chambersHelpers.chamberById(chamber);
+    if(!chamberByIdData) {
+        return res.send(chamberByIdData);
+    }
+    const chamberIsOccupied = chamberByIdData.data?.occupied;
+    if(chamberIsOccupied) {
+        return res.send({status: false, data: null, message: errorConstants.CHAMBERS.OCCUPIED_CHAMBER});
     }
 
     // Database saving

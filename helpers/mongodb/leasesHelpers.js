@@ -6,6 +6,7 @@ const LeaseModel = require('../../models/leaseModel');
 const envConstants = require('../../constants/envConstants');
 const invoicesHelpers = require('../mongodb/invoicesHelpers');
 const errorConstants = require('../../constants/errorConstants');
+const ChamberModel = require("../../models/chamberModel");
 
 // Data
 const leasesCollection = "leases";
@@ -16,13 +17,20 @@ module.exports.leases = async () => {
     return await atomicLeasesFetch({enable: true});
 };
 
+// Fetch chamber active lease
+module.exports.chamberActiveLeases = async (chamber) => {
+    return await atomicLeasesFetch({enable: true, chamber: new ObjectId(chamber)});
+};
+
 // Create chamber
 module.exports.createLease = async ({commercial, property, chamber, tenant, leasePeriod, rentPeriod,
                                         rent, surety, deposit, leaseStartDate, description, creator}) => {
     // Data
+    const enable = true;
     const canceled = false;
     const updatable = false;
     const deletable = false;
+    const cancelable = true;
     const created_by = creator;
     const created_at = new Date();
     const start_at = dayjs(leaseStartDate).toDate();
@@ -30,8 +38,8 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
 
     // Keep into database
     const atomicLeaseCreateData = await atomicLeaseCreate({
-        property: new ObjectId(property), chamber: new ObjectId(chamber),
-        created_by, created_at, start_at, end_at, rent, surety, deposit, tenant,
+        property: new ObjectId(property), chamber: new ObjectId(chamber), cancelable,
+        created_by, created_at, start_at, end_at, rent, surety, deposit, tenant, enable,
         commercial, canceled, updatable, deletable, description, leasePeriod, rentPeriod,
     });
     if(!atomicLeaseCreateData.status) {
@@ -41,23 +49,23 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
     // Push property, chamber & tenant lease
     const createdLeaseId = atomicLeaseCreateData.data;
 
-    // Generate invoice for surety
+    // Generate invoice & payment for surety
     if(surety > 0) {
         const suretyAmount = surety * rent;
         const reference = `Caution sur contract de bail de reference ${createdLeaseId}`;
         const createdInvoiceId = invoicesHelpers.createInvoice({
             lease: createdLeaseId, amount: suretyAmount,
-            tenant, chamber, property,creator, reference,
+            tenant, chamber, property,creator, reference, withPayment: true
         });
     }
 
-    // Generate invoice for deposit
+    // Generate invoice & payment for deposit
     if(deposit > 0) {
         const depositAmount = deposit * rent;
         const reference = `Avance sur loyer sur contract de bail de reference ${createdLeaseId}`;
         const createdInvoiceId = invoicesHelpers.createInvoice({
             lease: createdLeaseId, amount: depositAmount,
-            tenant, chamber, property,creator, reference,
+            tenant, chamber, property,creator, reference, withPayment: true
         });
     }
 
@@ -95,6 +103,30 @@ const atomicLeasesFetch = async (filter) => {
         data = [];
         status = true;
         atomicLeasesFetchData.forEach(item => data.push(new LeaseModel(item).simpleResponseFormat));
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
+// Atomic lease fetch into database
+const atomicLeaseFetch = async (filter) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const atomicLeaseFetchData = await client.db().collection(leasesCollection).findOne(filter);
+        // Format response
+        if(atomicLeaseFetchData !== null) {
+            status = true;
+            data = new LeaseModel(atomicLeaseFetchData);
+        }
+        else message = errorConstants.LEASES.LEASE_NOT_FOUND;
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

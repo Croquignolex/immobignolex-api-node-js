@@ -171,6 +171,17 @@ module.exports.addChamberInvoiceByChamberId = async (id, invoiceId) => {
     );
 };
 
+// Add chamber payment by chamber id
+module.exports.addChamberPaymentByChamberId = async (id, paymentId) => {
+    return await atomicChamberUpdate(
+        {_id: new ObjectId(id)},
+        {
+            $addToSet: {payments: new ObjectId(paymentId)},
+            $set: {deletable: false, updatable: false}
+        }
+    );
+};
+
 // Remove chamber good by chamber id
 module.exports.removeChamberGoodByChamberId = async (id, goodId) => {
     // Data

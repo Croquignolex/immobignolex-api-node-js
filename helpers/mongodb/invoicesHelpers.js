@@ -4,6 +4,7 @@ const generalHelpers = require('../generalHelpers');
 const usersHelpers = require('../mongodb/usersHelpers');
 const envConstants = require('../../constants/envConstants');
 const chambersHelpers = require('../mongodb/chambersHelpers');
+const paymentsHelpers = require('../mongodb/paymentsHelpers');
 const errorConstants = require('../../constants/errorConstants');
 const propertiesHelpers = require('../mongodb/propertiesHelpers');
 
@@ -11,21 +12,22 @@ const propertiesHelpers = require('../mongodb/propertiesHelpers');
 const invoicesCollection = "invoices";
 const databaseUrl = envConstants.DATABASE_URL;
 
-// Create chamber
-module.exports.createInvoice = async ({amount, tenant, chamber, property, lease, reference, creator}) => {
+// Create invoice
+module.exports.createInvoice = async ({amount, tenant, chamber, property, lease, reference, creator, withPayment = false}) => {
     // Data
-    const payed = false;
     const advance = false;
     const canceled = false;
     const updatable = false;
     const deletable = false;
+    const payed = withPayment;
     const created_by = creator;
     const created_at = new Date();
+    const cancelable = withPayment;
 
     // Keep into database
     const atomicInvoiceCreateData = await atomicInvoiceCreate({
         payed, advance, deletable, updatable, canceled,
-        created_by, created_at, amount, tenant, reference,
+        created_by, created_at, amount, tenant, reference, cancelable,
         property: new ObjectId(property), chamber: new ObjectId(chamber), lease: new ObjectId(lease),
     });
     if(!atomicInvoiceCreateData.status) {
@@ -37,6 +39,13 @@ module.exports.createInvoice = async ({amount, tenant, chamber, property, lease,
     await chambersHelpers.addChamberInvoiceByChamberId(chamber, createdInvoiceId);
     await usersHelpers.addTenantInvoiceByTenantUsername(chamber, createdInvoiceId);
     await propertiesHelpers.addPropertyInvoiceByPropertyId(chamber, createdInvoiceId);
+
+    if(withPayment) {
+        // Create payment
+        await paymentsHelpers.createPayment({
+            amount, tenant, chamber, property, lease, reference, creator
+        });
+    }
 
     return atomicInvoiceCreateData;
 };
