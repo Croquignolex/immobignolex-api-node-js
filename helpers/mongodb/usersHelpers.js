@@ -101,6 +101,11 @@ module.exports.deleteUserByUsername = async (username) => {
     return await atomicUserDelete({username, deletable: true});
 };
 
+// Update tenant balance by username
+module.exports.updateTenantBalanceByUsername = async (username, balance) => {
+    return await atomicUserUpdate({username, role: roles.tenant}, {$inc: {balance}});
+};
+
 // Add tenant invoice by tenant username
 module.exports.addTenantInvoiceByTenantUsername = async (username, invoiceId) => {
     return await atomicUserUpdate(

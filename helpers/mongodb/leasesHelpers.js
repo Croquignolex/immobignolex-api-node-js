@@ -69,6 +69,8 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
             lease: createdLeaseId, amount: depositAmount,
             tenant, chamber, property,creator, reference, withPayment: true
         });
+        // Update tenant balance
+        await usersHelpers.updateTenantBalanceByUsername(tenant, depositAmount);
     }
 
     // Date config
@@ -87,7 +89,6 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
 
     for(let i = 1; i <= rentsNumber; i++) {
         await rentsHelpers.createRent({
-            payed: (i <= deposit),
             tenant, chamber, property, creator,
             lease: createdLeaseId, amount: rent,
             start: start.add(i - 1, rentPeriod),
