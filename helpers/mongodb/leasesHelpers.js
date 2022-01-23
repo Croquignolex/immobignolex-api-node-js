@@ -9,7 +9,6 @@ const envConstants = require('../../constants/envConstants');
 const chambersHelpers = require("../mongodb/chambersHelpers");
 const invoicesHelpers = require('../mongodb/invoicesHelpers');
 const errorConstants = require('../../constants/errorConstants');
-const propertiesHelpers = require("../mongodb/propertiesHelpers");
 
 // Data
 const leasesCollection = "leases";
@@ -85,7 +84,7 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
     const end = dayjs(leaseStartDate).add(1, leasePeriod).endOf(rentPeriod);
 
     if(leasePeriod === rentPeriod) rentsNumber = 1;
-    else rentsNumber = start.diff(end, rentPeriod);
+    else rentsNumber = end.diff(start, rentPeriod);
 
     for(let i = 1; i <= rentsNumber; i++) {
         await rentsHelpers.createRent({
@@ -96,48 +95,10 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
         });
     }
 
-    // Push property, chamber & tenant lease
-    await chambersHelpers.addChamberLeaseByChamberId(chamber, createdLeaseId);
-    await usersHelpers.addTenantLeaseByTenantUsername(tenant, createdLeaseId);
-    await propertiesHelpers.addPropertyLeaseByPropertyId(property, createdLeaseId);
-
     // Occupy chamber & property occupation
     await chambersHelpers.occupiedChamberByChamberId(chamber, property);
 
     return atomicLeaseCreateData;
-};
-
-// Add lease rent by lease id
-module.exports.addLeaseRentByLeaseId = async (id, rentId) => {
-    return await atomicLeaseUpdate(
-        {_id: new ObjectId(id)},
-        {
-            $addToSet: {rents: new ObjectId(rentId)},
-            $set: {deletable: false, updatable: false}
-        }
-    );
-};
-
-// Add lease invoice by lease id
-module.exports.addLeaseInvoiceByLeaseId = async (id, invoiceId) => {
-    return await atomicLeaseUpdate(
-        {_id: new ObjectId(id)},
-        {
-            $addToSet: {invoices: new ObjectId(invoiceId)},
-            $set: {deletable: false, updatable: false}
-        }
-    );
-};
-
-// Add lease payment by lease id
-module.exports.addLeasePaymentsByLeaseId = async (id, paymentId) => {
-    return await atomicLeaseUpdate(
-        {_id: new ObjectId(id)},
-        {
-            $addToSet: {payments: new ObjectId(paymentId)},
-            $set: {deletable: false, updatable: false}
-        }
-    );
 };
 
 // Atomic leases fetch into database

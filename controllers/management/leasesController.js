@@ -48,7 +48,7 @@ module.exports.create = async (req, res) => {
     }
 
     // Check deposit format
-    const depositCheck = parseInt(rent, 10);
+    const depositCheck = parseInt(deposit, 10);
     if(!depositCheck) {
         return res.send({data: null, status: false, message: errorConstants.LEASES.WRONG_LEASE_DEPOSIT});
     }

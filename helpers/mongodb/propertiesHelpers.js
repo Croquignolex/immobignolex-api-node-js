@@ -135,50 +135,6 @@ module.exports.removePropertyChamberByPropertyId = async (id, chamberId) => {
     return atomicPropertyFetchData;
 };
 
-// Add property invoice by property id
-module.exports.addPropertyInvoiceByPropertyId = async (id, invoiceId) => {
-    return await atomicPropertyUpdate(
-        {_id: new ObjectId(id)},
-        {
-            $addToSet: {invoices: new ObjectId(invoiceId)},
-            $set: {deletable: false, updatable: false}
-        }
-    );
-};
-
-// Add property payment by property id
-module.exports.addPropertyPaymentByPropertyId = async (id, paymentId) => {
-    return await atomicPropertyUpdate(
-        {_id: new ObjectId(id)},
-        {
-            $addToSet: {payments: new ObjectId(paymentId)},
-            $set: {deletable: false, updatable: false}
-        }
-    );
-};
-
-// Add property rent by property id
-module.exports.addPropertyRentByPropertyId = async (id, rentId) => {
-    return await atomicPropertyUpdate(
-        {_id: new ObjectId(id)},
-        {
-            $addToSet: {rents: new ObjectId(rentId)},
-            $set: {deletable: false, updatable: false}
-        }
-    );
-};
-
-// Add property lease by property id
-module.exports.addPropertyLeaseByPropertyId = async (id, leaseId) => {
-    return await atomicPropertyUpdate(
-        {_id: new ObjectId(id)},
-        {
-            $addToSet: {leases: new ObjectId(leaseId)},
-            $set: {deletable: false, updatable: false}
-        }
-    );
-};
-
 // Delete property
 module.exports.deletePropertyByPropertyId = async (id) => {
     return await atomicPropertyDelete({_id: new ObjectId(id), deletable: true});

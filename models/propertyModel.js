@@ -22,6 +22,7 @@ module.exports = class PropertyModel {
             updatable: this.updatable,
             deletable: this.deletable,
             description: this.description,
+            occupied_chambers: this.occupied_chambers,
             occupied_percentage: this.occupied_percentage,
             chambers: this.chambers ? this.chambers?.length : 0,
             pictures: generalHelpers.picturesPublicUrl(this.pictures)
@@ -38,6 +39,7 @@ module.exports = class PropertyModel {
             deletable: this.deletable,
             created_at: this.created_at,
             description: this.description,
+            occupied_chambers: this.occupied_chambers,
             occupied_percentage: this.occupied_percentage,
             chambers: this.chambers ? this.chambers?.length : 0,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),

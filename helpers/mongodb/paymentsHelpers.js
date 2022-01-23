@@ -1,12 +1,8 @@
 const {MongoClient, ObjectId} = require('mongodb');
 
 const generalHelpers = require('../generalHelpers');
-const usersHelpers = require('../mongodb/usersHelpers');
-const leasesHelpers = require('../mongodb/leasesHelpers');
 const envConstants = require('../../constants/envConstants');
-const chambersHelpers = require('../mongodb/chambersHelpers');
 const errorConstants = require('../../constants/errorConstants');
-const propertiesHelpers = require('../mongodb/propertiesHelpers');
 
 // Data
 const paymentsCollection = "payments";
@@ -23,23 +19,11 @@ module.exports.createPayment = async ({amount, tenant, chamber, property, lease,
     const created_at = new Date();
 
     // Keep into database
-    const atomicPaymentCreateData = await atomicPaymentCreate({
+    return await atomicPaymentCreate({
         cancelable, deletable, updatable, canceled,
         created_by, created_at, amount, tenant, reference,
         property: new ObjectId(property), chamber: new ObjectId(chamber), lease: new ObjectId(lease),
     });
-    if(!atomicPaymentCreateData.status) {
-        return atomicPaymentCreateData;
-    }
-
-    // Push property, chamber & tenant payment
-    const createdPaymentId = atomicPaymentCreateData.data;
-    await leasesHelpers.addLeasePaymentsByLeaseId(lease, createdPaymentId);
-    await chambersHelpers.addChamberPaymentByChamberId(chamber, createdPaymentId);
-    await usersHelpers.addTenantPaymentByTenantUsername(tenant, createdPaymentId);
-    await propertiesHelpers.addPropertyPaymentByPropertyId(property, createdPaymentId);
-
-    return atomicPaymentCreateData;
 };
 
 // Atomic payment create into database

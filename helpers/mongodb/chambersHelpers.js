@@ -186,50 +186,6 @@ module.exports.addChamberGoodByChamberId = async (id, goodId) => {
     );
 };
 
-// Add chamber invoice by chamber id
-module.exports.addChamberInvoiceByChamberId = async (id, invoiceId) => {
-    return await atomicChamberUpdate(
-        {_id: new ObjectId(id)},
-        {
-            $addToSet: {invoices: new ObjectId(invoiceId)},
-            $set: {deletable: false, updatable: false}
-        }
-    );
-};
-
-// Add chamber payment by chamber id
-module.exports.addChamberPaymentByChamberId = async (id, paymentId) => {
-    return await atomicChamberUpdate(
-        {_id: new ObjectId(id)},
-        {
-            $addToSet: {payments: new ObjectId(paymentId)},
-            $set: {deletable: false, updatable: false}
-        }
-    );
-};
-
-// Add chamber rent by chamber id
-module.exports.addChamberRentByChamberId = async (id, rentId) => {
-    return await atomicChamberUpdate(
-        {_id: new ObjectId(id)},
-        {
-            $addToSet: {rents: new ObjectId(rentId)},
-            $set: {deletable: false, updatable: false}
-        }
-    );
-};
-
-// Add chamber lease by chamber id
-module.exports.addChamberLeaseByChamberId = async (id, leaseId) => {
-    return await atomicChamberUpdate(
-        {_id: new ObjectId(id)},
-        {
-            $addToSet: {leases: new ObjectId(leaseId)},
-            $set: {deletable: false, updatable: false}
-        }
-    );
-};
-
 // Remove chamber good by chamber id
 module.exports.removeChamberGoodByChamberId = async (id, goodId) => {
     // Data
@@ -240,8 +196,9 @@ module.exports.removeChamberGoodByChamberId = async (id, goodId) => {
     if(atomicChamberFetchData.status) {
         const chamberData = atomicChamberFetchData.data?.simpleResponseFormat;
         const goods = chamberData.goods - 1;
-        const deletable = (goods === 0);
-        const updatable = (goods === 0) ? true : chamberData.updatable;
+        const free = !chamberData.occupied;
+        const deletable = (goods === 0 && free) ? true : chamberData.deletable;
+        const updatable = (goods === 0 && free) ? true : chamberData.updatable;
         return await atomicChamberUpdate(
             {_id},
             {

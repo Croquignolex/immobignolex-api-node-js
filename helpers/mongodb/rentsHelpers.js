@@ -1,12 +1,8 @@
 const {MongoClient, ObjectId} = require('mongodb');
 
 const generalHelpers = require('../generalHelpers');
-const usersHelpers = require('../mongodb/usersHelpers');
-const leasesHelpers = require('../mongodb/leasesHelpers');
 const envConstants = require('../../constants/envConstants');
-const chambersHelpers = require('../mongodb/chambersHelpers');
 const errorConstants = require('../../constants/errorConstants');
-const propertiesHelpers = require('../mongodb/propertiesHelpers');
 
 // Data
 const rentsCollection = "rents";
@@ -24,24 +20,12 @@ module.exports.createRent = async ({amount, tenant, chamber, property, lease, st
     const created_at = new Date();
 
     // Keep into database
-    const atomicRentCreateData = await atomicRentCreate({
+    return await atomicRentCreate({
         start_at: start, end_at: end,
         payed, advance, deletable, updatable, canceled,
         created_by, created_at, amount, tenant, cancelable,
         property: new ObjectId(property), chamber: new ObjectId(chamber), lease: new ObjectId(lease),
     });
-    if(!atomicRentCreateData.status) {
-        return atomicRentCreateData;
-    }
-
-    // Push lease, chamber & tenant rent
-    const createdRentId = atomicRentCreateData.data;
-    await leasesHelpers.addLeaseRentByLeaseId(lease, createdRentId);
-    await chambersHelpers.addChamberRentByChamberId(chamber, createdRentId);
-    await usersHelpers.addTenantRentByTenantUsername(tenant, createdRentId);
-    await propertiesHelpers.addPropertyRentByPropertyId(property, createdRentId);
-
-    return atomicRentCreateData;
 };
 
 // Atomic rent create into database

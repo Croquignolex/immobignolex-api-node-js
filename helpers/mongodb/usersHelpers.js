@@ -1,4 +1,4 @@
-const {MongoClient, ObjectId} = require('mongodb');
+const {MongoClient} = require('mongodb');
 
 const UserModel = require('../../models/userModel');
 const generalHelpers = require('../generalHelpers');
@@ -104,50 +104,6 @@ module.exports.deleteUserByUsername = async (username) => {
 // Update tenant balance by username
 module.exports.updateTenantBalanceByUsername = async (username, balance) => {
     return await atomicUserUpdate({username, role: roles.tenant}, {$inc: {balance}});
-};
-
-// Add tenant invoice by tenant username
-module.exports.addTenantInvoiceByTenantUsername = async (username, invoiceId) => {
-    return await atomicUserUpdate(
-        {username, role: roles.tenant},
-        {
-            $addToSet: {invoices: new ObjectId(invoiceId)},
-            $set: {deletable: false, updatable: false}
-        }
-    );
-};
-
-// Add tenant payment by tenant username
-module.exports.addTenantPaymentByTenantUsername = async (username, paymentId) => {
-    return await atomicUserUpdate(
-        {username, role: roles.tenant},
-        {
-            $addToSet: {payments: new ObjectId(paymentId)},
-            $set: {deletable: false, updatable: false}
-        }
-    );
-};
-
-// Add tenant rent by tenant username
-module.exports.addTenantRentByTenantUsername = async (username, rentId) => {
-    return await atomicUserUpdate(
-        {username, role: roles.tenant},
-        {
-            $addToSet: {rents: new ObjectId(rentId)},
-            $set: {deletable: false, updatable: false}
-        }
-    );
-};
-
-// Add tenant lease by tenant username
-module.exports.addTenantLeaseByTenantUsername = async (username, leaseId) => {
-    return await atomicUserUpdate(
-        {username, role: roles.tenant},
-        {
-            $addToSet: {leases: new ObjectId(leaseId)},
-            $set: {deletable: false, updatable: false}
-        }
-    );
 };
 
 // User create process

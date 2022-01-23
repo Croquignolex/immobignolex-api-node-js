@@ -1,13 +1,9 @@
 const {MongoClient, ObjectId} = require('mongodb');
 
 const generalHelpers = require('../generalHelpers');
-const usersHelpers = require('../mongodb/usersHelpers');
-const leasesHelpers = require('../mongodb/leasesHelpers');
 const envConstants = require('../../constants/envConstants');
-const chambersHelpers = require('../mongodb/chambersHelpers');
 const paymentsHelpers = require('../mongodb/paymentsHelpers');
 const errorConstants = require('../../constants/errorConstants');
-const propertiesHelpers = require('../mongodb/propertiesHelpers');
 
 // Data
 const invoicesCollection = "invoices";
@@ -23,7 +19,7 @@ module.exports.createInvoice = async ({amount, tenant, chamber, property, lease,
     const payed = withPayment;
     const created_by = creator;
     const created_at = new Date();
-    const cancelable = withPayment;
+    const cancelable = !withPayment;
 
     // Keep into database
     const atomicInvoiceCreateData = await atomicInvoiceCreate({
@@ -34,13 +30,6 @@ module.exports.createInvoice = async ({amount, tenant, chamber, property, lease,
     if(!atomicInvoiceCreateData.status) {
         return atomicInvoiceCreateData;
     }
-
-    // Push property, chamber & tenant invoice
-    const createdInvoiceId = atomicInvoiceCreateData.data;
-    await leasesHelpers.addLeaseInvoiceByLeaseId(lease, createdInvoiceId);
-    await chambersHelpers.addChamberInvoiceByChamberId(chamber, createdInvoiceId);
-    await usersHelpers.addTenantInvoiceByTenantUsername(tenant, createdInvoiceId);
-    await propertiesHelpers.addPropertyInvoiceByPropertyId(property, createdInvoiceId);
 
     if(withPayment) {
         // Create payment
