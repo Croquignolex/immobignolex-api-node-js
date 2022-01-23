@@ -73,7 +73,7 @@ module.exports.addPropertyOccupiedChamberByPropertyId = async (id) => {
     // Calculate occupation
     const atomicPropertyFetchData = await atomicPropertyFetch({_id});
     if(atomicPropertyFetchData.status) {
-        const propertyData = atomicPropertyFetchData.data?.simpleResponseFormat;
+        const propertyData = atomicPropertyFetchData.data?.responseFormat;
         const occupiedChambers = propertyData.occupied_chambers + 1;
         const occupiedPercentage = Math.round((occupiedChambers * 100) / propertyData.chambers);
         return await atomicPropertyUpdate(
@@ -98,7 +98,7 @@ module.exports.addPropertyChamberByPropertyId = async (id, chamberId) => {
     // Calculate occupation
     const atomicPropertyFetchData = await atomicPropertyFetch({_id});
     if(atomicPropertyFetchData.status) {
-        const propertyData = atomicPropertyFetchData.data?.simpleResponseFormat;
+        const propertyData = atomicPropertyFetchData.data?.responseFormat;
         const occupiedPercentage = Math.round((propertyData.occupied_chambers * 100) / propertyData.chambers + 1);
         return await atomicPropertyUpdate(
             {_id},
@@ -119,7 +119,7 @@ module.exports.removePropertyChamberByPropertyId = async (id, chamberId) => {
     // Calculate occupation
     const atomicPropertyFetchData = await atomicPropertyFetch({_id});
     if(atomicPropertyFetchData.status) {
-        const propertyData = atomicPropertyFetchData.data?.simpleResponseFormat;
+        const propertyData = atomicPropertyFetchData.data?.responseFormat;
         const chambers = propertyData.chambers - 1;
         const deletable = (chambers === 0);
         const updatable = (chambers === 0) ? true : propertyData.updatable;
@@ -181,7 +181,7 @@ const atomicPropertiesFetch = async (filter) => {
         // Format response
         data = [];
         status = true;
-        atomicPropertiesFetchData.forEach(item => data.push(new PropertyModel(item).simpleResponseFormat));
+        atomicPropertiesFetchData.forEach(item => data.push(new PropertyModel(item).responseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

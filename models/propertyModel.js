@@ -13,22 +13,6 @@ module.exports = class PropertyModel {
         };
     };
 
-    get simpleResponseFormat() {
-        return {
-            id: this._id,
-            name: this.name,
-            phone: this.phone,
-            address: this.address,
-            updatable: this.updatable,
-            deletable: this.deletable,
-            description: this.description,
-            occupied_chambers: this.occupied_chambers,
-            occupied_percentage: this.occupied_percentage,
-            chambers: this.chambers ? this.chambers?.length : 0,
-            pictures: generalHelpers.picturesPublicUrl(this.pictures)
-        };
-    };
-
     get responseFormat() {
         return {
             id: this._id,
@@ -41,7 +25,6 @@ module.exports = class PropertyModel {
             description: this.description,
             occupied_chambers: this.occupied_chambers,
             occupied_percentage: this.occupied_percentage,
-            chambers: this.chambers ? this.chambers?.length : 0,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
             creator: this.creator ? new UserModel(this.creator).miniResponseFormat : null
         };

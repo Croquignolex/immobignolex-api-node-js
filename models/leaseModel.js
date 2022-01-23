@@ -10,14 +10,6 @@ module.exports = class LeaseModel {
         };
     };
 
-    get simpleResponseFormat() {
-        return {
-            id: this._id,
-            name: this.name,
-
-        };
-    };
-
     get responseFormat() {
         return {
             id: this._id,

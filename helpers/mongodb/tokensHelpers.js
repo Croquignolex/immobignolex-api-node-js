@@ -55,9 +55,9 @@ module.exports.generateUserTokens = async (user, useragent) => {
     }
 
     // Update user tokens
-    const updateUserTokensByUsernameData = await usersHelpers.updateUserTokensByUsername(user.username, tokens);
-    if(!updateUserTokensByUsernameData.status) {
-        return updateUserTokensByUsernameData;
+    const updateUserTokensData = await usersHelpers.updateUserTokens({username: user.username, tokens});
+    if(!updateUserTokensData.status) {
+        return updateUserTokensData;
     }
 
     // Send generated tokens
@@ -82,7 +82,7 @@ module.exports.removeUserToken = async (user, useragent) => {
     ));
 
     // Update user tokens
-    return await usersHelpers.updateUserTokensByUsername(user.username, tokens);
+    return await usersHelpers.updateUserTokens({username: user.username, tokens});
 };
 
 module.exports.checkUserToken = async (user, useragent, refreshToken) => {

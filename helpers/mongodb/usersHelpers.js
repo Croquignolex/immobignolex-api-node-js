@@ -47,32 +47,42 @@ module.exports.tenantsWithoutUserByUsername = async (username) => {
     return await atomicUsersFetch({role: roles.tenant, username: {$ne: username}});
 };
 
-// Update user avatar by username
-module.exports.updateUserAvatarByUsername = async (username, avatar) => {
+// Update user avatar
+module.exports.updateUserAvatar = async ({username, avatar}) => {
     return await atomicUserUpdate({username}, {$set: {avatar}});
 };
 
-// Update user password by username
-module.exports.updateUserPasswordByUsername = async (username, password) => {
+// Update user password
+module.exports.updateUserPassword = async ({username, password}) => {
     return await atomicUserUpdate({username}, {$set: {password}});
 };
 
-// Update user status by username
-module.exports.updateUserStatusByUsername = async (username, status) => {
+// Update user status
+module.exports.updateUserStatus = async ({username, status}) => {
     return await atomicUserUpdate({username}, {$set: {enable: status}});
 };
 
-// Update user info by username
-module.exports.updateUserInfoByUsername = async ({username, name, phone, email, cni, post, description}) => {
+// Update user tokens
+module.exports.updateUserTokens = async ({username, tokens}) => {
+    return await atomicUserUpdate({username}, {$set: {tokens}});
+};
+
+// Update tenant balance
+module.exports.updateTenantBalance = async ({username, balance}) => {
+    return await atomicUserUpdate({username, role: roles.tenant}, {$inc: {balance}});
+};
+
+// Delete user
+module.exports.deleteUserByUsername = async (username) => {
+    return await atomicUserDelete({username, deletable: true});
+};
+
+// Update user info
+module.exports.updateUserInfo = async ({username, name, phone, email, cni, post, description}) => {
     return await atomicUserUpdate(
         {username, updatable: true},
         {$set: {name, phone, email, cni, post, description}}
     );
-};
-
-// Update user tokens by username
-module.exports.updateUserTokensByUsername = async (username, tokens) => {
-    return await atomicUserUpdate({username}, {$set: {tokens}});
 };
 
 // Create admin
@@ -94,16 +104,6 @@ module.exports.createTenant = async ({name, phone, email, cni, description, crea
     return await userCreateProcess({
         name, phone, email, cni, description, creator, balance: 0, role: roles.tenant
     });
-};
-
-// Delete user
-module.exports.deleteUserByUsername = async (username) => {
-    return await atomicUserDelete({username, deletable: true});
-};
-
-// Update tenant balance by username
-module.exports.updateTenantBalanceByUsername = async (username, balance) => {
-    return await atomicUserUpdate({username, role: roles.tenant}, {$inc: {balance}});
 };
 
 // User create process
@@ -181,7 +181,7 @@ const atomicUsersFetch = async (filter) => {
         // Format response
         data = [];
         status = true;
-        atomicUsersFetchData.forEach(item => data.push(new UserModel(item).simpleResponseFormat));
+        atomicUsersFetchData.forEach(item => data.push(new UserModel(item).responseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

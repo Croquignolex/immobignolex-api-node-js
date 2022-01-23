@@ -157,7 +157,7 @@ const embeddedGoodsFetch = async (pipeline) => {
         // Format response
         data = [];
         status = true;
-        embeddedGoodsFetchData.forEach(item => data.push(new GoodModel(item).simpleResponseFormat));
+        embeddedGoodsFetchData.forEach(item => data.push(new GoodModel(item).responseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
@@ -208,7 +208,7 @@ const atomicGoodsFetch = async (filter) => {
         // Format response
         data = [];
         status = true;
-        atomicGoodsFetchData.forEach(item => data.push(new GoodModel(item).simpleResponseFormat));
+        atomicGoodsFetchData.forEach(item => data.push(new GoodModel(item).responseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

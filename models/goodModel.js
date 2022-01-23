@@ -14,21 +14,6 @@ module.exports = class GoodModel {
         };
     };
 
-    get simpleResponseFormat() {
-        return {
-            id: this._id,
-            name: this.name,
-            color: this.color,
-            weigh: this.weigh,
-            height: this.height,
-            updatable: this.updatable,
-            deletable: this.deletable,
-            description: this.description,
-            pictures: generalHelpers.picturesPublicUrl(this.pictures),
-            chamber: this.unit ? new ChamberModel(this.unit).miniResponseFormat : null
-        };
-    };
-
     get responseFormat() {
         return {
             id: this._id,

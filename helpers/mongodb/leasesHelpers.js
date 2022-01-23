@@ -69,7 +69,7 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
             tenant, chamber, property,creator, reference, withPayment: true
         });
         // Update tenant balance
-        await usersHelpers.updateTenantBalanceByUsername(tenant, depositAmount);
+        await usersHelpers.updateTenantBalance({username: tenant, balance: depositAmount});
     }
 
     // Date config
@@ -116,7 +116,7 @@ const atomicLeasesFetch = async (filter) => {
         // Format response
         data = [];
         status = true;
-        atomicLeasesFetchData.forEach(item => data.push(new LeaseModel(item).simpleResponseFormat));
+        atomicLeasesFetchData.forEach(item => data.push(new LeaseModel(item).responseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

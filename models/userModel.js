@@ -12,25 +12,6 @@ module.exports = class UserModel {
         };
     };
 
-    get simpleResponseFormat() {
-        return {
-            cni: this.cni,
-            name: this.name,
-            post: this.post,
-            role: this.role,
-            email: this.email,
-            phone: this.phone,
-            enable: this.enable,
-            balance: this.balance,
-            username: this.username,
-            updatable: this.updatable,
-            deletable: this.deletable,
-            permissions: this.permissions,
-            description: this.description,
-            avatar: generalHelpers.filePublicUrl(this.avatar)
-        };
-    };
-
     get responseFormat() {
         return {
             id: this._id,

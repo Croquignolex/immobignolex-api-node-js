@@ -55,9 +55,9 @@ module.exports.updateInfo = async (req, res) => {
     }
 
     // Save user info in the database
-    return res.send(await usersHelpers.updateUserInfoByUsername(
-        username, {name, phone, email, description}
-    ));
+    return res.send(await usersHelpers.updateUserInfo({
+        username, name, phone, email, description
+    }));
 };
 
 // POST: Update user password
@@ -90,5 +90,5 @@ module.exports.updatePassword = async (req, res) => {
 
     // Save user info in the database
     const password = await bcrypt.hash(newPassword, 10);
-    return res.send(await usersHelpers.updateUserPasswordByUsername(username, password));
+    return res.send(await usersHelpers.updateUserPassword({username, password}));
 };

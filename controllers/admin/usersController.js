@@ -53,7 +53,7 @@ module.exports.updateInfo = async (req, res) => {
     }
 
     // Update user
-    return res.send(await usersHelpers.updateUserInfoByUsername({
+    return res.send(await usersHelpers.updateUserInfo({
         username, name, phone, email, cni, post, description
     }));
 };
@@ -71,7 +71,7 @@ module.exports.toggleStatus = async (req, res) => {
 
     // Update user
     const databaseUser = userByUsernameData.data;
-    return res.send(await usersHelpers.updateUserStatusByUsername(username, !databaseUser?.enable));
+    return res.send(await usersHelpers.updateUserStatus({username, status: !databaseUser?.enable}));
 };
 
 // POST: Reset user password
@@ -82,7 +82,7 @@ module.exports.resetPassword = async (req, res) => {
     // Save user info in the database
     const bcrypt = require("bcryptjs");
     const password = await bcrypt.hash("000000", 10);
-    return res.send(await usersHelpers.updateUserPasswordByUsername(username, password));
+    return res.send(await usersHelpers.updateUserPassword({username, password}));
 };
 
 // DELETE: Delete user avatar

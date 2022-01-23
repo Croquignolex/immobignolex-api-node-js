@@ -194,7 +194,7 @@ module.exports.removeChamberGoodByChamberId = async (id, goodId) => {
     //
     const atomicChamberFetchData = await atomicChamberFetch({_id});
     if(atomicChamberFetchData.status) {
-        const chamberData = atomicChamberFetchData.data?.simpleResponseFormat;
+        const chamberData = atomicChamberFetchData.data?.responseFormat;
         const goods = chamberData.goods - 1;
         const free = !chamberData.occupied;
         const deletable = (goods === 0 && free) ? true : chamberData.deletable;
@@ -235,7 +235,7 @@ const embeddedChambersFetch = async (pipeline) => {
         // Format response
         data = [];
         status = true;
-        embeddedChambersFetchData.forEach(item => data.push(new ChamberModel(item).simpleResponseFormat));
+        embeddedChambersFetchData.forEach(item => data.push(new ChamberModel(item).responseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
@@ -286,7 +286,7 @@ const atomicChambersFetch = async (filter) => {
         // Format response
         data = [];
         status = true;
-        atomicChambersFetchData.forEach(item => data.push(new ChamberModel(item).simpleResponseFormat));
+        atomicChambersFetchData.forEach(item => data.push(new ChamberModel(item).responseFormat));
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
