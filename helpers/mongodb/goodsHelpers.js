@@ -49,7 +49,7 @@ module.exports.chamberGoods = async (chamber) => {
 };
 
 // Create good
-module.exports.createGood = async ({name, weigh, color, height, chamber, description, creator}) => {
+module.exports.createGood = async ({name, weigh, color, height, chamber, property, description, creator}) => {
     // Data
     const updatable = true;
     const deletable = true;
@@ -58,9 +58,9 @@ module.exports.createGood = async ({name, weigh, color, height, chamber, descrip
 
     // Keep into database
     const atomicGoodCreateData = await atomicGoodCreate({
-        name, weigh, color, height,
-        updatable, deletable, description,
-        created_by, created_at, chamber: new ObjectId(chamber)
+        name, weigh, color, height, description,
+        created_by, created_at, updatable, deletable,
+        chamber: new ObjectId(chamber), property: new ObjectId(property),
     });
     if(!atomicGoodCreateData.status) {
         return atomicGoodCreateData;

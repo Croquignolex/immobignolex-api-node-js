@@ -21,13 +21,14 @@ module.exports.good = async (req, res) => {
 module.exports.create = async (req, res) => {
     // Form data & data
     const username = req.username;
-    const {name, color, weigh, height, chamber, description} = req.body;
+    const {name, color, weigh, height, chamber, property, description} = req.body;
 
     // Form checker
     if(
         !formCheckerHelpers.requiredChecker(name) ||
         !formCheckerHelpers.requiredChecker(color) ||
-        !formCheckerHelpers.requiredChecker(chamber)
+        !formCheckerHelpers.requiredChecker(chamber) ||
+        !formCheckerHelpers.requiredChecker(property)
     ) {
         return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
     }
@@ -38,6 +39,12 @@ module.exports.create = async (req, res) => {
         return res.send({data: null, status: false, message: errorConstants.GOODS.WRONG_GOOD_COLOR});
     }
 
+    // Check property chamber
+    const propertyHasChamberCheck = await chambersHelpers.propertyHasChamber(property, chamber);
+    if(!propertyHasChamberCheck.status) {
+        return res.send({...propertyHasChamberCheck, message: errorConstants.CHAMBERS.WRONG_CHAMBER_PROPERTY});
+    }
+
     // Check chamber existence
     const chamberCheck = await chambersHelpers.chamberById(chamber);
     if(!chamberCheck.status) {
@@ -46,7 +53,7 @@ module.exports.create = async (req, res) => {
 
     // Database saving
     return res.send(await goodsHelpers.createGood({
-        name, weigh, color, height, chamber, description, creator: username
+        name, weigh, color, height, chamber, property, description, creator: username
     }));
 };
 

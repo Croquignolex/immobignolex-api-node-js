@@ -76,9 +76,9 @@ module.exports.create = async (req, res) => {
     }
 
     // Check property chamber
-    const propertyHasChamberData = await chambersHelpers.propertyHasChamber(property, chamber);
-    if(!propertyHasChamberData.status) {
-        return res.send({...propertyHasChamberData, message: errorConstants.CHAMBERS.WRONG_CHAMBER_PROPERTY});
+    const propertyHasChamberCheck = await chambersHelpers.propertyHasChamber(property, chamber);
+    if(!propertyHasChamberCheck.status) {
+        return res.send({...propertyHasChamberCheck, message: errorConstants.CHAMBERS.WRONG_CHAMBER_PROPERTY});
     }
 
     // Check tenant
@@ -88,11 +88,11 @@ module.exports.create = async (req, res) => {
     }
 
     // Check that current chamber do not have any active lease (chamber is free)
-    const chamberByIdData = await chambersHelpers.chamberById(chamber);
-    if(!chamberByIdData) {
-        return res.send(chamberByIdData);
+    const chamberCheck = await chambersHelpers.chamberById(chamber);
+    if(!chamberCheck) {
+        return res.send(chamberCheck);
     }
-    const chamberIsOccupied = chamberByIdData.data?.occupied;
+    const chamberIsOccupied = chamberCheck.data?.occupied;
     if(chamberIsOccupied) {
         return res.send({status: false, data: null, message: errorConstants.CHAMBERS.OCCUPIED_CHAMBER});
     }
