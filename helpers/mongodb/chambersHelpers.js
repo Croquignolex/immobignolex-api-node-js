@@ -114,7 +114,7 @@ module.exports.occupiedChamberByChamberId = async (id, property) => {
     }
 
     // Update property occupation
-    await propertiesHelpers.addPropertyOccupiedChamberByPropertyId(property);
+    await propertiesHelpers.updatePropertyOccupation(property);
 
     return atomicChamberUpdateData;
 };
@@ -136,12 +136,9 @@ module.exports.deleteChamberByChamberId = async (id) => {
         return atomicChamberDeleteData;
     }
 
-    // Old and new property management
-    const oldProperty = atomicChamberFetchData.data.property;
-    if(oldProperty) {
-        // Remove old chamber property id different from new property
-        await propertiesHelpers.removePropertyChamberByPropertyId(oldProperty, id);
-    }
+    // Update property occupation
+    const chamber = atomicChamberFetchData.data;
+    await propertiesHelpers.updatePropertyOccupation(chamber.property);
 
     return atomicChamberDeleteData;
 };
@@ -155,8 +152,8 @@ module.exports.updateChamberOccupation = async (id) => {
     if(atomicChamberFetchData.status) {
         if(chamberGoodsData.status) {
             const occupiedChamber = atomicChamberFetchData.occupied;
-            const chamberGoods = chamberGoodsData.data;
-            const deletable = !occupiedChamber && (chamberGoods.length === 0);
+            const chamberGoods = chamberGoodsData.data?.length;
+            const deletable = !occupiedChamber && (chamberGoods === 0);
             const updatable = !occupiedChamber;
             // Update chamber
             return await atomicChamberUpdate(
