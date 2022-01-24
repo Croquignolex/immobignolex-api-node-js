@@ -91,35 +91,15 @@ module.exports.createChamber = async ({name, phone, rent, type, property, descri
 };
 
 // Update chamber
-module.exports.updateChamber = async ({id, name, phone, rent, type, property, description}) => {
+module.exports.updateChamber = async ({id, name, phone, rent, type, description}) => {
     //Data
     const _id = new ObjectId(id);
 
-    // Updatable check & fetch
-    const atomicChamberFetchData = await atomicChamberFetch({_id});
-    if(!atomicChamberFetchData.status) {
-        return atomicChamberFetchData
-    }
-
     // Update chamber info
-    const atomicChamberUpdateData = await atomicChamberUpdate(
+    return await atomicChamberUpdate(
         {_id, updatable: true},
-        {$set: {name, phone, rent, description, type, property: new ObjectId(property)}}
+        {$set: {name, phone, rent, description, type}}
     );
-    if(!atomicChamberUpdateData.status) {
-        return atomicChamberUpdateData;
-    }
-
-    // Old and new property management
-    const oldProperty = atomicChamberFetchData.data.property;
-    if(oldProperty !== property) {
-        // Remove old chamber property id different from new property
-        await propertiesHelpers.removePropertyChamberByPropertyId(oldProperty, id);
-        // Add new chamber property id different from new property
-        await propertiesHelpers.addPropertyChamberByPropertyId(property, id);
-    }
-
-    return atomicChamberUpdateData;
 };
 
 // Occupied chamber by chamber id

@@ -62,14 +62,13 @@ module.exports.create = async (req, res) => {
 module.exports.updateInfo = async (req, res) => {
     // Form data & data
     const {chamberId} = req.params;
-    const {name, phone, rent, type, property, description} = req.body;
+    const {name, phone, rent, type, description} = req.body;
 
     // Form checker
     if(
         !formCheckerHelpers.requiredChecker(rent) ||
         !formCheckerHelpers.requiredChecker(type) ||
-        !formCheckerHelpers.requiredChecker(name) ||
-        !formCheckerHelpers.requiredChecker(property)
+        !formCheckerHelpers.requiredChecker(name)
     ) {
         return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
     }
@@ -86,15 +85,9 @@ module.exports.updateInfo = async (req, res) => {
         return res.send({data: null, status: false, message: errorConstants.CHAMBERS.WRONG_CHAMBER_TYPE});
     }
 
-    // Check property existence
-    const propertyCheck = await propertiesHelpers.propertyById(property);
-    if(!propertyCheck.status) {
-        return res.send(propertyCheck);
-    }
-
     // Update chamber
     return res.send(await chambersHelpers.updateChamber({
-        id: chamberId, name, phone, type, property, description, rent: rentCheck
+        id: chamberId, name, phone, type, description, rent: rentCheck
     }));
 };
 
