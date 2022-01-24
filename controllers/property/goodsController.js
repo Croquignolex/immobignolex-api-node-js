@@ -7,14 +7,14 @@ const goodPicturesHelpers = require("../../helpers/cloudary/goodPicturesHelpers"
 
 // GET: All goods
 module.exports.goods = async (req, res) => {
-    return res.send(await goodsHelpers.goodsWithChamber());
+    return res.send(await goodsHelpers.goodsWithChamberAndProperty());
 };
 
 // GET: Good
 module.exports.good = async (req, res) => {
     // Route params
     const {goodId} = req.params;
-    return res.send(await goodsHelpers.goodByIdWithChamberAndCreator(goodId));
+    return res.send(await goodsHelpers.goodByIdWithChamberAndPropertyAndCreator(goodId));
 };
 
 // PUT: Create good

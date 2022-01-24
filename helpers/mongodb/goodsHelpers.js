@@ -22,7 +22,7 @@ module.exports.goodsWithChamberAndProperty = async () => {
 };
 
 // Fetch good by id with chamber & creator into database
-module.exports.goodByIdWithChamberAndCreator = async (id) => {
+module.exports.goodByIdWithChamberAndPropertyAndCreator = async (id) => {
     // Data
     const _id = new ObjectId(id);
 
@@ -44,7 +44,8 @@ module.exports.chamberGoods = async (chamber) => {
 };
 
 // Create good
-module.exports.createGood = async ({name, weigh, color, height, chamber, property, description, creator}) => {
+module.exports.createGood = async ({name, weigh, color, height, chamber,
+                                       property, description, creator}) => {
     // Data
     const updatable = true;
     const deletable = true;
@@ -61,7 +62,7 @@ module.exports.createGood = async ({name, weigh, color, height, chamber, propert
         return atomicGoodCreateData;
     }
 
-    // update chamber occupation
+    // Update chamber occupation
     await chambersHelpers.updateChamberOccupation(chamber);
 
     return atomicGoodCreateData;
@@ -96,12 +97,9 @@ module.exports.deleteGoodByGoodId = async (id) => {
         return atomicGoodDeleteData;
     }
 
-    // Old and new chamber management
-    const oldChamber = atomicGoodFetchData.data.chamber;
-    if(oldChamber) {
-        // Remove old good chamber id different from new chamber
-        await chambersHelpers.removeChamberGoodByChamberId(oldChamber, id);
-    }
+    // Update chamber occupation
+    const good = atomicGoodFetchData.data;
+    await chambersHelpers.updateChamberOccupation(good.chamber);
 
     return atomicGoodDeleteData;
 };
