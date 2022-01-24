@@ -61,13 +61,12 @@ module.exports.create = async (req, res) => {
 module.exports.updateInfo = async (req, res) => {
     // Form data & data
     const {goodId} = req.params;
-    const {name, color, weigh, height, chamber, description} = req.body;
+    const {name, color, weigh, height, description} = req.body;
 
     // Form checker
     if(
         !formCheckerHelpers.requiredChecker(name) ||
-        !formCheckerHelpers.requiredChecker(color) ||
-        !formCheckerHelpers.requiredChecker(chamber)
+        !formCheckerHelpers.requiredChecker(color)
     ) {
         return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
     }
@@ -78,15 +77,9 @@ module.exports.updateInfo = async (req, res) => {
         return res.send({data: null, status: false, message: errorConstants.GOODS.WRONG_GOOD_COLOR});
     }
 
-    // Check chamber existence
-    const chamberCheck = await chambersHelpers.chamberById(chamber);
-    if(!chamberCheck.status) {
-        return res.send(chamberCheck);
-    }
-
     // Update good
     return res.send(await goodsHelpers.updateGood({
-        id: goodId, name, color, weigh, height, chamber, description
+        id: goodId, name, color, weigh, height, description
     }));
 };
 

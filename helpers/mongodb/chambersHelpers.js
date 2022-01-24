@@ -4,26 +4,18 @@ const generalHelpers = require('../generalHelpers');
 const ChamberModel = require('../../models/chamberModel');
 const envConstants = require('../../constants/envConstants');
 const errorConstants = require('../../constants/errorConstants');
+const goodsHelpers = require("../../helpers/mongodb/goodsHelpers");
 const generalConstants = require("../../constants/generalConstants");
 const propertiesHelpers = require("../../helpers/mongodb/propertiesHelpers");
 
 // Data
 const chambersCollection = "chambers";
-const propertiesCollection = "properties";
 const databaseUrl = envConstants.DATABASE_URL;
-const chamberPropertyLookup = {
-    $lookup: {
-        from: propertiesCollection,
-        localField: "property",
-        foreignField: "_id",
-        as: "building"
-    }
-};
 
 // Fetch all chambers with property into database
 module.exports.chambersWithProperty = async () => {
     return await embeddedChambersFetch([
-        chamberPropertyLookup,
+        generalConstants.LOOP_DIRECTIVE.BUILDING,
         generalHelpers.databaseUnwind("$building")
     ]);
 };
@@ -35,7 +27,7 @@ module.exports.chamberByIdWithPropertyAndCreator = async (id) => {
 
     // Database fetch
     return await embeddedChamberFetch([
-        chamberPropertyLookup,
+        generalConstants.LOOP_DIRECTIVE.BUILDING,
         generalHelpers.databaseUnwind("$building"),
         generalConstants.LOOP_DIRECTIVE.CREATOR,
         generalHelpers.databaseUnwind("$creator"),
@@ -83,9 +75,8 @@ module.exports.createChamber = async ({name, phone, rent, type, property, descri
         return atomicChamberCreateData;
     }
 
-    // Push property chambers & update occupation
-    const createdChamberId = atomicChamberCreateData.data;
-    await propertiesHelpers.addPropertyChamberByPropertyId(property, createdChamberId);
+    // Update property occupation
+    await propertiesHelpers.updatePropertyOccupation(property);
 
     return atomicChamberCreateData;
 };
@@ -155,37 +146,25 @@ module.exports.deleteChamberByChamberId = async (id) => {
     return atomicChamberDeleteData;
 };
 
-// Add chamber good by chamber id
-module.exports.addChamberGoodByChamberId = async (id, goodId) => {
-    return await atomicChamberUpdate(
-        {_id: new ObjectId(id)},
-        {
-            $addToSet: {goods: new ObjectId(goodId)},
-            $set: {deletable: false}
-        }
-    );
-};
-
-// Remove chamber good by chamber id
-module.exports.removeChamberGoodByChamberId = async (id, goodId) => {
+// Update chamber
+module.exports.updateChamberOccupation = async (id) => {
     // Data
     const _id = new ObjectId(id);
-
-    //
     const atomicChamberFetchData = await atomicChamberFetch({_id});
+    const chamberGoodsData = await goodsHelpers.chamberGoods(id);
     if(atomicChamberFetchData.status) {
-        const chamberData = atomicChamberFetchData.data?.responseFormat;
-        const goods = chamberData.goods - 1;
-        const free = !chamberData.occupied;
-        const deletable = (goods === 0 && free) ? true : chamberData.deletable;
-        const updatable = (goods === 0 && free) ? true : chamberData.updatable;
-        return await atomicChamberUpdate(
-            {_id},
-            {
-                $pull: {goods: new ObjectId(goodId)},
-                $set: {deletable, updatable}
-            }
-        );
+        if(chamberGoodsData.status) {
+            const occupiedChamber = atomicChamberFetchData.occupied;
+            const chamberGoods = chamberGoodsData.data;
+            const deletable = !occupiedChamber && (chamberGoods.length === 0);
+            const updatable = !occupiedChamber;
+            // Update chamber
+            return await atomicChamberUpdate(
+                {_id},
+                {$set: {deletable, updatable}}
+            );
+        }
+        return chamberGoodsData;
     }
     return atomicChamberFetchData;
 };

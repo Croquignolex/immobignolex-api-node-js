@@ -3,6 +3,7 @@ const {MongoClient, ObjectId} = require('mongodb');
 const generalHelpers = require('../generalHelpers');
 const PropertyModel = require('../../models/propertyModel');
 const envConstants = require('../../constants/envConstants');
+const chambersHelpers = require('../mongodb/chambersHelpers');
 const errorConstants = require('../../constants/errorConstants');
 const generalConstants = require('../../constants/generalConstants');
 
@@ -86,6 +87,41 @@ module.exports.addPropertyOccupiedChamberByPropertyId = async (id) => {
                 }
             }
         );
+    }
+    return atomicPropertyFetchData;
+};
+
+// Update property occupation by property id
+module.exports.updatePropertyOccupation = async (id) => {
+    // Data
+    const _id = new ObjectId(id);
+    const atomicPropertyFetchData = await atomicPropertyFetch({_id});
+    const propertyChambersData = await chambersHelpers.propertyChambers(id);
+    if(atomicPropertyFetchData.status) {
+        if(propertyChambersData.status) {
+            let occupiedChambers = 0;
+            const propertyChambers = propertyChambersData.data;
+            propertyChambers.forEach((property) => {
+                if(property.occupied) {
+                    occupiedChambers++;
+                }
+            });
+            const occupiedPercentage = Math.round((occupiedChambers * 100) / propertyChambers);
+            const deletable = propertyChambers.length === 0;
+            const updatable = occupiedChambers === 0;
+            // Update property
+            return await atomicPropertyUpdate(
+                {_id},
+                {
+                    $set: {
+                        occupied_percentage: occupiedPercentage,
+                        deletable,
+                        updatable
+                    }
+                }
+            );
+        }
+        return propertyChambersData;
     }
     return atomicPropertyFetchData;
 };

@@ -12,5 +12,21 @@ module.exports.LOOP_DIRECTIVE = {
             foreignField: "username",
             as: "creator"
         },
+    },
+    BUILDING: {
+        $lookup: {
+            from: "properties",
+            localField: "property",
+            foreignField: "_id",
+            as: "building"
+        }
+    },
+    UNIT: {
+        $lookup: {
+            from: "chambers",
+            localField: "chamber",
+            foreignField: "_id",
+            as: "unit"
+        }
     }
 };

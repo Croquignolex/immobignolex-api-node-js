@@ -9,21 +9,14 @@ const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
 
 // Data
 const goodsCollection = "goods";
-const chambersCollection = "chambers";
 const databaseUrl = envConstants.DATABASE_URL;
-const goodChamberLookup = {
-    $lookup: {
-        from: chambersCollection,
-        localField: "chamber",
-        foreignField: "_id",
-        as: "unit"
-    }
-};
 
 // Fetch all goods with chamber into database
-module.exports.goodsWithChamber = async () => {
+module.exports.goodsWithChamberAndProperty = async () => {
     return await embeddedGoodsFetch([
-        goodChamberLookup,
+        generalConstants.LOOP_DIRECTIVE.BUILDING,
+        generalHelpers.databaseUnwind("$building"),
+        generalConstants.LOOP_DIRECTIVE.UNIT,
         generalHelpers.databaseUnwind("$unit")
     ]);
 };
@@ -35,7 +28,9 @@ module.exports.goodByIdWithChamberAndCreator = async (id) => {
 
     // Database fetch
     return await embeddedGoodFetch([
-        goodChamberLookup,
+        generalConstants.LOOP_DIRECTIVE.BUILDING,
+        generalHelpers.databaseUnwind("$building"),
+        generalConstants.LOOP_DIRECTIVE.UNIT,
         generalHelpers.databaseUnwind("$unit"),
         generalConstants.LOOP_DIRECTIVE.CREATOR,
         generalHelpers.databaseUnwind("$creator"),
@@ -66,43 +61,22 @@ module.exports.createGood = async ({name, weigh, color, height, chamber, propert
         return atomicGoodCreateData;
     }
 
-    // Push chamber good
-    const createdGoodId = atomicGoodCreateData.data;
-    await chambersHelpers.addChamberGoodByChamberId(chamber, createdGoodId);
+    // update chamber occupation
+    await chambersHelpers.updateChamberOccupation(chamber);
 
     return atomicGoodCreateData;
 };
 
 // Update good
-module.exports.updateGood = async ({id, name, color, weigh, height, chamber, description}) => {
+module.exports.updateGood = async ({id, name, color, weigh, height, description}) => {
     // Data
     const _id = new ObjectId(id);
 
-    // Fetch good
-    const atomicGoodFetchData = await atomicGoodFetch({_id});
-    if(!atomicGoodFetchData.status) {
-        return atomicGoodFetchData;
-    }
-
     // Update good info
-    const atomicGoodUpdateData = await atomicGoodUpdate(
+    return await atomicGoodUpdate(
         {_id, updatable: true},
-        {$set: {name, color, weigh, height, description, chamber: new ObjectId(chamber)}}
+        {$set: {name, color, weigh, height, description}}
     );
-    if(!atomicGoodUpdateData.status) {
-        return atomicGoodUpdateData;
-    }
-
-    // Old and new chamber management
-    const oldChamber = atomicGoodFetchData.data.chamber;
-    if(oldChamber !== chamber) {
-        // Remove old good chamber id different from new chamber
-        await chambersHelpers.removeChamberGoodByChamberId(oldChamber, id);
-        // Add new good chamber id different from new chamber
-        await chambersHelpers.addChamberGoodByChamberId(chamber, id);
-    }
-
-    return atomicGoodUpdateData;
 };
 
 // Delete good
