@@ -80,8 +80,8 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
 
     // Generate rents
     let rentsNumber;
-    const start = dayjs(leaseStartDate).startOf(rentPeriod);
-    const end = dayjs(leaseStartDate).add(1, leasePeriod).endOf(rentPeriod);
+    const start = dayjs(leaseStartDate).startOf("day");
+    const end = dayjs(leaseStartDate).add(1, leasePeriod).endOf("day");
 
     if(leasePeriod === rentPeriod) rentsNumber = 1;
     else rentsNumber = end.diff(start, rentPeriod);
@@ -90,8 +90,8 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
         await rentsHelpers.createRent({
             tenant, chamber, property, creator,
             lease: createdLeaseId, amount: rent,
-            start: start.add(i - 1, rentPeriod),
-            end: end.subtract(rentsNumber + i - 1, rentPeriod),
+            start: start.add(i - 1, rentPeriod).toDate(),
+            end: end.subtract(rentsNumber + i - 1, rentPeriod).toDate(),
         });
     }
 
