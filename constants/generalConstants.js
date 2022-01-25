@@ -13,6 +13,14 @@ module.exports.LOOP_DIRECTIVE = {
             as: "creator"
         },
     },
+    TAKER: {
+        $lookup: {
+            from: "users",
+            localField: "tenant",
+            foreignField: "username",
+            as: "taker"
+        },
+    },
     BUILDING: {
         $lookup: {
             from: "properties",

@@ -9,7 +9,7 @@ const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
 
 // GET: All leases
 module.exports.leases = async (req, res) => {
-    return res.send(await leasesHelpers.leases());
+    return res.send(await leasesHelpers.leasesWithChamberAndPropertyAndTenant());
 };
 
 // PUT: Create lease

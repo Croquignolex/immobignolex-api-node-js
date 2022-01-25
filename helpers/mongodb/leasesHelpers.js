@@ -15,9 +15,16 @@ const generalConstants = require('../../constants/generalConstants');
 const leasesCollection = "leases";
 const databaseUrl = envConstants.DATABASE_URL;
 
-// Fetch all leases into database
-module.exports.leases = async () => {
-    return await atomicLeasesFetch({enable: true});
+// Fetch all leases with chamber, property, tenant into database
+module.exports.leasesWithChamberAndPropertyAndTenant = async () => {
+    return await embeddedLeasesFetch([
+        generalConstants.LOOP_DIRECTIVE.BUILDING,
+        generalHelpers.databaseUnwind("$building"),
+        generalConstants.LOOP_DIRECTIVE.UNIT,
+        generalHelpers.databaseUnwind("$unit"),
+        generalConstants.LOOP_DIRECTIVE.TAKER,
+        generalHelpers.databaseUnwind("$taker"),
+    ]);
 };
 
 // Create chamber
@@ -101,6 +108,57 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
     return atomicLeaseCreateData;
 };
 
+// Embedded leases fetch into database
+const embeddedLeasesFetch = async (pipeline) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const embeddedLeasesFetchData = await client.db().collection(leasesCollection)
+            .aggregate(pipeline)
+            .sort({created_at: -1})
+            .toArray();
+        // Format response
+        data = [];
+        status = true;
+        embeddedLeasesFetchData.forEach(item => data.push(new LeaseModel(item).responseFormat));
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
+// Embedded lease fetch into database
+const embeddedLeaseFetch = async (pipeline) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const embeddedLeaseFetchData = await client.db().collection(leasesCollection)
+            .aggregate(pipeline)
+            .toArray();
+        // Format response
+        if(embeddedLeaseFetchData.length > 0) {
+            status = true;
+            data = new LeaseModel(embeddedLeaseFetchData[0]).responseFormat;
+        }
+        else message = errorConstants.GOODS.GOOD_NOT_FOUND;
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
 // Atomic leases fetch into database
 const atomicLeasesFetch = async (filter) => {
     let client, data = null, status = false, message = "";
@@ -119,29 +177,6 @@ const atomicLeasesFetch = async (filter) => {
         atomicLeasesFetchData.forEach(item => data.push(new LeaseModel(item).responseFormat));
     }
     catch (err) {
-        generalHelpers.log("Connection failure to mongodb", err);
-        message = errorConstants.GENERAL.DATABASE;
-    }
-    finally { await client.close(); }
-    return {data, status, message};
-};
-
-// Atomic lease update into database
-const atomicLeaseUpdate = async (filter, update) => {
-    // Data
-    let client, data = null, status = false, message = "";
-    client = new MongoClient(databaseUrl);
-    try {
-        await client.connect();
-        // Query
-        const atomicLeaseUpdateData = await client.db().collection(leasesCollection).updateOne(filter, update);
-        // Format response
-        if(atomicLeaseUpdateData.acknowledged) {
-            if(atomicLeaseUpdateData.modifiedCount === 0) message = errorConstants.GENERAL.NO_CHANGES;
-            else status = true;
-        }
-        else message = errorConstants.LEASES.LEASE_UPDATE;
-    } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
     }
@@ -190,6 +225,29 @@ const atomicLeaseCreate = async (document) => {
         else message = errorConstants.LEASES.LEASE_CREATE;
     }
     catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
+// Atomic lease update into database
+const atomicLeaseUpdate = async (filter, update) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const atomicLeaseUpdateData = await client.db().collection(leasesCollection).updateOne(filter, update);
+        // Format response
+        if(atomicLeaseUpdateData.acknowledged) {
+            if(atomicLeaseUpdateData.modifiedCount === 0) message = errorConstants.GENERAL.NO_CHANGES;
+            else status = true;
+        }
+        else message = errorConstants.LEASES.LEASE_UPDATE;
+    } catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);
         message = errorConstants.GENERAL.DATABASE;
     }
