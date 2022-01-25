@@ -1,5 +1,6 @@
 const envConstants = require("../constants/envConstants");
 const generalHelpers = require("../helpers/generalHelpers");
+const generalConstants = require("../constants/generalConstants");
 
 module.exports.log = (message, data = null, highPriority = false) => {
     // Only in local environment
@@ -94,24 +95,18 @@ module.exports.databaseUnwind = (column) => {
 
 // Find period types rank
 module.exports.periodsTypesRank = (period) => {
-    const periodsTypes = [
-        {rank: 0, value: "day"},
-        {rank: 1, value: "week"},
-        {rank: 2, value: "month"},
-        {rank: 3,  value: "year"},
-    ];
-    const found = periodsTypes.find((item) => item.value === period);
+    const found = generalConstants.TYPES.PERIODS.find((item) => item.value === period);
     return found ? found.rank : found;
 };
 
 // Get available app chambers type
 module.exports.chambersTypes = (type) => {
-    return ["Villa", "Studio", "Duplex", "Chambre", "Appartement"].find((item) => item === type);
+    return generalConstants.TYPES.CHAMBERS.find((item) => item === type);
 };
 
 // Get available app goods color
 module.exports.goodsColors = (type) => {
-    return ["dark", "info", "success", "danger", "warning", "secondary", "primary"].find((item) => item === type);
+    return generalConstants.TYPES.GOOD_COLORS.find((item) => item === type);
 };
 
 // Extract picture from the correct env

@@ -101,13 +101,7 @@ module.exports.occupiedChamberByChamberId = async (id, property) => {
     // Update chamber info
     const atomicChamberUpdateData = await atomicChamberUpdate(
         {_id},
-        {
-            $set: {
-                occupied: true,
-                deletable: false,
-                updatable: false
-            }
-        }
+        {$set: {occupied: true, deletable: false, updatable: false}}
     );
     if(!atomicChamberUpdateData.status) {
         return atomicChamberUpdateData;

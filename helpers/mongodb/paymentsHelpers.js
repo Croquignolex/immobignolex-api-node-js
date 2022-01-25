@@ -9,7 +9,7 @@ const paymentsCollection = "payments";
 const databaseUrl = envConstants.DATABASE_URL;
 
 // Create payment
-module.exports.createPayment = async ({amount, tenant, chamber, property, lease, reference, creator}) => {
+module.exports.createPayment = async ({amount, tenant, chamber, property, lease, invoice, reference, creator}) => {
     // Data
     const canceled = false;
     const updatable = false;
@@ -22,7 +22,8 @@ module.exports.createPayment = async ({amount, tenant, chamber, property, lease,
     return await atomicPaymentCreate({
         cancelable, deletable, updatable, canceled,
         created_by, created_at, amount, tenant, reference,
-        property: new ObjectId(property), chamber: new ObjectId(chamber), lease: new ObjectId(lease),
+        lease: new ObjectId(lease), invoice: new ObjectId(invoice),
+        property: new ObjectId(property), chamber: new ObjectId(chamber),
     });
 };
 

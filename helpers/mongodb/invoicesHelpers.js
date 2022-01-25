@@ -10,7 +10,8 @@ const invoicesCollection = "invoices";
 const databaseUrl = envConstants.DATABASE_URL;
 
 // Create invoice
-module.exports.createInvoice = async ({amount, tenant, chamber, property, lease, reference, creator, withPayment = false}) => {
+module.exports.createInvoice = async ({type, amount, tenant, chamber, property, lease,
+                                          reference, creator, withPayment = false}) => {
     // Data
     const advance = false;
     const canceled = false;
@@ -23,7 +24,7 @@ module.exports.createInvoice = async ({amount, tenant, chamber, property, lease,
 
     // Keep into database
     const atomicInvoiceCreateData = await atomicInvoiceCreate({
-        payed, advance, deletable, updatable, canceled,
+        type, payed, advance, deletable, updatable, canceled,
         created_by, created_at, amount, tenant, reference, cancelable,
         property: new ObjectId(property), chamber: new ObjectId(chamber), lease: new ObjectId(lease),
     });
@@ -33,8 +34,9 @@ module.exports.createInvoice = async ({amount, tenant, chamber, property, lease,
 
     if(withPayment) {
         // Create payment
+        const createdInvoiceId = atomicInvoiceCreateData.data;
         await paymentsHelpers.createPayment({
-            amount, tenant, chamber, property, lease, reference, creator
+            amount, tenant, chamber, property, lease, reference, creator, invoice: createdInvoiceId
         });
     }
 

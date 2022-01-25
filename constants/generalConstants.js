@@ -30,3 +30,19 @@ module.exports.LOOP_DIRECTIVE = {
         }
     }
 };
+
+// Types
+module.exports.TYPES = {
+    INVOICE: {
+        RENT: "rent",
+        SURETY: "surety",
+    },
+    PERIODS: [
+        {rank: 0, value: "day"},
+        {rank: 1, value: "week"},
+        {rank: 2, value: "month"},
+        {rank: 3,  value: "year"},
+    ],
+    CHAMBERS: ["Villa", "Studio", "Duplex", "Chambre", "Appartement"],
+    GOOD_COLORS: ["dark", "info", "success", "danger", "warning", "secondary", "primary"],
+};

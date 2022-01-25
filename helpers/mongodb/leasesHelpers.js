@@ -9,6 +9,7 @@ const envConstants = require('../../constants/envConstants');
 const chambersHelpers = require("../mongodb/chambersHelpers");
 const invoicesHelpers = require('../mongodb/invoicesHelpers');
 const errorConstants = require('../../constants/errorConstants');
+const generalConstants = require('../../constants/generalConstants');
 
 // Data
 const leasesCollection = "leases";
@@ -17,11 +18,6 @@ const databaseUrl = envConstants.DATABASE_URL;
 // Fetch all leases into database
 module.exports.leases = async () => {
     return await atomicLeasesFetch({enable: true});
-};
-
-// Fetch chamber active lease
-module.exports.chamberActiveLeases = async (chamber) => {
-    return await atomicLeasesFetch({enable: true, chamber: new ObjectId(chamber)});
 };
 
 // Create chamber
@@ -55,8 +51,10 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
         const suretyAmount = surety * rent;
         const reference = `Caution sur contract de bail de reference ${createdLeaseId}`;
         await invoicesHelpers.createInvoice({
+            withPayment: true,
+            type: generalConstants.TYPES.INVOICE.SURETY,
             lease: createdLeaseId, amount: suretyAmount,
-            tenant, chamber, property, creator, reference, withPayment: true
+            tenant, chamber, property, creator, reference,
         });
     }
 
@@ -65,8 +63,10 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
         const depositAmount = deposit * rent;
         const reference = `Avance sur loyer sur contract de bail de reference ${createdLeaseId}`;
         await invoicesHelpers.createInvoice({
+            withPayment: true,
+            type: generalConstants.TYPES.INVOICE.RENT,
             lease: createdLeaseId, amount: depositAmount,
-            tenant, chamber, property,creator, reference, withPayment: true
+            tenant, chamber, property,creator, reference,
         });
         // Update tenant balance
         await usersHelpers.updateTenantBalance({username: tenant, balance: depositAmount});

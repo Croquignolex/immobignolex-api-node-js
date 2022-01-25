@@ -66,31 +66,6 @@ module.exports.removePropertyPictureByPropertyId = async (id, pictureId) => {
     return await atomicPropertyUpdate({_id: new ObjectId(id)}, {$pull: {pictures: {id: pictureId}}});
 };
 
-// Add property occupied chamber by property id
-module.exports.addPropertyOccupiedChamberByPropertyId = async (id) => {
-    // Data
-    const _id = new ObjectId(id);
-
-    // Calculate occupation
-    const atomicPropertyFetchData = await atomicPropertyFetch({_id});
-    if(atomicPropertyFetchData.status) {
-        const propertyData = atomicPropertyFetchData.data?.responseFormat;
-        const occupiedChambers = propertyData.occupied_chambers + 1;
-        const occupiedPercentage = Math.round((occupiedChambers * 100) / propertyData.chambers);
-        return await atomicPropertyUpdate(
-            {_id},
-            {
-                $set: {
-                    occupied_percentage: occupiedPercentage,
-                    deletable: false,
-                    updatable: false
-                }
-            }
-        );
-    }
-    return atomicPropertyFetchData;
-};
-
 // Update property occupation by property id
 module.exports.updatePropertyOccupation = async (id) => {
     // Data

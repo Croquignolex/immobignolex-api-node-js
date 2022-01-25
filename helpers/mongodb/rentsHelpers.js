@@ -9,8 +9,9 @@ const rentsCollection = "rents";
 const databaseUrl = envConstants.DATABASE_URL;
 
 // Create invoice
-module.exports.createRent = async ({amount, tenant, chamber, property, lease, start, end, creator, payed = false}) => {
+module.exports.createRent = async ({amount, tenant, chamber, property, lease, start, end, creator}) => {
     // Data
+    const payed = false;
     const advance = false;
     const canceled = false;
     const updatable = false;
