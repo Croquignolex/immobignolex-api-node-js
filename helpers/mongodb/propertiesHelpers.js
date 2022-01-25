@@ -81,7 +81,7 @@ module.exports.updatePropertyOccupation = async (id) => {
                     occupiedChambers++;
                 }
             });
-            const occupiedPercentage = Math.round((occupiedChambers * 100) / propertyChambers);
+            const occupiedPercentage = Math.round((occupiedChambers * 100) / propertyChambers.length);
             const deletable = propertyChambers.length === 0;
             const updatable = occupiedChambers === 0;
             // Update property
