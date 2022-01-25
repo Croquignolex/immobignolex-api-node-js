@@ -1,4 +1,5 @@
 const errorConstants = require("../../constants/errorConstants");
+const goodsHelpers = require("../../helpers/mongodb/goodsHelpers");
 const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
 const chambersHelpers = require("../../helpers/mongodb/chambersHelpers");
 const propertiesHelpers = require("../../helpers/mongodb/propertiesHelpers");
@@ -86,7 +87,7 @@ module.exports.deletePicture = async (req, res) => {
     return res.send(await propertyPicturesHelpers.cloudRemovePropertyPicture(propertyId, cloudPictureId));
 };
 
-// GET: All chambers
+// GET: Property chambers chambers
 module.exports.chambers = async (req, res) => {
     // Route params
     const {free} = req.query;
@@ -95,4 +96,11 @@ module.exports.chambers = async (req, res) => {
     // Fetch correspondent chambers
     if(free) return res.send(await chambersHelpers.propertyFreeChambers(propertyId));
     return res.send(await chambersHelpers.propertyChambers(propertyId));
+};
+
+// GET: Property goods chambers
+module.exports.goods = async (req, res) => {
+    // Route params
+    const {propertyId} = req.params;
+    return res.send(await goodsHelpers.propertyGoods(propertyId));
 };

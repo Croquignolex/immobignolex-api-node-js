@@ -43,6 +43,11 @@ module.exports.chamberGoods = async (chamber) => {
     return await atomicGoodsFetch({chamber: new ObjectId(chamber)});
 };
 
+// Fetch all property goods into database
+module.exports.propertyGoods = async (property) => {
+    return await atomicGoodsFetch({property: new ObjectId(property)});
+};
+
 // Create good
 module.exports.createGood = async ({name, weigh, color, height, chamber,
                                        property, description, creator}) => {

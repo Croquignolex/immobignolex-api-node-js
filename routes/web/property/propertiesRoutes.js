@@ -8,6 +8,7 @@ const basicPermissionMiddleware = require("../../../middlewares/basicPermissionM
 
 router.get('', [tokenMiddleware, basicPermissionMiddleware], propertiesController.properties);
 router.put('/create', [tokenMiddleware, basicPermissionMiddleware], propertiesController.create);
+router.get('/:propertyId/goods', [tokenMiddleware, basicPermissionMiddleware], propertiesController.goods);
 router.get('/:propertyId/detail', [tokenMiddleware, basicPermissionMiddleware], propertiesController.property);
 router.get('/:propertyId/chambers', [tokenMiddleware, basicPermissionMiddleware], propertiesController.chambers);
 router.post('/:propertyId/info-update', [tokenMiddleware, basicPermissionMiddleware], propertiesController.updateInfo);
