@@ -12,6 +12,13 @@ module.exports.leases = async (req, res) => {
     return res.send(await leasesHelpers.leasesWithChamberAndPropertyAndTenant());
 };
 
+// GET: Lease
+module.exports.lease = async (req, res) => {
+    // Route params
+    const {leaseId} = req.params;
+    return res.send(await leasesHelpers.leaseByIdWithChamberAndPropertyAndTenantAndCreator(leaseId));
+};
+
 // PUT: Create lease
 module.exports.create = async (req, res) => {
     // Form data & data

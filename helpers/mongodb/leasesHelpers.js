@@ -27,6 +27,25 @@ module.exports.leasesWithChamberAndPropertyAndTenant = async () => {
     ]);
 };
 
+// Fetch lease by id with chamber, property, tenant into database
+module.exports.leaseByIdWithChamberAndPropertyAndTenantAndCreator = async (id) => {
+    // Data
+    const _id = new ObjectId(id);
+
+    // Database fetch
+    return await embeddedLeaseFetch([
+        generalConstants.LOOP_DIRECTIVE.BUILDING,
+        generalHelpers.databaseUnwind("$building"),
+        generalConstants.LOOP_DIRECTIVE.UNIT,
+        generalHelpers.databaseUnwind("$unit"),
+        generalConstants.LOOP_DIRECTIVE.TAKER,
+        generalHelpers.databaseUnwind("$taker"),
+        generalConstants.LOOP_DIRECTIVE.CREATOR,
+        generalHelpers.databaseUnwind("$creator"),
+        { $match : {_id} }
+    ]);
+};
+
 // Create chamber
 module.exports.createLease = async ({commercial, property, chamber, tenant, leasePeriod, rentPeriod,
                                         rent, surety, deposit, leaseStartDate, description, creator}) => {
@@ -44,7 +63,7 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
     const atomicLeaseCreateData = await atomicLeaseCreate({
         property: new ObjectId(property), chamber: new ObjectId(chamber),
         created_by, created_at, start_at, end_at, rent, surety, deposit, tenant, enable,
-        commercial, updatable, deletable, description, leasePeriod, rentPeriod, cancelable,
+        commercial, updatable, deletable, description, leasePeriod, rentPeriod, cancelable
     });
     if(!atomicLeaseCreateData.status) {
         return atomicLeaseCreateData;
