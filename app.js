@@ -63,3 +63,25 @@ server.listen(
     }
 );
 
+/*const function1 = async () => {
+    return new Promise((resolve => {
+        setTimeout(() => {
+            console.log('finction 1')
+            resolve()
+        }, 5000)
+    }))
+}
+
+const function2 = () => {
+    console.log('finction 2')
+}
+
+const function3 = () => {
+    console.log('excution');
+
+    function1().then(() => {
+        function2();
+    })
+}
+
+function3();*/
