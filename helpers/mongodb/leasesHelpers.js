@@ -7,7 +7,7 @@ const rentsHelpers = require('../mongodb/rentsHelpers');
 const usersHelpers = require("../mongodb/usersHelpers");
 const envConstants = require('../../constants/envConstants');
 const chambersHelpers = require("../mongodb/chambersHelpers");
-const invoicesHelpers = require('../mongodb/invoicesHelpers');
+const paymentsHelpers = require('../mongodb/paymentsHelpers');
 const errorConstants = require('../../constants/errorConstants');
 const generalConstants = require('../../constants/generalConstants');
 
@@ -76,8 +76,7 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
     if(surety > 0) {
         const suretyAmount = surety * rent;
         const reference = `Caution sur contract de bail de reference ${createdLeaseId}`;
-        await invoicesHelpers.createInvoice({
-            withPayment: true,
+        await paymentsHelpers.createPayment({
             type: generalConstants.TYPES.INVOICE.SURETY,
             lease: createdLeaseId, amount: suretyAmount,
             tenant, chamber, property, creator, reference,
@@ -88,9 +87,8 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
     if(deposit > 0) {
         const depositAmount = deposit * rent;
         const reference = `Avance sur loyer sur contract de bail de reference ${createdLeaseId}`;
-        await invoicesHelpers.createInvoice({
-            withPayment: true,
-            type: generalConstants.TYPES.INVOICE.RENT,
+        await paymentsHelpers.createPayment({
+            type: generalConstants.TYPES.INVOICE.DEPOSIT,
             lease: createdLeaseId, amount: depositAmount,
             tenant, chamber, property,creator, reference,
         });

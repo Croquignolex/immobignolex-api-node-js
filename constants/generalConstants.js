@@ -44,6 +44,7 @@ module.exports.TYPES = {
     INVOICE: {
         RENT: "rent",
         SURETY: "surety",
+        DEPOSIT: "deposit",
     },
     PERIODS: [
         {rank: 1, value: "day"},
