@@ -58,10 +58,11 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
     const created_at = new Date();
     const start_at = dayjs(leaseStartDate).toDate();
     const end_at = dayjs(leaseStartDate).add(1, leasePeriod).toDate();
+    const history = [{start_at, end_at}];
 
     // Keep into database
     const atomicLeaseCreateData = await atomicLeaseCreate({
-        property: new ObjectId(property), chamber: new ObjectId(chamber),
+        property: new ObjectId(property), chamber: new ObjectId(chamber), history,
         created_by, created_at, start_at, end_at, rent, surety, deposit, tenant, enable,
         commercial, updatable, deletable, description, leasePeriod, rentPeriod, cancelable
     });
