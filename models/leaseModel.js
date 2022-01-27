@@ -26,6 +26,7 @@ module.exports = class LeaseModel {
             history: this.history,
             canceled: this.canceled,
             start_at: this.start_at,
+            reference: this.reference,
             updatable: this.updatable,
             deletable: this.deletable,
             rentPeriod: this.rentPeriod,
