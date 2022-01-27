@@ -23,7 +23,6 @@ module.exports = class PropertyModel {
             deletable: this.deletable,
             created_at: this.created_at,
             description: this.description,
-            occupied_chambers: this.occupied_chambers,
             occupied_percentage: this.occupied_percentage,
             pictures: generalHelpers.picturesPublicUrl(this.pictures),
             creator: this.creator ? new UserModel(this.creator).miniResponseFormat : null

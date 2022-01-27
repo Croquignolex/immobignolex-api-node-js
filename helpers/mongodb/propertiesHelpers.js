@@ -36,15 +36,13 @@ module.exports.createProperty = async ({name, phone, address, description, creat
     const updatable = true;
     const deletable = true;
     const created_by = creator;
-    const occupied_chambers = 0;
     const occupied_percentage = 0;
     const created_at = new Date();
 
     // Keep into database
     return await atomicPropertyCreate({
         name, phone, address, updatable, deletable,
-        occupied_percentage, occupied_chambers,
-        description, created_by, created_at
+        occupied_percentage, description, created_by, created_at
     });
 };
 
