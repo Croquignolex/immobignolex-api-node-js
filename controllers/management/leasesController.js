@@ -2,6 +2,7 @@ const dayjs = require("dayjs");
 
 const generalHelpers = require("../../helpers/generalHelpers");
 const errorConstants = require("../../constants/errorConstants");
+const rentsHelpers = require("../../helpers/mongodb/rentsHelpers");
 const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 const leasesHelpers = require("../../helpers/mongodb/leasesHelpers");
 const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
@@ -107,4 +108,11 @@ module.exports.create = async (req, res) => {
         commercial, property, chamber, tenant, leasePeriod, rentPeriod, leaseStartDate, description,
         rent: rentCheck, surety: suretyCheck, deposit: depositCheck, creator: username
     }));
+};
+
+// GET: Lease rents
+module.exports.rents = async (req, res) => {
+    // Route params
+    const {leaseId} = req.params;
+    return res.send(await rentsHelpers.leaseRents(leaseId));
 };

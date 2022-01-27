@@ -98,7 +98,7 @@ module.exports.chambers = async (req, res) => {
     return res.send(await chambersHelpers.propertyChambers(propertyId));
 };
 
-// GET: Property goods chambers
+// GET: Property chambers
 module.exports.goods = async (req, res) => {
     // Route params
     const {propertyId} = req.params;

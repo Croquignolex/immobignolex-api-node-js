@@ -41,7 +41,7 @@ module.exports.LOOP_DIRECTIVE = {
 
 // Types
 module.exports.TYPES = {
-    INVOICE: {
+    PAYMENTS: {
         RENT: "rent",
         SURETY: "surety",
         DEPOSIT: "deposit",

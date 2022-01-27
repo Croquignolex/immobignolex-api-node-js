@@ -57,6 +57,7 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
     const created_by = creator;
     const created_at = new Date();
     const start_at = dayjs(leaseStartDate).toDate();
+    const reference = "LEASE" + created_at?.getTime();
     const end_at = dayjs(leaseStartDate).add(1, leasePeriod).toDate();
     const history = [{start_at, end_at}];
 
@@ -64,7 +65,7 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
     const atomicLeaseCreateData = await atomicLeaseCreate({
         property: new ObjectId(property), chamber: new ObjectId(chamber), history,
         created_by, created_at, start_at, end_at, rent, surety, deposit, tenant, enable,
-        commercial, updatable, deletable, description, leasePeriod, rentPeriod, cancelable
+        commercial, updatable, deletable, description, leasePeriod, rentPeriod, cancelable, reference,
     });
     if(!atomicLeaseCreateData.status) {
         return atomicLeaseCreateData;
@@ -75,22 +76,22 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
     // Generate invoice & payment for surety
     if(surety > 0) {
         const suretyAmount = surety * rent;
-        const reference = `Caution sur contract de bail de reference ${createdLeaseId}`;
+        const description = `Caution sur contract de bail de reference ${reference}`;
         await paymentsHelpers.createPayment({
-            type: generalConstants.TYPES.INVOICE.SURETY,
             lease: createdLeaseId, amount: suretyAmount,
-            tenant, chamber, property, creator, reference,
+            type: generalConstants.TYPES.PAYMENTS.SURETY,
+            tenant, chamber, property, creator, description
         });
     }
 
     // Generate invoice & payment for deposit
     if(deposit > 0) {
         const depositAmount = deposit * rent;
-        const reference = `Avance sur loyer sur contract de bail de reference ${createdLeaseId}`;
+        const description = `Avance sur loyer sur contract de bail de reference ${reference}`;
         await paymentsHelpers.createPayment({
-            type: generalConstants.TYPES.INVOICE.DEPOSIT,
+            type: generalConstants.TYPES.PAYMENTS.DEPOSIT,
             lease: createdLeaseId, amount: depositAmount,
-            tenant, chamber, property, creator, reference,
+            tenant, chamber, property, creator, description,
         });
         // Update tenant balance
         await usersHelpers.updateTenantBalance({username: tenant, balance: depositAmount});
