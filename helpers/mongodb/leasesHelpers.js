@@ -90,7 +90,7 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
         await paymentsHelpers.createPayment({
             type: generalConstants.TYPES.INVOICE.DEPOSIT,
             lease: createdLeaseId, amount: depositAmount,
-            tenant, chamber, property,creator, reference,
+            tenant, chamber, property, creator, reference,
         });
         // Update tenant balance
         await usersHelpers.updateTenantBalance({username: tenant, balance: depositAmount});

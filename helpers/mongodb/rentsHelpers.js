@@ -18,10 +18,11 @@ module.exports.createRent = async ({amount, tenant, chamber, property, lease, st
     const cancelable = false;
     const created_by = creator;
     const created_at = new Date();
+    const payed_at = payed ? new Date() : null;
 
     // Keep into database
     return await atomicRentCreate({
-        start_at: start, end_at: end,
+        start_at: start, end_at: end, payed_at,
         payed, advance, deletable, updatable, canceled,
         created_by, created_at, amount, tenant, cancelable,
         property: new ObjectId(property), chamber: new ObjectId(chamber), lease: new ObjectId(lease),
