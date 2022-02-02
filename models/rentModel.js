@@ -29,6 +29,7 @@ module.exports = class RentModel {
             reference: this.reference,
             updatable: this.updatable,
             deletable: this.deletable,
+            cancel_at: this.canceled_at,
             cancelable: this.cancelable,
             created_at: this.created_at,
             description: this.description,

@@ -45,8 +45,8 @@ module.exports.createRent = async ({amount, tenant, chamber, property, lease, st
 
     // Keep into database
     return await atomicRentCreate({
-        start_at: start, end_at: end, payed_at,
         payed, advance, deletable, updatable, canceled, remain,
+        start_at: start, end_at: end, payed_at, canceled_at: null,
         created_by, created_at, amount, tenant, cancelable, reference,
         property: new ObjectId(property), chamber: new ObjectId(chamber), lease: new ObjectId(lease),
     });
@@ -62,7 +62,7 @@ const embeddedRentsFetch = async (pipeline) => {
         // Query
         const embeddedRentsFetchData = await client.db().collection(rentsCollection)
             .aggregate(pipeline)
-            .sort({created_at: -1})
+            .sort({payed: 1})
             .toArray();
         // Format response
         data = [];
