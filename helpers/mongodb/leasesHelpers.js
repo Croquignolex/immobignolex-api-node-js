@@ -73,7 +73,7 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
 
     const createdLeaseId = atomicLeaseCreateData.data;
 
-    // Generate invoice & payment for surety
+    // Generate payment for surety
     if(surety > 0) {
         const suretyAmount = surety * rent;
         const description = `Caution sur contract de bail de reference ${reference}`;
@@ -84,7 +84,7 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
         });
     }
 
-    // Generate invoice & payment for deposit
+    // Generate payment for deposit
     if(deposit > 0) {
         const depositAmount = deposit * rent;
         const description = `Avance sur loyer sur contract de bail de reference ${reference}`;
@@ -93,8 +93,6 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
             lease: createdLeaseId, amount: depositAmount,
             tenant, chamber, property, creator, description,
         });
-        // Update tenant balance
-        await usersHelpers.updateTenantBalance({username: tenant, balance: depositAmount});
     }
 
     // Date config
@@ -119,6 +117,12 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
             start: start.add(i - 1, rentPeriod).toDate(),
             end: end.subtract(rentsNumber + i - 1, rentPeriod).toDate(),
         });
+    }
+
+    if(deposit > 0) {
+        // Update tenant balance
+        let balance = (deposit >= rentsNumber) ? (deposit - rentsNumber) : 0;
+        await usersHelpers.updateTenantBalance({username: tenant, balance});
     }
 
     // Occupy chamber & property occupation

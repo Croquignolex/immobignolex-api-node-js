@@ -29,7 +29,7 @@ module.exports.leaseRents = async (lease) => {
     return await atomicRentsFetch({lease: new ObjectId(lease)});
 };
 
-// Create invoice
+// Create rent
 module.exports.createRent = async ({amount, tenant, chamber, property, lease, start, end, creator, payed = false}) => {
     // Data
     const advance = false;
