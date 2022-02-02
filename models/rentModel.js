@@ -1,7 +1,7 @@
 const UserModel = require('./userModel');
+const LeaseModel = require("./leaseModel");
 const ChamberModel = require("./chamberModel");
 const PropertyModel = require("./propertyModel");
-const generalHelpers = require('../helpers/generalHelpers');
 
 module.exports = class RentModel {
     constructor(rent) {
@@ -11,24 +11,31 @@ module.exports = class RentModel {
     get miniResponseFormat() {
         return {
             id: this._id,
-            name: this.name
+            name: this.reference
         };
     };
 
     get responseFormat() {
         return {
             id: this._id,
-            name: this.name,
-            color: this.color,
-            weigh: this.weigh,
-            height: this.height,
+            payed: this.payed,
+            end_at: this.end_at,
+            amount: this.amount,
+            remain: this.remain,
+            advance: this.advance,
+            canceled: this.canceled,
+            start_at: this.start_at,
+            payed_at: this.payed_at,
+            reference: this.reference,
             updatable: this.updatable,
             deletable: this.deletable,
+            cancelable: this.cancelable,
             created_at: this.created_at,
             description: this.description,
-            pictures: generalHelpers.picturesPublicUrl(this.pictures),
+            tenant: this.taker ? new UserModel(this.taker).miniResponseFormat : null,
             chamber: this.unit ? new ChamberModel(this.unit).miniResponseFormat : null,
             creator: this.creator ? new UserModel(this.creator).miniResponseFormat : null,
+            lease: this.contract ? new LeaseModel(this.contract).miniResponseFormat : null,
             property: this.building ? new PropertyModel(this.building).miniResponseFormat : null
         };
     };

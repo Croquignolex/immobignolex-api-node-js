@@ -32,6 +32,7 @@ app.use(useragent.express());
 const webAuthRoutes = require('./routes/web/general/authRoutes');
 const webUsersRoutes = require('./routes/web/admin/usersRoutes');
 const webGoodsRoutes = require('./routes/web/property/goodsRoutes');
+const webRentsRoutes = require('./routes/web/management/rentsRoutes');
 const webProfileRoutes = require('./routes/web/general/profileRoutes');
 const webLeasesRoutes = require('./routes/web/management/leasesRoutes');
 const webChambersRoutes = require('./routes/web/property/chambersRoutes');
@@ -40,6 +41,7 @@ const webPropertiesRoutes = require('./routes/web/property/propertiesRoutes');
 // Setting general model route
 router.use("/web/v1/auth", webAuthRoutes);
 router.use("/web/v1/goods", webGoodsRoutes);
+router.use("/web/v1/rents", webRentsRoutes);
 router.use("/web/v1/users", webUsersRoutes);
 router.use("/web/v1/leases", webLeasesRoutes);
 router.use("/web/v1/profile", webProfileRoutes);

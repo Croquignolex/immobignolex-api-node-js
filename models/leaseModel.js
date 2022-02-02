@@ -10,14 +10,13 @@ module.exports = class LeaseModel {
     get miniResponseFormat() {
         return {
             id: this._id,
-            name: this.name
+            reference: this.reference
         };
     };
 
     get responseFormat() {
         return {
             id: this._id,
-            name: this.name,
             rent: this.rent,
             enable: this.enable,
             end_at: this.end_at,

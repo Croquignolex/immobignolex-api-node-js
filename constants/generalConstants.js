@@ -36,6 +36,14 @@ module.exports.LOOP_DIRECTIVE = {
             foreignField: "_id",
             as: "unit"
         }
+    },
+    CONTRACT: {
+        $lookup: {
+            from: "leases",
+            localField: "lease",
+            foreignField: "_id",
+            as: "contract"
+        }
     }
 };
 
