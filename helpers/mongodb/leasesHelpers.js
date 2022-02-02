@@ -119,9 +119,9 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
         });
     }
 
-    if(deposit > 0) {
+    let balance = (deposit >= rentsNumber) ? (deposit - rentsNumber) * rent : 0;
+    if(balance > 0) {
         // Update tenant balance
-        let balance = (deposit >= rentsNumber) ? (deposit - rentsNumber) : 0;
         await usersHelpers.updateTenantBalance({username: tenant, balance});
     }
 
