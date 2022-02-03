@@ -22,6 +22,7 @@ module.exports = class PaymentModel {
             type: this.type,
             amount: this.amount,
             canceled: this.canceled,
+            quantity: this.quantity,
             deletable: this.deletable,
             updatable: this.updatable,
             reference: this.reference,

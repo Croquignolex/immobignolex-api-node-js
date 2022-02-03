@@ -76,24 +76,22 @@ module.exports.createLease = async ({commercial, property, chamber, tenant, leas
     // Generate payment for surety
     if(surety > 0) {
         const suretyAmount = surety * rent;
-        const description = `Caution sur contract de bail de reference ${reference}`;
         await paymentsHelpers.createPayment({
-            payed_at: created_at,
+            tenant, chamber, property, creator,
+            payed_at: created_at, quantity: surety,
             lease: createdLeaseId, amount: suretyAmount,
-            type: generalConstants.TYPES.PAYMENTS.SURETY,
-            tenant, chamber, property, creator, description
+            type: generalConstants.TYPES.PAYMENTS.SURETY
         });
     }
 
     // Generate payment for deposit
     if(deposit > 0) {
         const depositAmount = deposit * rent;
-        const description = `Avance sur loyer sur contract de bail de reference ${reference}`;
         await paymentsHelpers.createPayment({
-            payed_at: created_at,
-            type: generalConstants.TYPES.PAYMENTS.DEPOSIT,
+            tenant, chamber, property, creator,
+            payed_at: created_at, quantity: deposit,
             lease: createdLeaseId, amount: depositAmount,
-            tenant, chamber, property, creator, description,
+            type: generalConstants.TYPES.PAYMENTS.DEPOSIT,
         });
     }
 

@@ -58,9 +58,9 @@ module.exports.LOOP_DIRECTIVE = {
 // Types
 module.exports.TYPES = {
     PAYMENTS: {
-        RENT: "rent",
-        SURETY: "surety",
-        DEPOSIT: "deposit",
+        RENT: "Loyer",
+        SURETY: "Caution",
+        DEPOSIT: "Avance sur loyer",
     },
     PERIODS: [
         {rank: 1, value: "day"},

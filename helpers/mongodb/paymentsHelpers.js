@@ -27,7 +27,7 @@ module.exports.paymentsWithChamberAndPropertyAndTenantAndLeaseAndRent = async ()
 };
 
 // Create payment
-module.exports.createPayment = async ({type, amount, payed_at, tenant, chamber, property, lease, rent, description, creator}) => {
+module.exports.createPayment = async ({type, amount, quantity, payed_at, tenant, chamber, property, lease, rent, description, creator}) => {
     // Data
     const canceled = false;
     const updatable = false;
@@ -40,7 +40,7 @@ module.exports.createPayment = async ({type, amount, payed_at, tenant, chamber, 
     // Keep into database
     return await atomicPaymentCreate({
         rent: rent ? new ObjectId(rent): null,
-        type, amount, cancelable, deletable, updatable, canceled,
+        quantity, type, amount, cancelable, deletable, updatable, canceled,
         created_by, created_at, payed_at, cancel_at: null, tenant, reference, description,
         lease: new ObjectId(lease), property: new ObjectId(property), chamber: new ObjectId(chamber),
     });
