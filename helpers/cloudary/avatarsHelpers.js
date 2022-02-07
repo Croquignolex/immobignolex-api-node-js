@@ -15,7 +15,7 @@ module.exports.cloudUpdateUserAvatar = async (user, file) => {
         return fileHelperData;
     }
 
-    // Delete old image n cloud if exist
+    // Delete old image in cloud if exist
     if(oldUserAvatar) {
         await filesHelpers.cloudRemoveFile(oldUserAvatar.id);
     }
