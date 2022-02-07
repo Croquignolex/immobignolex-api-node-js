@@ -46,6 +46,7 @@ module.exports.login = async (req, res) => {
     }
 
     // Generate user tokens
+    const databaseCompany = companyData.data;
     const generateUserTokensData = await tokensHelpers.generateUserTokens(databaseUser, useragent);
     if(!generateUserTokensData.status) {
         return res.send(generateUserTokensData);
@@ -56,8 +57,8 @@ module.exports.login = async (req, res) => {
         status: true,
         data: {
             user: databaseUser.responseFormat,
-            company: companyData.responseFormat,
-            tokens: generateUserTokensData.data
+            tokens: generateUserTokensData.data,
+            company: databaseCompany.responseFormat
         }
     });
 };
