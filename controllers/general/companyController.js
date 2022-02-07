@@ -1,7 +1,7 @@
 const errorConstants = require('../../constants/errorConstants');
-const usersHelpers = require("../../helpers/mongodb/usersHelpers");
-const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
 const logosHelpers = require('../../helpers/cloudary/logosHelpers');
+const companyHelpers = require("../../helpers/mongodb/companyHelpers");
+const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
 
 // POST: Update company logo
 module.exports.updateLogo = async (req, res) => {
@@ -17,31 +17,35 @@ module.exports.updateLogo = async (req, res) => {
         return res.send({status: false, data: null, message: errorConstants.GENERAL.FORM_DATA});
     }
 
-    // Get user by username
-    const username = req.username;
-    const userByUsernameData = await usersHelpers.userByUsername(username);
-    if(!userByUsernameData.status) {
-        return res.send(userByUsernameData);
+    // Get company
+    const companyData = await companyHelpers.company();
+    if(!companyData.status) {
+        return res.send(companyData);
     }
 
     // Save user avatar in the cloud & database
-    const databaseUser = userByUsernameData.data;
-    return res.send(await logosHelpers.cloudUpdateCompanyLogo(databaseUser, file));
+    const databaseCompany = companyData.data;
+    return res.send(await logosHelpers.cloudUpdateCompanyLogo(databaseCompany, file));
 };
 
 // POST: Update user info
 module.exports.updateInfo = async (req, res) => {
     // Form data & data
-    const username = req.username;
-    const {name, phone, email, description} = req.body;
+    const {
+        name, owner, address,
+        phone, email, accountBank,
+        accountName, accountNumber, accountIban
+    } = req.body;
 
     // Form checker
     if(!formCheckerHelpers.requiredChecker(name)) {
         return res.send({status: false, message: errorConstants.GENERAL.FORM_DATA, data: null});
     }
 
-    // Save user info in the database
-    return res.send(await usersHelpers.updateUserInfo({
-        username, name, phone, email, description
+    // Save company info in the database
+    return res.send(await companyHelpers.updateCompanyInfo({
+        name, owner, address,
+        phone, email, accountBank,
+        accountName, accountNumber, accountIban
     }));
 };

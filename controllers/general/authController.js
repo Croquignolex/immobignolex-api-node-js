@@ -2,6 +2,7 @@ const errorConstants = require("../../constants/errorConstants");
 const usersHelpers = require("../../helpers/mongodb/usersHelpers");
 const tokensHelpers = require("../../helpers/mongodb/tokensHelpers");
 const formCheckerHelpers = require("../../helpers/formCheckerHelpers");
+const companyHelpers = require("../../helpers/mongodb/companyHelpers");
 
 // POST: Attempt login
 module.exports.login = async (req, res) => {
@@ -37,6 +38,13 @@ module.exports.login = async (req, res) => {
         return res.send({status: false, message: errorConstants.USERS.USER_AUTH, data: null});
     }
 
+    // TODO: Fetch company if user has the permission
+    // Get company
+    const companyData = await companyHelpers.company();
+    if(!companyData.status) {
+        return res.send(companyData);
+    }
+
     // Generate user tokens
     const generateUserTokensData = await tokensHelpers.generateUserTokens(databaseUser, useragent);
     if(!generateUserTokensData.status) {
@@ -48,6 +56,7 @@ module.exports.login = async (req, res) => {
         status: true,
         data: {
             user: databaseUser.responseFormat,
+            company: companyData.responseFormat,
             tokens: generateUserTokensData.data
         }
     });
