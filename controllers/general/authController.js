@@ -102,7 +102,23 @@ module.exports.refresh = async (req, res) => {
         return res.send({status: false, message: errorConstants.USERS.USER_DISABLED, data: null});
     }
 
-    return res.send({...userByUsernameData, data: databaseUser.responseFormat});
+    // Get company
+    // TODO: Fetch company if user has the permission
+    const companyData = await companyHelpers.company();
+    if(!companyData.status) {
+        return res.send(companyData);
+    }
+
+    const databaseCompany = companyData.data;
+
+    return res.send({
+        message: "",
+        status: true,
+        data: {
+            user: databaseUser.responseFormat,
+            company: databaseCompany.responseFormat
+        }
+    });
 };
 
 // POST: Create a new access token
