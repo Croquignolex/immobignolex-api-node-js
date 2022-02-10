@@ -9,13 +9,6 @@ module.exports = class PaymentModel {
         Object.assign(this, payment);
     };
 
-    get miniResponseFormat() {
-        return {
-            id: this._id,
-            name: this.reference
-        };
-    };
-
     get responseFormat() {
         return {
             id: this._id,

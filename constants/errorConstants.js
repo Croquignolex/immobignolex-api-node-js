@@ -94,7 +94,8 @@ module.exports.INVOICES = {
 
 // Payments
 module.exports.PAYMENTS = {
-    PAYMENT_CREATE: "PAYMENT_CREATE_ERROR"
+    PAYMENT_CREATE: "PAYMENT_CREATE_ERROR",
+    PAYMENT_NOT_FOUND: "PAYMENT_NOT_FOUND_ERROR",
 };
 
 // Rents

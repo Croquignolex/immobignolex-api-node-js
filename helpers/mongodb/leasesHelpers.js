@@ -27,7 +27,7 @@ module.exports.leasesWithChamberAndPropertyAndTenant = async () => {
     ]);
 };
 
-// Fetch lease by id with chamber, property, tenant into database
+// Fetch lease by id with chamber, property, tenant, creator into database
 module.exports.leaseByIdWithChamberAndPropertyAndTenantAndCreator = async (id) => {
     // Data
     const _id = new ObjectId(id);
@@ -172,7 +172,7 @@ const embeddedLeaseFetch = async (pipeline) => {
             status = true;
             data = new LeaseModel(embeddedLeaseFetchData[0]).responseFormat;
         }
-        else message = errorConstants.GOODS.GOOD_NOT_FOUND;
+        else message = errorConstants.LEASES.LEASE_NOT_FOUND;
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

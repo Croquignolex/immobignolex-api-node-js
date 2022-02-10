@@ -10,7 +10,7 @@ const generalConstants = require("../../constants/generalConstants");
 const paymentsCollection = "payments";
 const databaseUrl = envConstants.DATABASE_URL;
 
-// Fetch all payments with chamber, property, tenant, lease into database
+// Fetch all payments with chamber, property, tenant, lease, rent into database
 module.exports.paymentsWithChamberAndPropertyAndTenantAndLeaseAndRent = async () => {
     return await embeddedPaymentsFetch([
         generalConstants.LOOP_DIRECTIVE.BUILDING,
@@ -26,13 +26,36 @@ module.exports.paymentsWithChamberAndPropertyAndTenantAndLeaseAndRent = async ()
     ]);
 };
 
+// Fetch payment by id with chamber, property, tenant, lease, rent, creator into database
+module.exports.paymentByIdWithChamberAndPropertyAndTenantAndLeaseAndRentAndCreator = async (id) => {
+    // Data
+    const _id = new ObjectId(id);
+
+    // Database fetch
+    return await embeddedPaymentFetch([
+        generalConstants.LOOP_DIRECTIVE.BUILDING,
+        generalHelpers.databaseUnwind("$building"),
+        generalConstants.LOOP_DIRECTIVE.UNIT,
+        generalHelpers.databaseUnwind("$unit"),
+        generalConstants.LOOP_DIRECTIVE.TAKER,
+        generalHelpers.databaseUnwind("$taker"),
+        generalConstants.LOOP_DIRECTIVE.CONTRACT,
+        generalHelpers.databaseUnwind("$contract"),
+        generalConstants.LOOP_DIRECTIVE.RENTAL,
+        generalHelpers.databaseUnwind("$rental"),
+        generalConstants.LOOP_DIRECTIVE.CREATOR,
+        generalHelpers.databaseUnwind("$creator"),
+        { $match : {_id} }
+    ]);
+};
+
 // Create payment
 module.exports.createPayment = async ({type, amount, quantity, payed_at, tenant, chamber, property, lease, rent, description, creator}) => {
     // Data
     const canceled = false;
     const updatable = false;
     const deletable = false;
-    const cancelable = true;
+    const cancelable = !!rent;
     const created_by = creator;
     const created_at = new Date();
     const reference = "PAYMENT" + created_at?.getTime();
@@ -56,12 +79,38 @@ const embeddedPaymentsFetch = async (pipeline) => {
         // Query
         const embeddedPaymentsFetchData = await client.db().collection(paymentsCollection)
             .aggregate(pipeline)
-            .sort({payed: 1})
+            .sort({created_at: -1})
             .toArray();
         // Format response
         data = [];
         status = true;
         embeddedPaymentsFetchData.forEach(item => data.push(new PaymentModel(item).responseFormat));
+    }
+    catch (err) {
+        generalHelpers.log("Connection failure to mongodb", err);
+        message = errorConstants.GENERAL.DATABASE;
+    }
+    finally { await client.close(); }
+    return {data, status, message};
+};
+
+// Embedded payment fetch into database
+const embeddedPaymentFetch = async (pipeline) => {
+    // Data
+    let client, data = null, status = false, message = "";
+    client = new MongoClient(databaseUrl);
+    try {
+        await client.connect();
+        // Query
+        const embeddedPaymentFetchData = await client.db().collection(paymentsCollection)
+            .aggregate(pipeline)
+            .toArray();
+        // Format response
+        if(embeddedPaymentFetchData.length > 0) {
+            status = true;
+            data = new PaymentModel(embeddedPaymentFetchData[0]).responseFormat;
+        }
+        else message = errorConstants.PAYMENTS.PAYMENT_NOT_FOUND;
     }
     catch (err) {
         generalHelpers.log("Connection failure to mongodb", err);

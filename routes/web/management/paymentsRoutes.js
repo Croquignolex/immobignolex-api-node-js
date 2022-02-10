@@ -6,6 +6,6 @@ const paymentsController = require('../../../controllers/management/paymentsCont
 const basicPermissionMiddleware = require("../../../middlewares/basicPermissionMiddleware");
 
 router.get('', [tokenMiddleware, basicPermissionMiddleware], paymentsController.payments);
-// router.get('/:leaseId/detail', [tokenMiddleware, basicPermissionMiddleware], leasesController.lease);
+router.get('/:paymentId/detail', [tokenMiddleware, basicPermissionMiddleware], paymentsController.payment);
 
 module.exports = router;
